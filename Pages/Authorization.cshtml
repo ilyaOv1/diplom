@@ -1,0 +1,27 @@
+﻿@page
+@model AuthorizationModel
+@{
+    ViewData["Title"] = "Authorization";
+}
+
+<div class="login-wrapper">
+    <div class="logo">TASKA</div>
+
+    <form id="form1" runat="server">
+        <div class="login-container">
+            <div class="form-title">ВВЕДИТЕ ДАННЫЕ</div>
+
+            <div class="input-group">
+                <input ID="inputEmail" placeholder="Почта xx@xx.xx">
+            </div>
+
+            <div class="input-group">
+                <input ID="inputPassword" type="password" placeholder="Пароль">
+            </div>
+        </div>
+    </form>
+
+    <button class="blue-button">Авторизоваться</button>
+    <p style="margin-top: 10px; font-size: 17px;">или</p>
+    <a href="/Registration" style="font-size: 19px; color: #2954EC;">Создать аккаунт</a>
+</div>

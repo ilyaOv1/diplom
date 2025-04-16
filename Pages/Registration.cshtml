@@ -1,0 +1,36 @@
+﻿@page
+@model RegistrationModel
+@{
+	ViewData["Title"] = "Registration";
+}
+
+<div class="login-wrapper">
+    <div class="logo">TASKA</div>
+
+    <form id="form1" runat="server">
+        <div class="registration-container">
+            <div class="form-title">ЗАПОЛНИТЕ ВАШИ ДАННЫЕ</div>
+
+            <div class="input-group">
+                <input ID="inputSurname" placeholder="Фамилия">
+            </div>
+            <div class="input-group" style="display: flex; gap: 15px;">
+                <input ID="inputName" placeholder="Имя" style="flex: 1;">
+                <input ID="inputLastName" placeholder="Отчество" style="flex: 1;">
+            </div>
+            <div class="input-group">
+                <input ID="inputEmail" placeholder="Почта xx@xx.xx">
+            </div>
+
+            <div class="input-group" style="display: flex; gap: 15px;">
+                <input ID="inputPassword" type="password" style="flex: 1;" placeholder="Пароль">
+                <input ID="inputRepeatPassword" type="password" style="flex: 1;" placeholder="Повторите пароль">
+            </div>
+        </div>
+    </form>
+
+    <button class="blue-button">Зарегистрироваться</button>
+    <p style="margin-top: 10px; font-size: 17px;">или</p>
+    <p style="font-size: 17px;">Есть аккаунт? <a href="/Authorization" style="font-size: 19px; color: #2954EC;">Войти</a></p>
+    
+</div>

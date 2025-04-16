@@ -18,5 +18,8 @@ app.UseRouting();
 app.UseAuthorization();
 
 app.MapRazorPages();
+app.MapGet("/", () => Results.Redirect("/authorization"));
 
 app.Run();
+
+
