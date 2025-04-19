@@ -1,6 +1,7 @@
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorPages();
+builder.Services.AddHttpClient();
 
 var app = builder.Build();
 
@@ -19,6 +20,7 @@ app.UseAuthorization();
 
 app.MapRazorPages();
 app.MapGet("/", () => Results.Redirect("/authorization"));
+
 
 app.Run();
 
