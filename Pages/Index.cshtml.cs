@@ -1,20 +1,17 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.Net.Http.Headers;
 
 namespace ProjManagmentSystem.Pages
 {
-    public class IndexModel : PageModel
+    public class IndexModel : BasePageModel
     {
-        private readonly ILogger<IndexModel> _logger;
+        public IndexModel(IHttpClientFactory httpClientFactory) : base(httpClientFactory) { }
 
-        public IndexModel(ILogger<IndexModel> logger)
+        public async Task<IActionResult> OnGet()
         {
-            _logger = logger;
-        }
-
-        public void OnGet()
-        {
-
+            var isAuthenticated = await IsUserAuthenticated();
+            return HandleAuthorization(isAuthenticated);
         }
     }
 }

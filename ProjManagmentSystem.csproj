@@ -7,7 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Models\" />
+    <Compile Remove="Models\Новая папка1\**" />
+    <Compile Remove="Models\Новая папка\**" />
+    <Content Remove="Models\Новая папка1\**" />
+    <Content Remove="Models\Новая папка\**" />
+    <EmbeddedResource Remove="Models\Новая папка1\**" />
+    <EmbeddedResource Remove="Models\Новая папка\**" />
+    <None Remove="Models\Новая папка1\**" />
+    <None Remove="Models\Новая папка\**" />
   </ItemGroup>
 
 </Project>

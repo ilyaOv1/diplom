@@ -1,7 +1,23 @@
+using System.Net;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorPages();
-builder.Services.AddHttpClient();
+
+builder.Services.AddHttpClient("AuthClient", client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7136/api/auth/"); // ”кажите ваш базовый URL
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+})
+.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+{
+    UseCookies = true,
+    CookieContainer = new CookieContainer(),
+    AllowAutoRedirect = true,
+    UseDefaultCredentials = true
+});
+
+
 
 var app = builder.Build();
 
@@ -19,7 +35,7 @@ app.UseRouting();
 app.UseAuthorization();
 
 app.MapRazorPages();
-app.MapGet("/", () => Results.Redirect("/authorization"));
+app.MapGet("/", () => Results.Redirect("/Index"));
 
 
 app.Run();

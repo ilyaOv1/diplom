@@ -4,10 +4,25 @@
 	ViewData["Title"] = "Profile";
 }
 <h1>Главная страница</h1>
-
+<form method="post">
+    <button type="submit" asp-page-handler="ButtonClick" class="btn btn-primary">Нажми меня</button>
+</form>
 @if (!string.IsNullOrEmpty(Model.Token) && Model.Token != "Куки не найдены.")
 {
     <p>Токен из куков: @Model.Token</p>
+    @if (Model.user != null)
+    {
+
+        <ul>
+            <li>
+                @Model.user.name @Model.user.surname @Model.user.patronymic - @Model.user.description
+            </li>
+        </ul>
+    }
+    else
+    {
+        <p>Нет данных о пользователях.</p>
+    }
 }
 else
 {
