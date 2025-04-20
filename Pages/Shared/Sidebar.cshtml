@@ -1,0 +1,24 @@
+﻿@{
+    <div class="sidebar">
+    <h1>TASKS</h1>
+        <a asp-page="/Profile" class="block-link @(ViewContext.RouteData.Values["Page"]?.ToString() == "/Profile" ? "active" : "")">
+            <div class="user-info">
+                <div class="user-info-content">
+                    <p>Иванов Иван Иванович</p>
+                </div>
+            </div>
+        </a>
+        <hr class="divider">
+        <ul>
+            <li class="@(ViewContext.RouteData.Values["Page"]?.ToString() == "/Employee" ? "active" : "")">
+                <a href="@Url.Action("Contact", "Home")">Контакты</a>
+            </li>
+            <li class="@(ViewContext.RouteData.Values["Page"]?.ToString() == "/Projects" ? "active" : "")">
+                <a asp-page="/Projects">Проекты</a>
+            </li>
+            <li>
+                <a href="@Url.Action("Contact", "Home")">Контакты</a>
+            </li>
+        </ul>
+    </div>
+}

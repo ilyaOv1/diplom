@@ -25,6 +25,7 @@ namespace ProjManagmentSystem.Pages
 
         public async Task<IActionResult> OnGet()
         {
+            ViewData["ShowSidebar"] = false;
             if (await IsUserAuthenticated())
             {
                 return Redirect("/Profile");

@@ -1,4 +1,7 @@
-﻿<!DOCTYPE html>
+﻿@{
+    var showSidebar = ViewData["ShowSidebar"] as bool? ?? true; 
+}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -13,9 +16,14 @@
 
     </header>
     <div class="container" style="background-color: #F9F9F9;">
-        <main role="main" class="pb-3">
+        @if (showSidebar)
+        {
+            @Html.Partial("Sidebar")
+        }
+
+        <div class="content">
             @RenderBody()
-        </main>
+        </div>
     </div>
 
     <footer class="border-top footer text-muted">
