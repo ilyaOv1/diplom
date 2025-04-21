@@ -1,3 +1,4 @@
+using ProjManagmentSystem.Services;
 using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,7 +17,7 @@ builder.Services.AddHttpClient("AuthClient", client =>
     AllowAutoRedirect = true,
     UseDefaultCredentials = true
 });
-
+builder.Services.AddSingleton<UserService>();
 
 
 var app = builder.Build();

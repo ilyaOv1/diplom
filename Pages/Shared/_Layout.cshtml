@@ -1,5 +1,8 @@
 ﻿@{
     var showSidebar = ViewData["ShowSidebar"] as bool? ?? true; 
+    var centeredPages = new[] { "/Authorization", "/Registration" };
+    var isLoginPage = centeredPages.Contains(ViewContext.RouteData.Values["Page"]?.ToString());
+    var isProfilePage = ViewContext.RouteData.Values["Page"]?.ToString() == "/Profile";
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -11,19 +14,23 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/ProjManagmentSystem.styles.css" asp-append-version="true" />
 </head>
-<body>
+<body >
     <header>
 
     </header>
-    <div class="container" style="background-color: #F9F9F9;">
-        @if (showSidebar)
-        {
-            @Html.Partial("Sidebar")
-        }
+    @if (ViewContext.RouteData.Values["Page"]?.ToString() == "/Profile" )
+    {
+        <div class="profile-background"></div>
+    }
 
-        <div class="content">
-            @RenderBody()
-        </div>
+    @if (showSidebar)
+    {
+        @Html.Partial("Sidebar")
+    }
+
+    <!-- Основной контент -->
+    <div class="content @(isLoginPage ? "authreg" : "") @(isProfilePage ? "auth-page" : "")">
+        @RenderBody()
     </div>
 
     <footer class="border-top footer text-muted">

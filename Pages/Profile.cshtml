@@ -3,28 +3,26 @@
 @{
 	ViewData["Title"] = "Profile";
 }
-<h1>Главная страница</h1>
-<form method="post">
-    <button type="submit" asp-page-handler="ButtonClick" class="btn btn-primary">Нажми меня</button>
-</form>
-@if (!string.IsNullOrEmpty(Model.Token) && Model.Token != "Куки не найдены.")
-{
-    <p>Токен из куков: @Model.Token</p>
-    @if (Model.user != null)
-    {
+<div class="profile-block">
+            <div class="image-info">
+                <img src="Images/big-ico.png" style="width: 180px; height: 210px; margin-right: 32px;"></img>
+                <div class="info">
+                    <div style="display: flex; justify-content: space-between;">
+                        <h1 style="font-weight: bold;">Фамилия Имя Отчество</h1>
+                        <div style="display: flex;align-items: center;">
+                            <a style="color: #2954EC; font-size: 13px; margin-right: 5px; font-weight:550">Редактировать профиль</a>
+                            <form method="post">
+                                <button type="submit" asp-page-handler="ButtonClick" class="button">Выйти</button>
+                            </form>
+                        </div>
+                    </div>
+                    <p style="color: #232323; font-size: 13px;">email@mail.ru</p>
+                    <p style="color: #AEAEAE; font-size: 11px;">Последняя активность: </p>
+                    <hr style="border: 0; height: 2px; background: #2954EC;">
+                    <h3 style="font-size: 14px;">О себе</h3>
+                    <p style="color: #8E8E8E; font-size: 14px;">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                </div>
+            </div>
 
-        <ul>
-            <li>
-                @Model.user.name @Model.user.surname @Model.user.patronymic - @Model.user.description
-            </li>
-        </ul>
-    }
-    else
-    {
-        <p>Нет данных о пользователях.</p>
-    }
-}
-else
-{
-    <p>@Model.Token</p>
-}
+    </div>
+

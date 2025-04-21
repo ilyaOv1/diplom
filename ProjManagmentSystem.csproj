@@ -17,4 +17,17 @@
     <None Remove="Models\Новая папка\**" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="wwwroot\Images\employees.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\Images\projects.png" />
+    <None Include="wwwroot\Images\tasks.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="wwwroot\Images\employees.png" />
+  </ItemGroup>
+
 </Project>

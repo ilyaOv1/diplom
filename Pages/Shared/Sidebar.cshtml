@@ -1,23 +1,37 @@
-﻿@{
+﻿@using ProjManagmentSystem.Services
+
+@{
+    @inject UserService UserService
+    
     <div class="sidebar">
-    <h1>TASKS</h1>
+        <h1>TASKS</h1>
         <a asp-page="/Profile" class="block-link @(ViewContext.RouteData.Values["Page"]?.ToString() == "/Profile" ? "active" : "")">
             <div class="user-info">
-                <div class="user-info-content">
-                    <p>Иванов Иван Иванович</p>
+                <div class="user-info-content" style="display: flex;">
+                    <img class="menu-ico" style="width: 30px; height: 30px;" src="Images/ico.png" />
+                    <p>@UserService.FIO</p>
                 </div>
             </div>
         </a>
         <hr class="divider">
         <ul>
-            <li class="@(ViewContext.RouteData.Values["Page"]?.ToString() == "/Employee" ? "active" : "")">
-                <a href="@Url.Action("Contact", "Home")">Контакты</a>
+            <li class="menu-elements @(ViewContext.RouteData.Values["Page"]?.ToString() == "/Employee" ? "active" : "")">
+                <a asp-page="/Employee" class="menu-link">
+                    <img class="menu-ico" src="~/Images/employees.png" alt="Employees" />
+                    <span>Сотрудники</span>
+                </a>
             </li>
-            <li class="@(ViewContext.RouteData.Values["Page"]?.ToString() == "/Projects" ? "active" : "")">
-                <a asp-page="/Projects">Проекты</a>
+            <li class="menu-elements @(ViewContext.RouteData.Values["Page"]?.ToString() == "/Projects" ? "active" : "")">
+                <a asp-page="/Projects" class="menu-link">
+                    <img class="menu-ico" src="~/Images/projects.png" alt="Projects" />
+                    <span>Проекты</span>
+                </a>
             </li>
-            <li>
-                <a href="@Url.Action("Contact", "Home")">Контакты</a>
+            <li class="menu-elements @(ViewContext.RouteData.Values["Page"]?.ToString() == "/Tasks" ? "active" : "")">
+                <a asp-page="/Tasks" class="menu-link">
+                    <img class="menu-ico" src="~/Images/tasks.png" alt="Tasks" />
+                    <span>Задачи</span>
+                </a>
             </li>
         </ul>
     </div>

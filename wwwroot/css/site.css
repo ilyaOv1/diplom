@@ -24,11 +24,12 @@ html {
   min-height: 100%;
 }
 
-.content {
-    margin-left: 270px;
-    padding: 20px;
-    flex-grow: 1;
+
+.image-info{
+    display: flex;
 }
+
+
 
 @media (max-width: 768px) {
     .sidebar {
@@ -41,8 +42,9 @@ html {
 }
 
 body {
+    overflow-y: hidden;
     margin-bottom: 60px;
-    background-color: #F9F9F9;
+    background-color: #FFFFFF;
 }
 
 * {
@@ -52,20 +54,97 @@ body {
     font-family: Arial, Arial, sans-serif;
 }
 
+.button {
+    color: #fff;
+    background-color: #2954EC;
+    border: none;
+    border-color: #2954EC;
+    border-radius: 20px;
+    font-size: 13px;
+    padding: 10px;
+}
+
+.content {
+    background-color: #FFFFFF;
+    margin-left: auto;
+    margin-right: 15%;
+    padding: 30px;
+}
+
+
+
+
+
+.profile-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 400px;
+    background-image: url("data:image/svg+xml,<svg id='patternId' width='100%' height='100%' xmlns='http://www.w3.org/2000/svg'><defs><pattern id='a' patternUnits='userSpaceOnUse' width='69.283' height='40' patternTransform='scale(4) rotate(0)'><rect x='0' y='0' width='100%' height='100%' fill='hsla(0,0%,100%,1)'/><path d='M46.189-20L57.736 0M46.189 20l11.547 20m-46.189 0l11.547 20M11.547 0l11.547 20m40.415 30H40.415M28.868 30H5.774m23.094-40H5.774m57.735 20H40.415m0 20L28.868 50m11.547-60L28.868 10m46.188 0L63.509 30M5.774 10L-5.773 30m75.056 10H46.189L34.64 20 46.19 0h23.094C73.13 6.667 76.98 13.333 80.83 20zM57.736 60H34.64L23.094 40 46.19 0h23.095c3.848 6.667 7.698 13.333 11.547 20L57.736 60zm0-40H34.64L23.094 0l11.547-20h23.095L69.283 0c-3.87 6.7-8.118 14.06-11.547 20zM34.64 60H11.547L0 40l11.547-20h23.094L46.19 40 34.64 60zm0-40H11.547L0 0l11.547-20h23.094L46.19 0 34.64 20zM23.094 40H0l-5.773-10-5.774-10L0 0h23.094l11.547 20-11.547 20z' stroke-width='2' stroke='%232954ecff' fill='none'/></pattern></defs><rect width='800%' height='800%' transform='translate(-300,-28)' fill='url(%23a)'/></svg>");
+    background-repeat: no-repeat;
+    background-position: top center;
+    background-size: cover;
+    z-index: -1;
+}
+
+.auth-page {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin-top: 220px;
+    background-color: white;
+    border-radius: 8px;
+    max-width: 1050px;
+    width: 100%;
+    position: relative;
+    z-index: 2;
+}
+.profile-block {
+
+}
+.content {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+}
+
+.authreg {
+    height: 100vh;
+}
+
 body {
     margin: 0;
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    display: block;
+    background-color: #FFFFFF;
+    overflow-x: hidden;
 }
+
+    body.auth-page {
+        display: flex; 
+        flex-direction: column; 
+        justify-content: center;
+        align-items: center; 
+        background-color: #F9F9F9; 
+    }
 
 .login-wrapper {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: center; 
+    text-align: center; 
+    width: 100%; 
+    max-width: 450px; 
 }
+
+    .login-wrapper p {
+        text-align: center;
+        margin-top: 10px;
+        font-size: 17px;
+        color: #555;
+    }
+
 
 .logo {
     font-size: 28px;
@@ -73,6 +152,8 @@ body {
     color: #3a3a3a;
     margin-bottom: 25px;
 }
+
+
 
 .login-container {
     background-color: white;
@@ -139,8 +220,9 @@ body {
 .user-info {
     margin-bottom: 20px;
     padding: 10px;
-    color: #232323;
-    font-size: 18px;
+    color: black;
+    font-size: 15px;
+    font-weight: 650;
     text-align: left;
     border: 1px solid #EBECF0;
     border-radius: 5px;
@@ -149,8 +231,8 @@ body {
     box-sizing: border-box;
     height: 70px;
     display: flex;
-    align-items: center; 
-    justify-content: flex-start; 
+    align-items: center;
+    justify-content: flex-start;
 }
 
 
@@ -158,10 +240,53 @@ body {
 .user-info-content {
     width: 100%;
 }
+
+
+
+.menu-elements {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+    .menu-elements a.menu-link {
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+        color: #232323;
+        padding: 10px;
+        border-radius: 5px;
+        width: 100%;
+        height: 100%;
+        box-sizing: border-box;
+        background-color: transparent;
+        cursor: pointer;
+    }
+
+        .menu-elements a.menu-link:hover {
+            background-color: #EBECF0;
+            color: #2954EC;
+        }
+
+        .menu-elements a.menu-link.active {
+            background-color: #EBECF0;
+            color: #2954EC;
+            font-weight: bold;
+        }
+
+.menu-ico {
+    width: 24px;
+    height: 24px;
+    margin-left: 10px;
+    margin-right: 10px;
+    object-fit: cover;
+}
+
 .block-link {
-    text-decoration: none; 
-    color: inherit; 
-    display: block; 
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    font-size: 15px;
 }
 
     .block-link .user-info:hover {
@@ -174,11 +299,12 @@ body {
     }
 
     .block-link.active .user-info {
-        background-color: #EBECF0; 
-        color: #2954EC; 
-        font-weight: bold; 
-        border: 1px solid #EBECF0; 
-        border-radius: 5px; 
+        background-color: #EBECF0;
+        color: #2954EC;
+        font-weight: 650;
+        border: 1px solid #EBECF0;
+        border-radius: 5px;
+        font-size: 15px;
     } 
 .divider {
     width: 100%;
@@ -188,7 +314,7 @@ body {
 }
 
 .sidebar {
-    width: 300px;
+    width: 350px;
     background-color: #FAFBFC;
     color: white;
     position: fixed;
@@ -204,8 +330,9 @@ body {
     
 }
 
+
     .sidebar h1 {
-        text-align: center; /* Текст внутри h1 также по центру */
+        text-align: center; 
         width: 100%;
         padding-bottom: 20px;
         color: #232323;
@@ -230,7 +357,8 @@ body {
             .sidebar ul li a {
                 color: #232323;
                 text-decoration: none;
-                font-size: 18px;
+                font-size: 15px;
+                font-weight: 650;
                 display: block;
                 padding: 10px;
                 border-radius: 5px;
