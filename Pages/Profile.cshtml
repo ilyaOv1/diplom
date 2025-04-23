@@ -5,6 +5,7 @@
     var isProfilePage = ViewContext.RouteData.Values["Page"]?.ToString() == "/Profile";
 }
 
+
 <div class="image-info">
     <img src="Images/big-ico.png" style="width: 180px; height: 210px; margin-right: 32px; "></img>
     <div class="info">
@@ -110,8 +111,10 @@
     const cancelDelete = document.getElementById('cancelDelete');
     const confirmDelete = document.getElementById('confirmDelete');
 
+
     if (editProfileButton) {
         editProfileButton.addEventListener('click', () => {
+
             modalOverlay.style.display = 'block';
             editProfileModal.style.display = 'block';
         });

@@ -18,19 +18,21 @@
     <header>
 
     </header>
-    @if (ViewContext.RouteData.Values["Page"]?.ToString() == "/Profile" )
-    {
-        <div class="profile-background"></div>
-    }
+    <div class="container">
+        @if (ViewContext.RouteData.Values["Page"]?.ToString() == "/Profile")
+        {
+            <div class="profile-background"></div>
+        }
 
-    @if (showSidebar)
-    {
-        @Html.Partial("Sidebar")
-    }
+        @if (showSidebar)
+        {
+            @Html.Partial("Sidebar")
+        }
 
-    
-    <div class="@(isLoginPage ? "authreg" : "") @(isProfilePage ? "auth-page" : "content")">
-        @RenderBody()
+
+        <div class="@(isLoginPage ? "authreg" : "") @(isProfilePage ? "auth-page" : "content")">
+            @RenderBody()
+        </div>
     </div>
 
     <footer class="border-top footer text-muted">
