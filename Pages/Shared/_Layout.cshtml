@@ -28,8 +28,8 @@
         @Html.Partial("Sidebar")
     }
 
-    <!-- Основной контент -->
-    <div class="content @(isLoginPage ? "authreg" : "") @(isProfilePage ? "auth-page" : "")">
+    
+    <div class="@(isLoginPage ? "authreg" : "") @(isProfilePage ? "auth-page" : "content")">
         @RenderBody()
     </div>
 

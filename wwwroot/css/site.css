@@ -25,11 +25,14 @@ html {
 }
 
 
-.image-info{
+.image-info {
     display: flex;
+    width: 100%; /* Растягиваем на всю ширину родителя */
 }
 
-
+.info {
+    flex-grow: 1; /* Занимаем все доступное пространство */
+}
 
 @media (max-width: 768px) {
     .sidebar {
@@ -89,18 +92,20 @@ body {
 }
 
 .auth-page {
+    padding: 30px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     margin-top: 220px;
     background-color: white;
     border-radius: 8px;
-    max-width: 1050px;
-    width: 100%;
-    position: relative;
+    width: 1050px;
     z-index: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: auto;
+    margin-right: 15%;
 }
-.profile-block {
 
-}
 .content {
     width: 100%;
     display: flex;
@@ -387,3 +392,94 @@ body {
                 background-color: #EBECF0;
                 text-decoration: none;
             }
+
+.modal-overlay {
+    display: none; /* По умолчанию скрыт */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Полупрозрачный черный фон */
+    z-index: 1000; /* Выше остальных элементов */
+}
+#modalConfirmOverlay {
+    z-index: 1002; /* Выше первого затемненного фона */
+}
+
+/* Стиль для второго модального окна */
+#modalConfirm {
+    z-index: 1003; /* Выше второго затемненного фона */
+    width: 500px; /* Меньше, чем у первого модального окна */
+}
+/* Модальное окно */
+.modal-content {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    padding: 50px;
+
+    border-radius: 8px;
+    width: 800px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1001; /* Выше затемненного фона */
+    display: none; /* По умолчанию скрыто */
+}
+
+/* Кнопка закрытия */
+.close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+/* Стилизация формы */
+label {
+    display: block;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+input, textarea {
+    padding: 8px;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+textarea{
+    width: 100%;
+    min-height: 36px;
+    max-height: 200px;
+}
+
+.modal-input {
+    padding-left: 16px;
+    padding-top: 11px;
+    padding-bottom: 11px;
+    color: #232323;
+    font-size: 13px;
+    font-weight: 500;
+    height: 26px;
+    width: 240px;
+    flex-grow: 0; /* Запретить растягивание */
+    flex-shrink: 0; /* Запретить сжатие */
+}
+
+button {
+    background-color: #2954EC;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+    button:hover {
+        background-color: #1e46c7;
+    }

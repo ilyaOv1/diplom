@@ -43,15 +43,18 @@ namespace ProjManagmentSystem.Pages
 
                 if (response.IsSuccessStatusCode)
                 {
+                    ViewData["ShowSidebar"] = true;
                     cookieService.SaveCookie(response, Response);
                     return RedirectToPage("/Profile");
                 }
                 else if (response.StatusCode == System.Net.HttpStatusCode.Forbidden)
                 {
+                    ViewData["ShowSidebar"] = false;
                     Message = "Неверный email или пароль.";
                 }
                 else
                 {
+                    ViewData["ShowSidebar"] = false;
                     Message = "Произошла ошибка при авторизации.";
                 }
             }
