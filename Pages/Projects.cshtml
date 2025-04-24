@@ -2,15 +2,117 @@
 @model ProjectsModel
 @{
 	ViewData["Title"] = "Projects";
-	
+    var isProjectPage = ViewContext.RouteData.Values["Page"]?.ToString() == "/Projects";
 }
-<div>
-	<div style="display: flex; justify-content: space-between; margin-top: 100px; align-items: center;">
-		<h1>Проекты</h1>
-		<form method="post">
-			<button type="submit" class="button">Создать</button>
-		</form>
-	</div>
-	<hr style="border: 0; height: 3px; background: #2954EC;">
+
+
+
+<div class="page-container">
+    <div class="header" style="margin-top: 80px;">
+        <h1>Проекты</h1>
+        <form method="post">
+            <button type="submit" class="button">Создать</button>
+        </form>
+    </div>
+    <hr class="header-line">
+
+    <div class="image-container" >
+        <div >
+            <div style="display: flex; justify-content: center; margin-bottom: 16px;">
+                <img src="~/Images/projimg.png" style="max-width: 100%;" />
+            </div>
+            <p  style="color: #ABABAB; font-size: 15px; text-align: center;margin-bottom: 16px;">У вас пока нет проектов</p>
+            <form method="post" style="text-align: center;">
+                <button id="addProjButton" type="button" class="button">Создать проект</button>
+            </form>
+        </div>
+    </div>
 </div>
+
+@if (isProjectPage)
+{
+    <div id="addProjModalOverlay" class="modal-overlay" style="display: none;"></div>
+    <div id="addProjModal" class="modal-content" style="display: none;">
+        <span id="addProjCloseModal" class="close">&times;</span>
+        <p style="color: #ABABAB; font-size: 14px;">Создание нового проекта</p>
+        <hr style="border: 0; height: 2px; background: #B5B5B5;">
+        <form id="addProjForm" method="post" asp-page-handler="CreateProject" enctype="multipart/form-data">
+            <div >
+                <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 16px;">Данные проекта</h2>
+                <div class="form-field">
+                    <p class="form-label">Наименование</p>
+                    <input class="form-control addProjInput"
+                           name="Name"
+                           placeholder="Введите название проекта" />
+                </div>
+
+                <div class="form-field">
+                    <p class="form-label">Описание</p>
+                    <textarea class="form-control addProjTextArea"
+                              name="Description"></textarea>
+                </div>
+
+                <div class="form-field">
+                    <p class="form-label">Публичность</p>
+                    <select name="IsPrivate" class="form-control">
+                        <option value="0">Публичный</option>
+                        <option value="1">Приватный</option>
+                    </select>
+                </div>
+                <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 16px;">Участники проекта</h2>
+                <p style="color: #D9D9D9; font-size: 13px; margin-bottom: 8px;">+ Добавить участника</p>
+                <div style="border: 1px solid #D2D2D2; border-radius: 8px; ;background: #FCFCFC; display: flex; padding-top: 9px; padding-bottom: 9px; padding-left: 16px; padding-right: 16px; justify-content: space-between;">
+                    <div style="display: flex; ">
+                        <img src="/Images/big-ico.png" style="width: 20px; height: 20px; margin-right: 10px;" />
+                        <p style="font-size: 13px; color: #232323;">Фамилия Имя Отчество</p>
+                    </div>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <img src="~/Images/star.png" style="width: 18px; height: 16px;" />
+                        <img src="~/Images/remove.png" style="width: 14px; height: 14px;" />
+                    </div>
+                </div>
+            </div>
+            <hr style="border: 0; height: 2px; background: #B5B5B5;">
+            <div style="display: flex;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
+                    <button  type="submit" class="button">Создать</button>
+                </div>
+            </div>
+
+        </form>
+    </div>
+}
+
+<script>
+    const addProjButton = document.getElementById('addProjButton');
+    const addProjModalOverlay = document.getElementById('addProjModalOverlay');
+    const addProjModal = document.getElementById('addProjModal');
+    const addProjCloseModal = document.getElementById('addProjCloseModal');
+
+    if (addProjButton) {
+        addProjButton.addEventListener('click', () => {
+
+            addProjModalOverlay.style.display = 'block';
+            addProjModal.style.display = 'block';
+        });
+    }
+
+    if (addProjCloseModal) {
+        addProjCloseModal.addEventListener('click', () => {
+            addProjModalOverlay.style.display = 'none';
+            addProjModal.style.display = 'none';
+        });
+    }
+
+    if (addProjModalOverlay) {
+        addProjModalOverlay.addEventListener('click', (event) => {
+            if (event.target === addProjModalOverlay) {
+                addProjModalOverlay.style.display = 'none';
+                addProjModal.style.display = 'none';
+            }
+        });
+    }
+
+  
+</script>
 
