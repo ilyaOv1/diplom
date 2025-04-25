@@ -4,6 +4,8 @@ using ProjManagmentSystem.Models;
 using ProjManagmentSystem.Services;
 using System.Net.Http.Headers;
 using System.Net.Http;
+using System.Text.Json;
+using System.Text;
 
 namespace ProjManagmentSystem.Pages
 {
@@ -14,12 +16,22 @@ namespace ProjManagmentSystem.Pages
         private readonly UserService _userService;
         public string Token { get; set; }
         public Users user = new Users();
+        [BindProperty]
+        public List<Users> selectedUsers { get; set; } = new();
+        public static List<Users> selectedUsersToProject = new List<Users>();
 
 
         public ProjectsModel(IHttpClientFactory httpClientFactory, UserService userService) : base(httpClientFactory)
         {
             _httpClient = httpClientFactory.CreateClient("AuthClient");
             _userService = userService;
+        }
+
+        public async Task<IActionResult> OnPostProcessArrayAsync([FromBody] Users[] users)
+        {
+            selectedUsers = users.ToList();
+            selectedUsersToProject = users.ToList();
+            return new JsonResult(new { success = true, message = "Массив получен" });
         }
 
         public void OnGet()
@@ -53,8 +65,39 @@ namespace ProjManagmentSystem.Pages
 
                 if (response.IsSuccessStatusCode)
                 {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    var result = JsonSerializer.Deserialize<Project>(responseContent);
+                    int projectId = result.id;
+                    List<string> emails = new List<string>();
+                    foreach (var i in selectedUsersToProject)
+                    {
+                        emails.Add(i.email);
+                    }
+                    var addUsersToProjectDTO = new AddUsersToProjectDTO
+                    {
+                        ProjectId = projectId,
+                        UserIds = emails
+                    };
 
-                    return RedirectToPage("/Projects");
+                    // Формирование JSON-тела для второго запроса
+                    var jsonContent = new StringContent(
+                        JsonSerializer.Serialize(addUsersToProjectDTO),
+                        Encoding.UTF8,
+                        "application/json"
+                    );
+                    var addUserResponse = await _httpClient.PostAsync("project/add-users-project", jsonContent);
+
+                    if (addUserResponse.IsSuccessStatusCode)
+                    {
+                        // Успешное добавление пользователей
+                        return RedirectToPage("/Projects");
+                    }
+                    else
+                    {
+                        // Ошибка при добавлении пользователей
+                        Console.WriteLine($"Ошибка при добавлении пользователей: {addUserResponse.StatusCode}");
+                        return Page();
+                    }
                 }
                 else
                 {

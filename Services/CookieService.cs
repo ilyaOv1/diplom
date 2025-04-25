@@ -20,7 +20,7 @@
 
                         Response.Cookies.Append(key, value, new CookieOptions
                         {
-                            HttpOnly = true,
+                            HttpOnly = false,
                             Secure = true,
                             SameSite = SameSiteMode.None,
                             Path = "/"
