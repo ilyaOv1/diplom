@@ -11,7 +11,7 @@
     <div class="header" style="margin-top: 80px;">
         <h1>Проекты</h1>
         <form method="post">
-            <button type="submit" class="button">Создать</button>
+            <button id="addProjButton2" type="button" class="button">Создать</button>
         </form>
     </div>
     <hr class="header-line">
@@ -61,15 +61,8 @@
                 </div>
                 <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 16px;">Участники проекта</h2>
                 <p id="addParticipantBtn" style="color: #D9D9D9; font-size: 13px; margin-bottom: 8px;">+ Добавить участника</p>
-                <div style="border: 1px solid #D2D2D2; border-radius: 8px; ;background: #FCFCFC; display: flex; padding-top: 9px; padding-bottom: 9px; padding-left: 16px; padding-right: 16px; justify-content: space-between;">
-                    <div style="display: flex; ">
-                        <img src="/Images/big-ico.png" style="width: 20px; height: 20px; margin-right: 10px;" />
-                        <p style="font-size: 13px; color: #232323;">Фамилия Имя Отчество</p>
-                    </div>
-                    <div style="display: flex; gap: 10px; align-items: center;">
-                        <img src="~/Images/star.png" style="width: 18px; height: 16px;" />
-                        <img src="~/Images/remove.png" style="width: 14px; height: 14px;" />
-                    </div>
+                <div id="usersInProject">
+
                 </div>
             </div>
             <hr style="border: 0; height: 2px; background: #B5B5B5;">
@@ -87,6 +80,7 @@
     <div id="addParticipantModal" class="modal-content" style="display: none;">
         <span id="addParticipantCloseModal" class="close">&times;</span>
         <p style="color: #ABABAB; font-size: 14px;">Добавление участника</p>
+        <p id="currUserEmail" style="display: none">@Model._userService.email</p>
         <hr style="border: 0; height: 2px; background: #B5B5B5;">
         <div style="display: flex; align-content: center; align-items: center; justify-content:center;">
             <input id="participantSearchInput" class="form-control" placeholder="Введите почту пользователя" />
@@ -103,12 +97,21 @@
 
 <script>
     const addProjButton = document.getElementById('addProjButton');
+    const addProjButton2 = document.getElementById('addProjButton2');
     const addProjModalOverlay = document.getElementById('addProjModalOverlay');
     const addProjModal = document.getElementById('addProjModal');
     const addProjCloseModal = document.getElementById('addProjCloseModal');
 
     if (addProjButton) {
         addProjButton.addEventListener('click', () => {
+
+            addProjModalOverlay.style.display = 'block';
+            addProjModal.style.display = 'block';
+        });
+    }
+
+    if (addProjButton2) {
+        addProjButton2.addEventListener('click', () => {
 
             addProjModalOverlay.style.display = 'block';
             addProjModal.style.display = 'block';
@@ -187,9 +190,20 @@
 
         const participant = { email, name };
         selectedUsers.push(participant);
+
         sendArrayToServer();
+
         addParticipantModal.style.display = 'none';
         addParticipantModalOverlay.style.display = 'none';
+
+        const searchInput = document.getElementById('participantSearchInput');
+        searchInput.value = '';
+        const searchResults = document.getElementById('searchResults');
+        searchResults.innerHTML = '';
+
+        const usersInProject = document.getElementById('usersInProject');
+        const userElement = createUserElement(email, name); 
+        usersInProject.appendChild(userElement); 
     }
 
     async function sendArrayToServer() {
@@ -203,10 +217,6 @@
             body: JSON.stringify(selectedUsers)
         });
 
-        if (response.ok) {
-            const result = await response.json();
-            console.log('Результат:', result);
-        }
     }
 
     participantSearchInput.addEventListener('input', function () {
@@ -241,12 +251,16 @@
             })
             .then(data => {
                 searchResults.innerHTML = '';
+                const currUserEmail = document.getElementById('currUserEmail');
                 if (data.length === 0) {
                     searchResults.innerHTML = '<p>Пользователь не найден</p>';
                     return;
                 }
 
                 data.forEach(user => {
+                    if (selectedUsers.some(participant => participant.email === user.email) || user.email === currUserEmail.textContent) {
+                        return; 
+                    }
                     const userDiv = document.createElement('div');
                     userDiv.style.display = 'flex';
                     userDiv.style.justifyContent = 'space-between';
@@ -261,7 +275,7 @@
                             <p style="font-size: 13px; color: #232323;">${user.name} </p>
                             <p style="font-size: 13px; color: #232323;">${user.surname} </p>
                         </div>
-                                <button class="button" style="width: 100px;" onclick="addUser('${user.email}', '${user.name}')">Добавить</button>
+                                    <button class="button" style="width: 100px;" onclick="addUser('${user.email}', '${user.name} ${user.surname}' )">Добавить</button>
                     `;
                     searchResults.appendChild(userDiv);
                 });
@@ -273,5 +287,45 @@
 
         
     });
+    function createUserElement(email, name) {
+        const userDiv = document.createElement('div');
+        userDiv.style.border = '1px solid #D2D2D2';
+        userDiv.style.borderRadius = '8px';
+        userDiv.style.background = '#FCFCFC';
+        userDiv.style.display = 'flex';
+        userDiv.style.padding = '9px 16px';
+        userDiv.style.justifyContent = 'space-between';
+        userDiv.style.alignItems = 'center';
+        userDiv.style.marginBottom = '5px';
+
+        userDiv.setAttribute('data-email', email);
+
+        userDiv.innerHTML = `
+            <div style="display: flex; align-items: center;">
+                <img src="/Images/big-ico.png" style="width: 20px; height: 20px; margin-right: 10px;" />
+                <p style="font-size: 13px; color: #232323;">${name}</p>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <img src="/Images/star.png" style="width: 18px; height: 16px;" />
+                <img src="/Images/remove.png" style="width: 14px; height: 14px; cursor: pointer;" onclick="removeUser('${email}')"/>
+            </div>
+        `;
+
+        return userDiv;
+    }
+
+    function removeUser(email) {
+        const index = selectedUsers.findIndex(participant => participant.email === email);
+        if (index !== -1) {
+            selectedUsers.splice(index, 1); 
+        }
+
+        const usersInProject = document.getElementById('usersInProject');
+        const userElement = usersInProject.querySelector(`div[data-email="${email}"]`);
+        if (userElement) {
+            userElement.remove(); 
+        }
+        sendArrayToServer();
+    }
 </script>
 

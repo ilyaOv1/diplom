@@ -2,11 +2,13 @@
 {
 	public class UserService
 	{
+		public string email { get; set; }
 		public string FIO { get; set; }
 		public string Token { get; set; }
 
-		public void SetUserData(string fio, string token)
+		public void SetUserData(string email, string fio, string token)
 		{
+			this.email = email;
 			FIO = fio;
 			Token = token;
 		}

@@ -43,7 +43,7 @@ namespace ProjManagmentSystem.Pages
 				{
 					var user = await response.Content.ReadFromJsonAsync<Users>();
 					this.user = user;
-					_userService.SetUserData($"{user.surname} {user.name} {user.patronymic}", token);
+					_userService.SetUserData(user.email, $"{user.surname} {user.name} {user.patronymic}", token);
 
 					ViewData["SideBarFIO"] = _userService.FIO;
 				}
@@ -103,7 +103,7 @@ namespace ProjManagmentSystem.Pages
                     user.patronymic = updatedUser.patronymic;
                     user.description = updatedUser.description;
 
-                    _userService.SetUserData($"{updatedUser.surname} {updatedUser.name} {updatedUser.patronymic}", Token);
+                    _userService.SetUserData(updatedUser.email, $"{updatedUser.surname} {updatedUser.name} {updatedUser.patronymic}", Token);
 
                     ViewData["SideBarFIO"] = _userService.FIO;
 

@@ -13,9 +13,8 @@ namespace ProjManagmentSystem.Pages
     {
 
         private readonly HttpClient _httpClient;
-        private readonly UserService _userService;
+        public readonly UserService _userService;
         public string Token { get; set; }
-        public Users user = new Users();
         [BindProperty]
         public List<Users> selectedUsers { get; set; } = new();
         public static List<Users> selectedUsersToProject = new List<Users>();
@@ -89,12 +88,10 @@ namespace ProjManagmentSystem.Pages
 
                     if (addUserResponse.IsSuccessStatusCode)
                     {
-                        // Успешное добавление пользователей
                         return RedirectToPage("/Projects");
                     }
                     else
                     {
-                        // Ошибка при добавлении пользователей
                         Console.WriteLine($"Ошибка при добавлении пользователей: {addUserResponse.StatusCode}");
                         return Page();
                     }
