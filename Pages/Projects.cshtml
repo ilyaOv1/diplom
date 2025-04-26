@@ -16,17 +16,38 @@
     </div>
     <hr class="header-line">
 
-    <div class="image-container" >
-        <div >
-            <div style="display: flex; justify-content: center; margin-bottom: 16px;">
-                <img src="~/Images/projimg.png" style="max-width: 100%;" />
+    @if(Model.projects.Count == 0)
+    {
+        <div class="image-container" >
+            <div >
+                <div style="display: flex; justify-content: center; margin-bottom: 16px;">
+                    <img src="~/Images/projimg.png" style="max-width: 100%;" />
+                </div>
+                <p  style="color: #ABABAB; font-size: 15px; text-align: center;margin-bottom: 16px;">У вас пока нет проектов</p>
+                <form method="post" style="text-align: center;">
+                    <button id="addProjButton" type="button" class="button">Создать проект</button>
+                </form>
             </div>
-            <p  style="color: #ABABAB; font-size: 15px; text-align: center;margin-bottom: 16px;">У вас пока нет проектов</p>
-            <form method="post" style="text-align: center;">
-                <button id="addProjButton" type="button" class="button">Создать проект</button>
-            </form>
         </div>
-    </div>
+    }
+    else
+    {
+        <div style="height: 100vh; overflow-y: auto; display: flex; flex-wrap: wrap; gap: 16px; padding-bottom: 50px; margin-bottom: 25px; margin-top: 25px; background-color: #FAFAFA; padding-left: 20px; padding-top: 20px; border-radius: 10px;">
+            @{
+                int count = 0;
+            }
+            @foreach (var i in Model.projects)
+            {
+                count++;
+                <div style="background: #FFFFFF; width: calc(33% - 16px); height: 150px; padding: 8px; box-sizing: border-box; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+                    <p style="color: #D2D2D2; font-size: 11px; margin-left: 16px; margin-top: 8px;">№ @count</p>
+                    <p style="font-size: 16px; color: #000000; margin-bottom: 8px; margin-left: 16px;">@i.Name</p>
+                    <p style="font-size: 14px; color: #232323; margin-bottom: 10px; margin-left: 16px;">Создатель:</p>
+                    <button type="button" class="button" style="width: calc(100% - 32px); margin-left: 16px; margin-right: 16px;">к задачам проекта</button>
+                </div>
+            }
+        </div>
+    }
 </div>
 
 @if (isProjectPage)
@@ -173,14 +194,11 @@
         
     }
 
-
     function getCookie(name) {
         const value = `; ${document.cookie}`;
         const parts = value.split(`; ${name}=`);
         if (parts.length === 2) return parts.pop().split(';').shift();
     }
-
-    
 
     function addUser(email, name) {
         if (selectedUsers.some(participant => participant.email === email)) {
@@ -287,6 +305,7 @@
 
         
     });
+
     function createUserElement(email, name) {
         const userDiv = document.createElement('div');
         userDiv.style.border = '1px solid #D2D2D2';

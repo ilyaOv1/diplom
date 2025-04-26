@@ -17,6 +17,8 @@ namespace ProjManagmentSystem.Pages
         public string Token { get; set; }
         [BindProperty]
         public List<Users> selectedUsers { get; set; } = new();
+        [BindProperty]
+        public List<Project> projects { get; set; }
         public static List<Users> selectedUsersToProject = new List<Users>();
 
 
@@ -33,8 +35,40 @@ namespace ProjManagmentSystem.Pages
             return new JsonResult(new { success = true, message = "Массив получен" });
         }
 
-        public void OnGet()
+        public async Task<IActionResult> OnGet()
         {
+            var isAuthenticated = await IsUserAuthenticated();
+
+            if (!isAuthenticated)
+            {
+                return HandleAuthorization(isAuthenticated);
+            }
+
+            var token = Request.Cookies["token"];
+            Token = token;
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            try
+            {
+                var response = await _httpClient.GetAsync("project/users");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var projectsList = await response.Content.ReadFromJsonAsync<List<Project>>();
+
+                    this.projects = projectsList;
+                }
+                else
+                {
+                    Console.WriteLine($"Ошибка при получении данных пользователей: {response.StatusCode}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Исключение при запросе к /users: {ex.Message}");
+            }
+
+            return Page();
         }
 
         public async Task<IActionResult> OnPostCreateProject([FromForm] Project project)
