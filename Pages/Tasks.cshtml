@@ -1,0 +1,30 @@
+﻿@page
+@model TasksModel
+@{
+	ViewData["Title"] = "Tasks";
+}
+
+<div class="page-container">
+    <div class="header" style="margin-top: 80px;">
+        <h1>Доска задач @Model.ProjectName</h1>
+        <form method="post">
+            <button id="addProjButton2" type="button" class="button">Добавить задачу</button>
+        </form>
+    </div>
+    <hr class="header-line">
+
+    <div class="status-columns">
+        <div class="status-column" style="background-color: #EBECF0;">
+            <div class="status-title">Новый</div>
+        </div>
+        <div class="status-column" style="background-color: #EBECF0;">
+            <div class="status-title">В работе</div>
+        </div>
+        <div class="status-column" style="background-color: #EBECF0;">
+            <div class="status-title">На проверке</div>
+        </div>
+        <div class="status-column" style="background-color: #EBECF0;">
+            <div class="status-title">Завершено</div>
+        </div>
+    </div>
+</div>
