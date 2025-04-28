@@ -16,6 +16,9 @@ namespace ProjManagmentSystem.Pages
 
         [BindProperty(SupportsGet = true)]
         public string ProjectName { get; set; }
+
+        [BindProperty(SupportsGet = true)]
+        public int ProjectId { get; set; }
         [BindProperty]
         public List<Tasks> tasks { get; set; }
         public TasksModel(IHttpClientFactory httpClientFactory, UserService userService) : base(httpClientFactory)

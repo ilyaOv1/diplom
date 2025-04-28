@@ -40,7 +40,7 @@
             {
                 count++;
                 <div style="background: #FFFFFF; width: calc(33% - 16px); height: 150px; padding: 8px; box-sizing: border-box; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);"
-                     onclick="handleProjectClick(event, '@i.Name')"
+                     onclick="handleProjectClick(event, '@i.Name', '@i.id')"
                      data-project-name="@i.Name">
                     <p style="color: #D2D2D2; font-size: 11px; margin-left: 16px; margin-top: 8px;">№ @count</p>
                     <p style="font-size: 16px; color: #000000; margin-bottom: 8px; margin-left: 16px;">@i.Name</p>
@@ -349,9 +349,9 @@
         sendArrayToServer();
     }
 
-    function handleProjectClick(event, projectName) {
+    function handleProjectClick(event, projectName, projectId) {
         if (!event.target.closest('button')) {
-            const url = `/Tasks?projectName=${encodeURIComponent(projectName)}`;
+            const url = `/Tasks?projectName=${encodeURIComponent(projectName)}&projectId=${encodeURIComponent(projectId)}`;
             window.location.href = url;
         }
     }

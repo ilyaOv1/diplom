@@ -112,7 +112,6 @@ namespace ProjManagmentSystem.Pages
                         UserIds = emails
                     };
 
-                    // Формирование JSON-тела для второго запроса
                     var jsonContent = new StringContent(
                         JsonSerializer.Serialize(addUsersToProjectDTO),
                         Encoding.UTF8,
