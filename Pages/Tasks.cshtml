@@ -121,10 +121,10 @@
                 </div>
                 <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 16px;">Ответственный за задачу</h2>
                 <p id="addParticipantTaskBtn" style="color: #D9D9D9; font-size: 13px; margin-bottom: 8px;">+ Добавить участника</p>
-                <div style="margin-bottom: 8px;" id="usersInProject">
+                <div style="margin-bottom: 8px;" id="usersInProjectTask">
                 </div>
                 <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 16px; ">Подзадачи</h2>
-                <p id="addParticipantTaskBtn" style="color: #D9D9D9; font-size: 13px; margin-bottom: 8px;">+ Добавить подзадачу</p>
+                <p id="addSubtaskBtn" style="color: #D9D9D9; font-size: 13px; margin-bottom: 8px;">+ Добавить подзадачу</p>
             </div>
             <hr style="border: 0; height: 2px; background: #B5B5B5;">
             <div style="display: flex;">
@@ -151,6 +151,34 @@
         </div>
     </div>
 
+    <div id="addSubtaskModalOverlay" class="modal-overlay" style="display: none;"></div>
+    <div id="addSubtaskModal" class="modal-content" style="display: none;">
+        <span id="addSubtaskCloseModal" class="close">&times;</span>
+        <p style="color: #ABABAB; font-size: 14px;">Добавление подзадачи</p>
+        <p id="currUserEmail" style="display: none">@Model._userService.email</p>
+        <hr style="border: 0; height: 2px; background: #B5B5B5;">
+        <div style="">
+            <div class="form-field">
+                <p class="form-label">Наименование</p>
+                <input class="form-control addProjInput"
+                       name="Name"
+                       placeholder="Введите название задачи" />
+            </div>
+
+            <div class="form-field">
+                <p class="form-label">Описание</p>
+                <textarea class="form-control addProjTextArea"
+                          name="Description"></textarea>
+            </div>
+            <div class="form-field">
+                <p class="form-label">Ответственный</p>
+                <select></select>
+            </div>
+        </div>
+        <div id="searchResultsTask" style="margin-top: 16px;">
+        </div>
+    </div>
+
 
 
     <div id="participantsTaskList"></div>
@@ -160,7 +188,16 @@
     const addTaskModalOverlay = document.getElementById('addTaskModalOverlay');
     const addTaskModal = document.getElementById('addTaskModal');
     const addTaskCloseModal = document.getElementById('addTaskCloseModal');
+    const addParticipantTaskBtn = document.getElementById('addParticipantTaskBtn');
+    const addParticipantTaskModalOverlay = document.getElementById('addParticipantTaskModalOverlay');
+    const addParticipantTaskModal = document.getElementById('addParticipantTaskModal');
+    const addParticipantTaskCloseModal = document.getElementById('addParticipantTaskCloseModal');
+    const addSubtaskBtn = document.getElementById('addSubtaskBtn');
+    const addSubtaskModalOverlay = document.getElementById('addSubtaskModalOverlay');
+    const addSubtaskModal = document.getElementById('addSubtaskModal');
+    const addSubtaskCloseModal = document.getElementById('addSubtaskCloseModal');
 
+    const selectedTaskUsers = [];
 
     if (addTaskButton) {
         addTaskButton.addEventListener('click', () => {
@@ -169,7 +206,6 @@
             addTaskModal.style.display = 'block';
         });
     }
-
 
     if (addTaskCloseModal) {
         addTaskCloseModal.addEventListener('click', () => {
@@ -186,14 +222,7 @@
             }
         });
     }
-
-    const addParticipantTaskBtn = document.getElementById('addParticipantTaskBtn');
-    const addParticipantTaskModalOverlay = document.getElementById('addParticipantTaskModalOverlay');
-    const addParticipantTaskModal = document.getElementById('addParticipantTaskModal');
-    const addParticipantTaskCloseModal = document.getElementById('addParticipantTaskCloseModal');
-
-    const selectedTaskUsers = [];
-
+    
     if (addParticipantTaskBtn) {
         addParticipantTaskBtn.addEventListener('click', () => {
             addParticipantTaskModalOverlay.style.display = 'block';
@@ -208,8 +237,6 @@
         });
     }
 
-
-
     if (addParticipantTaskModalOverlay) {
         addParticipantTaskModalOverlay.addEventListener('click', (event) => {
             if (event.target === addParticipantTaskModalOverlay) {
@@ -220,10 +247,83 @@
 
     }
 
+    if (addSubtaskBtn) {
+        addSubtaskBtn.addEventListener('click', () => {
+            addSubtaskModalOverlay.style.display = 'block';
+            addSubtaskModal.style.display = 'block';
+        });
+    }
+
+    if (addSubtaskCloseModal) {
+        addSubtaskCloseModal.addEventListener('click', () => {
+            addSubtaskModalOverlay.style.display = 'none';
+            addSubtaskModal.style.display = 'none';
+        });
+    }
+
+    if (addSubtaskModalOverlay) {
+        addSubtaskModalOverlay.addEventListener('click', (event) => {
+            if (event.target === addSubtaskModalOverlay) {
+                addSubtaskModalOverlay.style.display = 'none';
+                addSubtaskModal.style.display = 'none';
+            }
+        });
+
+    }
+
     function getCookie(name) {
         const value = `; ${document.cookie}`;
         const parts = value.split(`; ${name}=`);
         if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+
+    function addUser(email, name) {
+        if (selectedTaskUsers.some(participant => participant.email === email)) {
+            alert('Участник уже добавлен');
+            return;
+        }
+
+        const participant = { email, name };
+        selectedTaskUsers.push(participant);
+
+        addParticipantTaskModal.style.display = 'none';
+        addParticipantTaskModalOverlay.style.display = 'none';
+
+        const searchInput = document.getElementById('participantTaskSearchInput');
+        searchInput.value = '';
+        const searchResults = document.getElementById('searchResultsTask');
+        searchResults.innerHTML = '';
+
+        const usersInProjectTask = document.getElementById('usersInProjectTask');
+        const userElement = createUserElement(email, name);
+        usersInProjectTask.appendChild(userElement);
+    }
+
+    function createUserElement(email, name) {
+        const userDiv = document.createElement('div');
+        userDiv.style.border = '1px solid #D2D2D2';
+        userDiv.style.borderRadius = '8px';
+        userDiv.style.background = '#FCFCFC';
+        userDiv.style.display = 'flex';
+        userDiv.style.padding = '9px 16px';
+        userDiv.style.justifyContent = 'space-between';
+        userDiv.style.alignItems = 'center';
+        userDiv.style.marginBottom = '5px';
+
+        userDiv.setAttribute('data-email', email);
+
+        userDiv.innerHTML = `
+                <div style="display: flex; align-items: center;">
+                    <img src="/Images/big-ico.png" style="width: 20px; height: 20px; margin-right: 10px;" />
+                    <p style="font-size: 13px; color: #232323;">${name}</p>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <img src="/Images/star.png" style="width: 18px; height: 16px;" />
+                    <img src="/Images/remove.png" style="width: 14px; height: 14px; cursor: pointer;" onclick="removeUser('${email}')"/>
+                </div>
+            `;
+
+        return userDiv;
     }
 
     participantTaskSearchInput.addEventListener('input', function () {
@@ -299,6 +399,8 @@
                 searchResultsTask.innerHTML = `<p>${error.message}</p>`;
             });
     });
+
+
 </script>
 
 
