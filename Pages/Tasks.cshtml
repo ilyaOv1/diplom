@@ -5,7 +5,7 @@
     var isTaskPage = ViewContext.RouteData.Values["Page"]?.ToString() == "/Tasks";
 }
 
-<div class="page-container">
+<div class="page-container" >
     <div class="header" style="margin-top: 80px;">
         <h1>Доска задач @Model.ProjectName</h1>
         
@@ -16,7 +16,7 @@
     <hr class="header-line">
 
     <div class="status-columns">
-        <div class="status-column" style="background-color: #EBECF0;">
+        <div class="status-column" style="background-color: #EBECF0; overflow-y: auto; padding-bottom: 200px;">
             <div class="status-title">новыe</div>
             @{
                 int count = 0;
@@ -26,7 +26,7 @@
                 if (i.status == "Новая" && i.project == Model.ProjectId)
                 {
                     count++;
-                    <div style="background: #FFFFFF; border-radius: 5px; width: 100%;  margin-right: 9px; margin-top: 10px;">
+                    <div style="background: #FFFFFF; border-radius: 5px; width: 100%;  margin-right: 9px; margin-top: 10px; ">
                         <p style="color: #D2D2D2; font-size: 11px; margin-left: 16px; margin-top: 6px;">№ @count</p>
                         <p style="font-size: 17px; color: black; margin-left: 16px; margin-top: 3px; font-weight: 600; ">@i.name</p>
                         <p style="font-size: 15px; color: black; margin-left: 16px; margin-top: 3px; ">Ответственный: </p>
@@ -35,7 +35,7 @@
                 }
             }
         </div>
-        <div class="status-column" style="background-color: #EBECF0;">
+        <div class="status-column" style="background-color: #EBECF0; overflow-y: auto; padding-bottom: 200px;">
             <div class="status-title">в работе</div>
             @{
                 count = 0;
@@ -54,7 +54,7 @@
                 }
             }
         </div>
-        <div class="status-column" style="background-color: #EBECF0;">
+        <div class="status-column" style="background-color: #EBECF0; overflow-y: auto; padding-bottom: 200px;">
             <div class="status-title">можно проверять</div>
             @{
                 count = 0;
@@ -73,7 +73,7 @@
                 }
             }
         </div>
-        <div class="status-column" style="background-color: #EBECF0;">
+        <div class="status-column" style="background-color: #EBECF0; overflow-y: auto; padding-bottom: 200px;">
             <div class="status-title">готово</div>
             @{
                 count = 0;
@@ -104,21 +104,30 @@
         <span id="addTaskCloseModal" class="close">&times;</span>
         <p style="color: #ABABAB; font-size: 14px;">Создание новой задачи</p>
         <hr style="border: 0; height: 2px; background: #B5B5B5;">
-        <form id="addProjForm" method="post" asp-page-handler="CreateProject" enctype="multipart/form-data">
+        <form id="addTaskForm" method="post" asp-page-handler="CreateTask" enctype="multipart/form-data">
             <div>
                 <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 16px;">Данные задачи</h2>
                 <div class="form-field">
                     <p class="form-label">Наименование</p>
-                    <input class="form-control addProjInput"
+                    <input class="form-control"
                            name="Name"
                            placeholder="Введите название задачи" />
                 </div>
-
+                <div class="form-field" style="display: none;">
+                    <p class="form-label">Наименование</p>
+                    <input class="form-control"
+                           name="Status"
+                           value="Новая"
+                           placeholder="Введите название задачи" />
+                </div>
+                <input type="hidden" name="ProjectId" value="@Model.ProjectId" />
+                <input type="hidden" name="ProjectName" value="@Model.ProjectName" />
                 <div class="form-field">
                     <p class="form-label">Описание</p>
-                    <textarea class="form-control addProjTextArea"
+                    <textarea class="form-control"
                               name="Description"></textarea>
                 </div>
+
                 <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 16px;">Ответственный за задачу</h2>
                 <p id="addParticipantTaskBtn" style="color: #D9D9D9; font-size: 13px; margin-bottom: 8px;">+ Добавить участника</p>
                 <div style="margin-bottom: 8px;" id="usersInProjectTask">
@@ -172,7 +181,9 @@
             </div>
             <div class="form-field">
                 <p class="form-label">Ответственный</p>
-                <select></select>
+                <select class="form-control">
+                    <option>sdada</option>
+                </select>
             </div>
         </div>
         <div id="searchResultsTask" style="margin-top: 16px;">
@@ -196,7 +207,7 @@
     const addSubtaskModalOverlay = document.getElementById('addSubtaskModalOverlay');
     const addSubtaskModal = document.getElementById('addSubtaskModal');
     const addSubtaskCloseModal = document.getElementById('addSubtaskCloseModal');
-
+    const searchResultsTask = document.getElementById('searchResultsTask');
     const selectedTaskUsers = [];
 
     if (addTaskButton) {
@@ -285,7 +296,7 @@
 
         const participant = { email, name };
         selectedTaskUsers.push(participant);
-
+        sendArrayToServer();
         addParticipantTaskModal.style.display = 'none';
         addParticipantTaskModalOverlay.style.display = 'none';
 
@@ -297,6 +308,19 @@
         const usersInProjectTask = document.getElementById('usersInProjectTask');
         const userElement = createUserElement(email, name);
         usersInProjectTask.appendChild(userElement);
+    }
+
+    async function sendArrayToServer() {
+
+        const response = await fetch('?handler=ProcessArray', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+            },
+            body: JSON.stringify(selectedTaskUsers)
+        });
+
     }
 
     function createUserElement(email, name) {
