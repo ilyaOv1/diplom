@@ -20,7 +20,7 @@ namespace ProjManagmentSystem.Pages
         [BindProperty]
         public List<Project> projects { get; set; }
         public static List<Users> selectedUsersToProject = new List<Users>();
-
+        public List<Users> ProjectUsers { get; set; } = new();
 
         public ProjectsModel(IHttpClientFactory httpClientFactory, UserService userService) : base(httpClientFactory)
         {
@@ -35,7 +35,7 @@ namespace ProjManagmentSystem.Pages
             return new JsonResult(new { success = true, message = "Массив получен" });
         }
 
-        public async Task<IActionResult> OnGet()
+        public async Task<IActionResult> OnGet(int projectId)
         {
             var isAuthenticated = await IsUserAuthenticated();
 
@@ -57,6 +57,17 @@ namespace ProjManagmentSystem.Pages
                     var projectsList = await response.Content.ReadFromJsonAsync<List<Project>>();
 
                     this.projects = projectsList;
+
+                    //var content = new FormUrlEncodedContent(new Dictionary<string, string>
+                    //{
+                    //    { "projectId", projectId.ToString() }
+                    //});
+
+                    //var usersResponse = await _httpClient.PostAsync("users-project", content);
+                    //if (usersResponse.IsSuccessStatusCode)
+                    //{
+                    //    ProjectUsers = await usersResponse.Content.ReadFromJsonAsync<List<Users>>();
+                    //}
                 }
                 else
                 {
@@ -121,7 +132,7 @@ namespace ProjManagmentSystem.Pages
 
                     if (addUserResponse.IsSuccessStatusCode)
                     {
-                        return RedirectToPage("/Projects");
+                        return RedirectToPage();
                     }
                     else
                     {
@@ -142,6 +153,43 @@ namespace ProjManagmentSystem.Pages
             }
 
 
+        }
+
+        public async Task<IActionResult> OnPostLoadProjectUsersAsync([FromQuery] int projectId)
+        {
+            var isAuthenticated = await IsUserAuthenticated();
+
+            if (!isAuthenticated)
+            {
+                return HandleAuthorization(isAuthenticated);
+            }
+
+            var token = Request.Cookies["token"];
+            Token = token;
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            var content = new FormUrlEncodedContent(new Dictionary<string, string>
+                    {
+                        { "projectId", projectId.ToString() }
+                    });
+
+            try
+            {
+                var response = await _httpClient.PostAsync("project/users-project", content);
+                if (response.IsSuccessStatusCode)
+                {
+                    var users = await response.Content.ReadFromJsonAsync<List<Users>>();
+                    return new JsonResult(new { success = true, users });
+                }
+                else
+                {
+                    return new JsonResult(new { success = false, message = "Ошибка загрузки пользователей" });
+                }
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(new { success = false, message = "Ошибка: " + ex.Message });
+            }
         }
     }
 }

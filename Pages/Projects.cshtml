@@ -40,12 +40,12 @@
             {
                 count++;
                 <div style="background: #FFFFFF; width: calc(33% - 16px); height: 150px; padding: 8px; box-sizing: border-box; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);"
-                     onclick="handleProjectClick(event, '@i.Name', '@i.id')"
-                     data-project-name="@i.Name">
+                     onclick="handleProjectUpdateClick('@i.id', '@i.Name', '@i.Description', '@i.IsPrivate', '@i.creatorProj')" data-project-name="@i.Name">
                     <p style="color: #D2D2D2; font-size: 11px; margin-left: 16px; margin-top: 8px;">№ @count</p>
+                    <p style="display: none;">@i.id</p>
                     <p style="font-size: 16px; color: #000000; margin-bottom: 8px; margin-left: 16px;">@i.Name</p>
-                    <p style="font-size: 14px; color: #232323; margin-bottom: 10px; margin-left: 16px;">Создатель:</p>
-                    <button type="button" class="button" style="width: calc(100% - 32px); margin-left: 16px; margin-right: 16px;">к задачам проекта</button>
+                    <p style="font-size: 14px; color: #232323; margin-bottom: 10px; margin-left: 16px;">Создатель: @i.creatorProj</p>
+                    <button type="button" class="button" onclick="handleProjectClick(event, '@i.Name', '@i.id')" style="width: calc(100% - 32px); margin-left: 16px; margin-right: 16px;">к задачам проекта</button>
                 </div>
             }
         </div>
@@ -66,18 +66,20 @@
                     <p class="form-label">Наименование</p>
                     <input class="form-control addProjInput"
                            name="Name"
+                           id="editName"
                            placeholder="Введите название проекта" />
                 </div>
 
                 <div class="form-field">
                     <p class="form-label">Описание</p>
                     <textarea class="form-control addProjTextArea"
-                              name="Description"></textarea>
+                                id="editDescription"
+                                name="Description"></textarea>
                 </div>
 
                 <div class="form-field">
                     <p class="form-label">Публичность</p>
-                    <select name="IsPrivate" class="form-control">
+                    <select name="IsPrivate" id="editPublic" class="form-control">
                         <option value="0">Публичный</option>
                         <option value="1">Приватный</option>
                     </select>
@@ -350,10 +352,70 @@
     }
 
     function handleProjectClick(event, projectName, projectId) {
-        if (!event.target.closest('button')) {
-            const url = `/Tasks?projectName=${encodeURIComponent(projectName)}&projectId=${encodeURIComponent(projectId)}`;
-            window.location.href = url;
+        const url = `/Tasks?projectName=${encodeURIComponent(projectName)}&projectId=${encodeURIComponent(projectId)}`;
+        window.location.href = url;
+    }
+    function handleProjectUpdateClick(projectId, name, description, isPrivate, creatorProj) {
+        addProjModalOverlay.style.display = 'block';
+        addProjModal.style.display = 'block';
+
+        document.getElementById("editName").value = name;
+        document.getElementById("editDescription").value = description;
+
+        const isPrivateBool = isPrivate === "True" || isPrivate === "true" ? "1" : "0";
+        document.getElementById("editPublic").value = isPrivateBool;
+
+        selectedUsers.length = 0; 
+        const usersInProject = document.getElementById('usersInProject');
+        usersInProject.innerHTML = ''; 
+
+        loadUsersForProject(projectId); 
+    }
+
+    async function loadUsersForProject(projectId) {
+        const usersInProject = document.getElementById('usersInProject');
+        usersInProject.innerHTML = '<p>Загрузка пользователей...</p>';
+
+        try {
+            const response = await fetch(`/Projects?handler=LoadProjectUsers&projectId=${projectId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: JSON.stringify({ projectId })
+            });
+
+            if (!response.ok) throw new Error("Ошибка сети");
+
+            const result = await response.json();
+
+            if (!result.success) {
+                usersInProject.innerHTML = `<p>${result.message}</p>`;
+                return;
+            }
+
+            usersInProject.innerHTML = '';
+
+            result.users.forEach(user => {
+                addUser(user.email, user.name + ' ' + user.surname);
+            });
+
+        } catch (error) {
+            console.error(error);
+            usersInProject.innerHTML = '<p>Не удалось загрузить пользователей</p>';
         }
     }
+
+    const initialUsers = [
+    @foreach (var user in Model.ProjectUsers)
+    {
+        <text>
+                {email: "@user.email", name: "@user.name @user.surname" },
+        </text>
+    }
+        ];
+        
+    initialUsers.forEach(user => addUser(user.email, user.name));
 </script>
 

@@ -25,7 +25,10 @@ namespace ProjManagmentSystem.Pages
         public int ProjectId { get; set; }
         [BindProperty]
         public List<Tasks> tasks { get; set; }
+        public List<Users> TaskUsers { get; set; } = new();
+
         public static List<Users> selectedUsersToTask = new List<Users>();
+
         public TasksModel(IHttpClientFactory httpClientFactory, UserService userService) : base(httpClientFactory)
         {
             _httpClient = httpClientFactory.CreateClient("AuthClient");
@@ -39,7 +42,7 @@ namespace ProjManagmentSystem.Pages
             return new JsonResult(new { success = true, message = "Массив получен" });
         }
 
-        public async Task<IActionResult> OnGet()
+        public async Task<IActionResult> OnGet(int taskId)
         {
             var isAuthenticated = await IsUserAuthenticated();
 
@@ -65,6 +68,14 @@ namespace ProjManagmentSystem.Pages
                 else
                 {
                     Console.WriteLine($"Ошибка при получении данных задач: {response.StatusCode}");
+                }
+                if (taskId > 0)
+                {
+                    var usersResponse = await _httpClient.GetAsync($"user/task/{taskId}");
+                    if (usersResponse.IsSuccessStatusCode)
+                    {
+                        TaskUsers = await usersResponse.Content.ReadFromJsonAsync<List<Users>>();
+                    }
                 }
             }
             catch (Exception ex)

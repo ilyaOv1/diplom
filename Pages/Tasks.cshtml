@@ -26,7 +26,8 @@
                 if (i.status == "Новая" && i.project == Model.ProjectId)
                 {
                     count++;
-                    <div style="background: #FFFFFF; border-radius: 5px; width: 100%;  margin-right: 9px; margin-top: 10px; ">
+                    <div onclick="openEditTaskModal(@i.id, '@i.name', '@i.description', '@i.status')" 
+                    style="background: #FFFFFF; border-radius: 5px; width: 100%;  margin-right: 9px; margin-top: 10px; ">
                         <p style="color: #D2D2D2; font-size: 11px; margin-left: 16px; margin-top: 6px;">№ @count</p>
                         <p style="font-size: 17px; color: black; margin-left: 16px; margin-top: 3px; font-weight: 600; ">@i.name</p>
                         <p style="font-size: 15px; color: black; margin-left: 16px; margin-top: 3px; ">Ответственный: </p>
@@ -111,12 +112,14 @@
                     <p class="form-label">Наименование</p>
                     <input class="form-control"
                            name="Name"
+                           id="editTaskName"
                            placeholder="Введите название задачи" />
                 </div>
                 <div class="form-field" style="display: none;">
                     <p class="form-label">Наименование</p>
                     <input class="form-control"
                            name="Status"
+
                            value="Новая"
                            placeholder="Введите название задачи" />
                 </div>
@@ -125,6 +128,7 @@
                 <div class="form-field">
                     <p class="form-label">Описание</p>
                     <textarea class="form-control"
+                              id="editTaskDescription"
                               name="Description"></textarea>
                 </div>
 
@@ -166,26 +170,44 @@
         <p style="color: #ABABAB; font-size: 14px;">Добавление подзадачи</p>
         <p id="currUserEmail" style="display: none">@Model._userService.email</p>
         <hr style="border: 0; height: 2px; background: #B5B5B5;">
-        <div style="">
-            <div class="form-field">
-                <p class="form-label">Наименование</p>
-                <input class="form-control addProjInput"
-                       name="Name"
-                       placeholder="Введите название задачи" />
-            </div>
+        <form id="addSubTaskForm" method="post" asp-page-handler="CreateSubTask" enctype="multipart/form-data">
+            <div style="">
+                <div class="form-field">
+                    <p class="form-label">Наименование</p>
+                    <input class="form-control addProjInput"
+                           name="Name"
+                           placeholder="Введите название задачи" />
+                </div>
 
-            <div class="form-field">
-                <p class="form-label">Описание</p>
-                <textarea class="form-control addProjTextArea"
-                          name="Description"></textarea>
+                <div class="form-field">
+                    <p class="form-label">Описание</p>
+                    <textarea class="form-control addProjTextArea"
+                              name="Description"></textarea>
+                </div>
+                <div class="form-field">
+                    <p class="form-label">Ответственный</p>
+                    <select class="form-control">
+                        @if (Model.TaskUsers != null && Model.TaskUsers.Count > 0)
+                        {
+                            foreach (var user in Model.TaskUsers)
+                            {
+                                <option value="@user.email">@user.email</option>
+                            }
+                        }
+                        else
+                        {
+                            <option disabled selected>Нет пользователей</option>
+                        }
+                    </select>
+                </div>
+                <hr style="border: 0; height: 2px; background: #B5B5B5;">
+                <div style="display: flex;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
+                        <button type="submit" class="button">Создать</button>
+                    </div>
+                </div>
             </div>
-            <div class="form-field">
-                <p class="form-label">Ответственный</p>
-                <select class="form-control">
-                    <option>sdada</option>
-                </select>
-            </div>
-        </div>
+        </form>
         <div id="searchResultsTask" style="margin-top: 16px;">
         </div>
     </div>
@@ -423,6 +445,16 @@
                 searchResultsTask.innerHTML = `<p>${error.message}</p>`;
             });
     });
+
+    function openEditTaskModal(id, name, description, status) {
+        document.getElementById("editTaskId").value = id;
+        document.getElementById("editTaskName").value = name;
+        document.getElementById("editTaskDescription").value = description;
+        document.getElementById("editTaskStatus").value = status;
+
+        document.getElementById("addTaskModalOverlay").style.display = "block";
+        document.getElementById("addTaskModal").style.display = "block";
+    }
 
 
 </script>
