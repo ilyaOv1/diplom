@@ -1,7 +1,8 @@
 ﻿@page
 @model ProjectsModel
 @{
-	ViewData["Title"] = "Projects";
+    ViewData["Title"] = "Projects";
+    bool isEditMode = false;
     var isProjectPage = ViewContext.RouteData.Values["Page"]?.ToString() == "/Projects";
 }
 
@@ -57,11 +58,12 @@
     <div id="addProjModalOverlay" class="modal-overlay" style="display: none;"></div>
     <div id="addProjModal" class="modal-content" style="display: none;">
         <span id="addProjCloseModal" class="close">&times;</span>
-        <p style="color: #ABABAB; font-size: 14px;">Создание нового проекта</p>
+        <p style="color: #ABABAB; font-size: 14px;" id="nameWindow">Создание нового проекта</p>
         <hr style="border: 0; height: 2px; background: #B5B5B5;">
         <form id="addProjForm" method="post" asp-page-handler="CreateProject" enctype="multipart/form-data">
             <div >
                 <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 16px;">Данные проекта</h2>
+                <input type="hidden" id="projectIdInput" name="EditingProjectId" value="" />
                 <div class="form-field">
                     <p class="form-label">Наименование</p>
                     <input class="form-control addProjInput"
@@ -85,7 +87,7 @@
                     </select>
                 </div>
                 <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 16px;">Участники проекта</h2>
-                <p id="addParticipantBtn" style="color: #D9D9D9; font-size: 13px; margin-bottom: 8px;">+ Добавить участника</p>
+                <p id="addParticipantBtn" style="color: #D9D9D9; font-size: 13px; margin-bottom: 8px; cursor: pointer;">+ Добавить участника</p>
                 <div id="usersInProject">
 
                 </div>
@@ -93,7 +95,7 @@
             <hr style="border: 0; height: 2px; background: #B5B5B5;">
             <div style="display: flex;">
                 <div style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
-                    <button  type="submit" class="button">Создать</button>
+                    <button type="submit" class="button" id="buttonUpdateCreateProj">Создать</button>
                 </div>
             </div>
 
@@ -127,11 +129,15 @@
     const addProjModal = document.getElementById('addProjModal');
     const addProjCloseModal = document.getElementById('addProjCloseModal');
 
+
     if (addProjButton) {
         addProjButton.addEventListener('click', () => {
-
+            
             addProjModalOverlay.style.display = 'block';
             addProjModal.style.display = 'block';
+            document.getElementById("buttonUpdateCreateProj").innerText = "Создать";
+            document.getElementById("nameWindow").innerText = "Создание проекта";
+            document.getElementById("projectIdInput").value = "";
         });
     }
 
@@ -140,6 +146,12 @@
 
             addProjModalOverlay.style.display = 'block';
             addProjModal.style.display = 'block';
+            document.getElementById("editName").value = "";
+            document.getElementById("editDescription").value = "";
+            document.getElementById('usersInProject').innerHTML = '';
+            document.getElementById("buttonUpdateCreateProj").innerText = "Создать";
+            document.getElementById("nameWindow").innerText = "Создание проекта";
+            document.getElementById("projectIdInput").value = "";
         });
     }
 
@@ -352,6 +364,7 @@
     }
 
     function handleProjectClick(event, projectName, projectId) {
+        event.stopPropagation();
         const url = `/Tasks?projectName=${encodeURIComponent(projectName)}&projectId=${encodeURIComponent(projectId)}`;
         window.location.href = url;
     }
@@ -361,14 +374,19 @@
 
         document.getElementById("editName").value = name;
         document.getElementById("editDescription").value = description;
+        document.getElementById("nameWindow").innerText = "Изменение проекта";
+        
+        document.getElementById("buttonUpdateCreateProj").innerText = "Изменить";
 
         const isPrivateBool = isPrivate === "True" || isPrivate === "true" ? "1" : "0";
         document.getElementById("editPublic").value = isPrivateBool;
-
-        selectedUsers.length = 0; 
+        document.getElementById("projectIdInput").value = projectId;
+        
+        
+        selectedUsers.length = 0;
         const usersInProject = document.getElementById('usersInProject');
-        usersInProject.innerHTML = ''; 
-
+        usersInProject.innerHTML = '';
+        console.log(document.getElementById("projectIdInput").value);
         loadUsersForProject(projectId); 
     }
 
@@ -407,15 +425,5 @@
         }
     }
 
-    const initialUsers = [
-    @foreach (var user in Model.ProjectUsers)
-    {
-        <text>
-                {email: "@user.email", name: "@user.name @user.surname" },
-        </text>
-    }
-        ];
-        
-    initialUsers.forEach(user => addUser(user.email, user.name));
 </script>
 

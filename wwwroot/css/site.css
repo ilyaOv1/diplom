@@ -539,22 +539,31 @@ textarea.form-control {
 }
 
 .status-columns {
-    display: flex; 
-    gap: 16px; 
-    margin-top: 20px; 
-    height: 100%;
-    margin-bottom: 10px;
+    display: flex;
+    gap: 16px;
+    height: calc(100vh - 50px); 
+    overflow-y: auto; 
+    overflow-x: hidden;
+    margin-bottom: 25px;
+    margin-top: 25px;
+    background-color: white;
+    padding-left: 20px;
+    padding-top: 20px;
+    border-radius: 10px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .status-column {
-    flex-grow: 1; 
-    flex-shrink: 1; 
-    flex-basis: 0; 
+    flex: 1; 
     min-width: 0; 
     background-color: #EBECF0;
     border-radius: 8px;
     padding: 16px;
     box-sizing: border-box;
+    overflow-x: hidden;
+    overflow-y: auto; 
+    max-height: 100%;
 }
 
 .status-title {

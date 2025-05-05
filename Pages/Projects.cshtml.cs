@@ -15,6 +15,8 @@ namespace ProjManagmentSystem.Pages
         private readonly HttpClient _httpClient;
         public readonly UserService _userService;
         public string Token { get; set; }
+        [BindProperty(SupportsGet = true)]
+        public int? EditingProjectId { get; set; }
         [BindProperty]
         public List<Users> selectedUsers { get; set; } = new();
         [BindProperty]
@@ -94,7 +96,6 @@ namespace ProjManagmentSystem.Pages
             var token = Request.Cookies["token"];
             Token = token;
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
             try
             {
                 project.IsPrivate = Request.Form["IsPrivate"] == "1";
@@ -105,39 +106,81 @@ namespace ProjManagmentSystem.Pages
                     { new StringContent(project.Description), "Description" },
                     { new StringContent((project.IsPrivate ? "true" : "false")), "IsPrivate" }
                 };
-                var response = await _httpClient.PostAsync("project/add", formContent);
 
+                HttpResponseMessage response;
+                if (EditingProjectId.HasValue)
+                {
+                    response = await _httpClient.PutAsync($"project/update?projectId={EditingProjectId}", formContent);
+                }
+                else
+                {
+                    response = await _httpClient.PostAsync("project/add", formContent);
+                }
                 if (response.IsSuccessStatusCode)
                 {
-                    var responseContent = await response.Content.ReadAsStringAsync();
-                    var result = JsonSerializer.Deserialize<Project>(responseContent);
-                    int projectId = result.id;
-                    List<string> emails = new List<string>();
-                    foreach (var i in selectedUsersToProject)
+                    if (!EditingProjectId.HasValue)
                     {
-                        emails.Add(i.email);
-                    }
-                    var addUsersToProjectDTO = new AddUsersToProjectDTO
-                    {
-                        ProjectId = projectId,
-                        UserIds = emails
-                    };
+                        var responseContent = await response.Content.ReadAsStringAsync();
+                        var result = JsonSerializer.Deserialize<Project>(responseContent);
+                        int projectId = result.id;
+                        List<string> emails = new List<string>();
+                        foreach (var i in selectedUsersToProject)
+                        {
+                            emails.Add(i.email);
+                        }
+                        var addUsersToProjectDTO = new AddUsersToProjectDTO
+                        {
+                            ProjectId = projectId,
+                            UserIds = emails
+                        };
 
-                    var jsonContent = new StringContent(
-                        JsonSerializer.Serialize(addUsersToProjectDTO),
-                        Encoding.UTF8,
-                        "application/json"
-                    );
-                    var addUserResponse = await _httpClient.PostAsync("project/add-users-project", jsonContent);
+                        var jsonContent = new StringContent(
+                            JsonSerializer.Serialize(addUsersToProjectDTO),
+                            Encoding.UTF8,
+                            "application/json"
+                        );
+                        var addUserResponse = await _httpClient.PostAsync("project/add-users-project", jsonContent);
 
-                    if (addUserResponse.IsSuccessStatusCode)
-                    {
-                        return RedirectToPage();
+                        if (addUserResponse.IsSuccessStatusCode)
+                        {
+                            return RedirectToPage();
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Ошибка при добавлении пользователей: {addUserResponse.StatusCode}");
+                            return Page();
+                        }
                     }
                     else
                     {
-                        Console.WriteLine($"Ошибка при добавлении пользователей: {addUserResponse.StatusCode}");
-                        return Page();
+                        int projectId = EditingProjectId.Value;
+
+                        List<string> emails = selectedUsersToProject.Select(u => u.email).ToList();
+
+                        var addUsersToProjectDTO = new AddUsersToProjectDTO
+                        {
+                            ProjectId = projectId,
+                            UserIds = emails
+                        };
+
+                        var jsonContent = new StringContent(
+                            JsonSerializer.Serialize(addUsersToProjectDTO),
+                            Encoding.UTF8,
+                            "application/json"
+                        );
+
+                        var addUserResponse = await _httpClient.PutAsync("project/update-users-project", jsonContent);
+
+                        if (addUserResponse.IsSuccessStatusCode)
+                        {
+                            return RedirectToPage();
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Ошибка при обновлении пользователей: {addUserResponse.StatusCode}");
+                            ModelState.AddModelError(string.Empty, "Ошибка при обновлении пользователей");
+                            return Page();
+                        }
                     }
                 }
                 else
