@@ -23,11 +23,11 @@
             }
             @foreach(var i in Model.tasks)
             {
-                if (i.status == "Новая" && i.project == Model.ProjectId)
+                if (i.status == "Новая" && (!Model.ProjectId.HasValue || i.project == Model.ProjectId.Value))
                 {
                     count++;
-                    <div onclick="openEditTaskModal(@i.id, '@i.name', '@i.description', '@i.status')" 
-                    style="background: #FFFFFF; border-radius: 5px; width: 100%;  margin-right: 9px; margin-top: 10px; ">
+                    <div style="background: #FFFFFF; border-radius: 5px; width: 100%;  margin-right: 9px; margin-top: 10px; "
+                        onclick="handleTaskUpdateClick('@i.id', '@i.name', '@i.description', '@i.status', '@i.project')" data-project-name="@i.name">
                         <p style="color: #D2D2D2; font-size: 11px; margin-left: 16px; margin-top: 6px;">№ @count</p>
                         <p style="font-size: 17px; color: black; margin-left: 16px; margin-top: 3px; font-weight: 600; ">@i.name</p>
                         <p style="font-size: 15px; color: black; margin-left: 16px; margin-top: 3px; ">Ответственный: </p>
@@ -43,10 +43,11 @@
             }
             @foreach (var i in Model.tasks)
             {
-                if (i.status == "В процессе" && i.project == Model.ProjectId)
+                if (i.status == "В процессе" && (!Model.ProjectId.HasValue || i.project == Model.ProjectId.Value))
                 {
                     count++;
-                    <div style="background: #FFFFFF; border-radius: 5px; width: 100%;  margin-right: 9px; margin-top: 10px;">
+                    <div style="background: #FFFFFF; border-radius: 5px; width: 100%;  margin-right: 9px; margin-top: 10px;"
+                         onclick="handleTaskUpdateClick('@i.id', '@i.name', '@i.description', '@i.status', '@i.project')" data-project-name="@i.name">
                         <p style="color: #D2D2D2; font-size: 11px; margin-left: 16px; margin-top: 6px;">№ @count</p>
                         <p style="font-size: 17px; color: black; margin-left: 16px; margin-top: 3px; font-weight: 600; ">@i.name</p>
                         <p style="font-size: 15px; color: black; margin-left: 16px; margin-top: 3px; ">Ответственный: </p>
@@ -62,10 +63,11 @@
             }
             @foreach (var i in Model.tasks)
             {
-                if (i.status == "Можно проверять" && i.project == Model.ProjectId )
+                if (i.status == "Можно проверять" && (!Model.ProjectId.HasValue || i.project == Model.ProjectId.Value))
                 {
                     count++;
-                    <div style="background: #FFFFFF; border-radius: 5px; width: 100%;  margin-right: 9px; margin-top: 10px;">
+                    <div style="background: #FFFFFF; border-radius: 5px; width: 100%;  margin-right: 9px; margin-top: 10px;"
+                         onclick="handleTaskUpdateClick('@i.id', '@i.name', '@i.description', '@i.status', '@i.project')" data-project-name="@i.name">
                         <p style="color: #D2D2D2; font-size: 11px; margin-left: 16px; margin-top: 6px;">№ @count</p>
                         <p style="font-size: 17px; color: black; margin-left: 16px; margin-top: 3px; font-weight: 600; ">@i.name</p>
                         <p style="font-size: 15px; color: black; margin-left: 16px; margin-top: 3px; ">Ответственный: </p>
@@ -81,10 +83,11 @@
             }
             @foreach (var i in Model.tasks)
             {
-                if (i.status == "Готово" && i.project == Model.ProjectId)
+                if (i.status == "Готово" && (!Model.ProjectId.HasValue || i.project == Model.ProjectId.Value))
                 {
                     count++;
-                    <div style="background: #FFFFFF; border-radius: 5px; width: 100%;  margin-right: 9px; margin-top: 10px;">
+                    <div style="background: #FFFFFF; border-radius: 5px; width: 100%;  margin-right: 9px; margin-top: 10px;"
+                         onclick="handleTaskUpdateClick('@i.id', '@i.name', '@i.description', '@i.status', '@i.project')" data-project-name="@i.name">
                         <p style="color: #D2D2D2; font-size: 11px; margin-left: 16px; margin-top: 6px;">№ @count</p>
                         <p style="font-size: 17px; color: black; margin-left: 16px; margin-top: 3px; font-weight: 600; ">@i.name</p>
                         <p style="font-size: 15px; color: black; margin-left: 16px; margin-top: 3px; ">Ответственный: </p>
@@ -103,7 +106,7 @@
     <div id="addTaskModal" class="modal-content" style="display: none;">
         <p style="display: none;" id="projId">@Model.ProjectId</p>
         <span id="addTaskCloseModal" class="close">&times;</span>
-        <p style="color: #ABABAB; font-size: 14px;">Создание новой задачи</p>
+        <p style="color: #ABABAB; font-size: 14px;" id="nameWindow">Создание новой задачи</p>
         <hr style="border: 0; height: 2px; background: #B5B5B5;">
         <form id="addTaskForm" method="post" asp-page-handler="CreateTask" enctype="multipart/form-data">
             <div>
@@ -123,7 +126,7 @@
                            value="Новая"
                            placeholder="Введите название задачи" />
                 </div>
-                <input type="hidden" name="ProjectId" value="@Model.ProjectId" />
+                <input type="hidden" name="ProjectId" id="projId" value="@Model.ProjectId" />
                 <input type="hidden" name="ProjectName" value="@Model.ProjectName" />
                 <div class="form-field">
                     <p class="form-label">Описание</p>
@@ -142,7 +145,7 @@
             <hr style="border: 0; height: 2px; background: #B5B5B5;">
             <div style="display: flex;">
                 <div style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
-                    <button type="submit" class="button">Создать</button>
+                    <button type="submit" class="button" id="editButton">Создать</button>
                 </div>
             </div>
 
@@ -234,9 +237,10 @@
 
     if (addTaskButton) {
         addTaskButton.addEventListener('click', () => {
-
             addTaskModalOverlay.style.display = 'block';
             addTaskModal.style.display = 'block';
+            document.getElementById("editButton").innerText = "Создать";
+            document.getElementById("nameWindow").innerText = "Создание задачи";
         });
     }
 
@@ -371,6 +375,19 @@
 
         return userDiv;
     }
+    function removeUser(email) {
+        const index = selectedTaskUsers.findIndex(participant => participant.email === email);
+        if (index !== -1) {
+            selectedTaskUsers.splice(index, 1);
+        }
+
+        const usersInProjectTask = document.getElementById('usersInProjectTask');
+        const userElement = usersInProjectTask.querySelector(`div[data-email="${email}"]`);
+        if (userElement) {
+            userElement.remove();
+        }
+        sendArrayToServer();
+    }
 
     participantTaskSearchInput.addEventListener('input', function () {
         const email = participantTaskSearchInput.value.trim();
@@ -456,6 +473,58 @@
         document.getElementById("addTaskModal").style.display = "block";
     }
 
+    function handleTaskUpdateClick(id, name, description, status, projectId) {
+        addTaskModalOverlay.style.display = 'block';
+        addTaskModal.style.display = 'block';
+
+        document.getElementById("editTaskName").value = name;
+        document.getElementById("editTaskDescription").value = description;
+        document.getElementById("nameWindow").innerText = "Изменение задачи";
+
+        document.getElementById("editButton").innerText = "Изменить";
+
+        document.getElementById("projId").value = projectId;
+
+
+        selectedTaskUsers.length = 0;
+        const usersInProjectTask = document.getElementById('usersInProjectTask');
+        usersInProjectTask.innerHTML = '';
+        loadUsersForProject(id);
+    }
+    async function loadUsersForProject(taskId) {
+        const usersInProject = document.getElementById('usersInProjectTask');
+        usersInProject.innerHTML = '<p>Загрузка пользователей...</p>';
+
+        try {
+            const response = await fetch(`/Tasks?handler=LoadTaskUsers&taskId=${taskId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: JSON.stringify({ taskId })
+            });
+
+            if (!response.ok) throw new Error("Ошибка сети");
+
+            const result = await response.json();
+
+            if (!result.success) {
+                usersInProject.innerHTML = `<p>${result.message}</p>`;
+                return;
+            }
+
+            usersInProjectTask.innerHTML = '';
+
+            result.users.forEach(user => {
+                addUser(user.email, user.name + ' ' + user.surname);
+            });
+
+        } catch (error) {
+            console.error(error);
+            usersInProjectTask.innerHTML = '<p>Не удалось загрузить пользователей</p>';
+        }
+    }
 
 </script>
 

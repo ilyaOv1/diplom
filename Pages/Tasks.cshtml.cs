@@ -22,7 +22,7 @@ namespace ProjManagmentSystem.Pages
         public string ProjectName { get; set; }
 
         [BindProperty(SupportsGet = true)]
-        public int ProjectId { get; set; }
+        public int? ProjectId { get; set; }
         [BindProperty]
         public List<Tasks> tasks { get; set; }
         public List<Users> TaskUsers { get; set; } = new();
@@ -57,7 +57,7 @@ namespace ProjManagmentSystem.Pages
 
             try
             {
-                var response = await _httpClient.GetAsync("tasks");
+                var response = await _httpClient.GetAsync("tasks/users");
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -158,6 +158,43 @@ namespace ProjManagmentSystem.Pages
             }
 
 
+        }
+
+        public async Task<IActionResult> OnPostLoadTaskUsersAsync([FromQuery] int taskId)
+        {
+            var isAuthenticated = await IsUserAuthenticated();
+
+            if (!isAuthenticated)
+            {
+                return HandleAuthorization(isAuthenticated);
+            }
+
+            var token = Request.Cookies["token"];
+            Token = token;
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            var content = new FormUrlEncodedContent(new Dictionary<string, string>
+                    {
+                        { "taskId", taskId.ToString() }
+                    });
+
+            try
+            {
+                var response = await _httpClient.PostAsync("tasks/users-task", content);
+                if (response.IsSuccessStatusCode)
+                {
+                    var users = await response.Content.ReadFromJsonAsync<List<Users>>();
+                    return new JsonResult(new { success = true, users });
+                }
+                else
+                {
+                    return new JsonResult(new { success = false, message = "Ошибка загрузки пользователей" });
+                }
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(new { success = false, message = "Ошибка: " + ex.Message });
+            }
         }
     }
 }
