@@ -40,8 +40,10 @@
             @foreach (var i in Model.projects)
             {
                 count++;
-                <div style="background: #FFFFFF; width: calc(33% - 16px); height: 150px; padding: 8px; box-sizing: border-box; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);"
-                     onclick="handleProjectUpdateClick('@i.id', '@i.Name', '@i.Description', '@i.IsPrivate', '@i.creatorProj')" data-project-name="@i.Name">
+                <div style="background: #FFFFFF; width: calc(33% - 16px); height: 150px; padding: 8px; box-sizing: border-box; border-radius: 10px; box-shadow:0 2px 6px rgba(0,0,0,0.05);cursor:pointer;"
+                     onclick="handleProjectUpdateClick('@i.id', '@i.Name', '@i.Description', '@i.IsPrivate', '@i.creatorProj', '@i.Access')" data-project-name="@i.Name"
+                     onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';"
+                     onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 6px rgba(0,0,0,0.05)';">
                     <p style="color: #D2D2D2; font-size: 11px; margin-left: 16px; margin-top: 8px;">№ @count</p>
                     <p style="display: none;">@i.id</p>
                     <p style="font-size: 16px; color: #000000; margin-bottom: 8px; margin-left: 16px;">@i.Name</p>
@@ -216,7 +218,7 @@
         if (parts.length === 2) return parts.pop().split(';').shift();
     }
 
-    function addUser(email, name) {
+    function addUser(email, name, access) {
         if (selectedUsers.some(participant => participant.email === email)) {
             alert('Участник уже добавлен');
             return;
@@ -309,7 +311,7 @@
                             <p style="font-size: 13px; color: #232323;">${user.name} </p>
                             <p style="font-size: 13px; color: #232323;">${user.surname} </p>
                         </div>
-                                    <button class="button" style="width: 100px;" onclick="addUser('${user.email}', '${user.name} ${user.surname}' )">Добавить</button>
+                                    <button class="button" style="width: 100px;" onclick="addUser('${user.email}', '${user.name} ${user.surname}')">Добавить</button>
                     `;
                     searchResults.appendChild(userDiv);
                 });
@@ -332,19 +334,19 @@
         userDiv.style.justifyContent = 'space-between';
         userDiv.style.alignItems = 'center';
         userDiv.style.marginBottom = '5px';
-
+        
         userDiv.setAttribute('data-email', email);
 
         userDiv.innerHTML = `
-            <div style="display: flex; align-items: center;">
-                <img src="/Images/big-ico.png" style="width: 20px; height: 20px; margin-right: 10px;" />
-                <p style="font-size: 13px; color: #232323;">${name}</p>
-            </div>
-            <div style="display: flex; gap: 10px; align-items: center;">
-                <img src="/Images/star.png" style="width: 18px; height: 16px;" />
-                <img src="/Images/remove.png" style="width: 14px; height: 14px; cursor: pointer;" onclick="removeUser('${email}')"/>
-            </div>
-        `;
+                    <div style="display: flex; align-items: center;">
+                        <img src="/Images/big-ico.png" style="width: 20px; height: 20px; margin-right: 10px;" />
+                        <p style="font-size: 13px; color: #232323;">${name}</p>
+                    </div>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <img src="/Images/star.png" style="width: 18px; height: 16px;" />
+                        <img src="/Images/remove.png" id="deleteUserImg" style="width: 14px; height: 14px; cursor: pointer;" onclick="removeUser('${email}')"/>
+                    </div>
+                `;
 
         return userDiv;
     }
@@ -368,26 +370,40 @@
         const url = `/Tasks?projectName=${encodeURIComponent(projectName)}&projectId=${encodeURIComponent(projectId)}`;
         window.location.href = url;
     }
-    function handleProjectUpdateClick(projectId, name, description, isPrivate, creatorProj) {
+    function handleProjectUpdateClick(projectId, name, description, isPrivate, creatorProj, access) {
+
+        const isPrivateBool = isPrivate === "True" || isPrivate === "true" ? "1" : "0";
+        const canEdit = access === "True" || access === true || access === "1";
+        selectedUsers.length = 0;
+
         addProjModalOverlay.style.display = 'block';
         addProjModal.style.display = 'block';
 
         document.getElementById("editName").value = name;
         document.getElementById("editDescription").value = description;
         document.getElementById("nameWindow").innerText = "Изменение проекта";
-        
         document.getElementById("buttonUpdateCreateProj").innerText = "Изменить";
-
-        const isPrivateBool = isPrivate === "True" || isPrivate === "true" ? "1" : "0";
         document.getElementById("editPublic").value = isPrivateBool;
         document.getElementById("projectIdInput").value = projectId;
+        document.getElementById('usersInProject').innerHTML = '';
+
+        loadUsersForProject(projectId);
+        if (canEdit) {
+            document.getElementById("editName").readOnly = false;
+            document.getElementById("editDescription").readOnly = false;
+            document.getElementById("editPublic").disabled = false;
+            document.getElementById("buttonUpdateCreateProj").style.display = "";
+            addParticipantBtn.style.display = "";
+        }
+        else{
+            document.getElementById("editName").readOnly = true;
+            document.getElementById("editDescription").readOnly = true;
+            document.getElementById("editPublic").disabled = true;
+            document.getElementById("buttonUpdateCreateProj").style.display = "none";
+            addParticipantBtn.style.display = "none";
+        }
         
         
-        selectedUsers.length = 0;
-        const usersInProject = document.getElementById('usersInProject');
-        usersInProject.innerHTML = '';
-        console.log(document.getElementById("projectIdInput").value);
-        loadUsersForProject(projectId); 
     }
 
     async function loadUsersForProject(projectId) {

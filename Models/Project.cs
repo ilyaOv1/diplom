@@ -7,5 +7,6 @@
         public string Description { get; set; }
         public bool IsPrivate { get; set; }
         public string creatorProj { get; set; }
+        public bool Access { get; set; }
     }
 }

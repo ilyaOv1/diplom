@@ -7,5 +7,7 @@
         public int project { get; set; }
         public string description { get; set; }
         public string status { get; set; }
+        public string creator { get; set; }
+        public bool Access { get; set; }
     }
 }
