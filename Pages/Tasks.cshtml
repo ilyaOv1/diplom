@@ -212,20 +212,12 @@
                     <textarea class="form-control addProjTextArea"
                               name="Description"></textarea>
                 </div>
+                <input type="hidden" name="Task" id="addSubTaskId" />
                 <div class="form-field">
                     <p class="form-label">Ответственный</p>
-                    <select class="form-control">
-                        @if (Model.TaskUsers != null && Model.TaskUsers.Count > 0)
-                        {
-                            foreach (var user in Model.TaskUsers)
-                            {
-                                <option value="@user.email">@user.email</option>
-                            }
-                        }
-                        else
-                        {
-                            <option disabled selected>Нет пользователей</option>
-                        }
+                    <select id="subtaskResponsibleSelect" name="Responsible" class="form-control">
+
+                        <option></option>
                     </select>
                 </div>
                 <hr style="border: 0; height: 2px; background: #B5B5B5;">
@@ -259,6 +251,7 @@
     const addSubtaskCloseModal = document.getElementById('addSubtaskCloseModal');
     const searchResultsTask = document.getElementById('searchResultsTask');
     const selectedTaskUsers = [];
+    const currUsersInTask = [];
 
     if (addTaskButton) {
         addTaskButton.addEventListener('click', () => {
@@ -297,6 +290,8 @@
         addParticipantTaskCloseModal.addEventListener('click', () => {
             addParticipantTaskModalOverlay.style.display = 'none';
             addParticipantTaskModal.style.display = 'none';
+            document.getElementById("participantTaskSearchInput").value = "";
+            document.getElementById("searchResultsTask").innerHTML = "";
         });
     }
 
@@ -305,6 +300,8 @@
             if (event.target === addParticipantTaskModalOverlay) {
                 addParticipantTaskModalOverlay.style.display = 'none';
                 addParticipantTaskModal.style.display = 'none';
+                document.getElementById("participantTaskSearchInput").value = "";
+                document.getElementById("searchResultsTask").innerHTML = "";
             }
         });
 
@@ -312,6 +309,7 @@
 
     if (addSubtaskBtn) {
         addSubtaskBtn.addEventListener('click', () => {
+            populateSubtaskUserSelect();
             addSubtaskModalOverlay.style.display = 'block';
             addSubtaskModal.style.display = 'block';
         });
@@ -340,13 +338,13 @@
         if (parts.length === 2) return parts.pop().split(';').shift();
     }
 
-    function addUser(email, name) {
+    function addUser(email, name, isResponsible) {
         if (selectedTaskUsers.some(participant => participant.email === email)) {
             alert('Участник уже добавлен');
             return;
         }
 
-        const participant = { email, name };
+        const participant = { email, name, isResponsible };
         selectedTaskUsers.push(participant);
         sendArrayToServer();
         addParticipantTaskModal.style.display = 'none';
@@ -358,7 +356,7 @@
         searchResults.innerHTML = '';
 
         const usersInProjectTask = document.getElementById('usersInProjectTask');
-        const userElement = createUserElement(email, name);
+        const userElement = createUserElement(email, name, isResponsible);
         usersInProjectTask.appendChild(userElement);
     }
 
@@ -375,7 +373,7 @@
 
     }
 
-    function createUserElement(email, name) {
+    function createUserElement(email, name, isResponsible) {
         const userDiv = document.createElement('div');
         userDiv.style.border = '1px solid #D2D2D2';
         userDiv.style.borderRadius = '8px';
@@ -387,17 +385,32 @@
         userDiv.style.marginBottom = '5px';
 
         userDiv.setAttribute('data-email', email);
+        console.log(isResponsible);
+        if (isResponsible){
+            userDiv.innerHTML = `
+                    <div style="display: flex; align-items: center;">
+                        <img src="/Images/big-ico.png" style="width: 20px; height: 20px; margin-right: 10px;" />
+                        <p style="font-size: 13px; color: #232323;">${name}</p>
+                    </div>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <img src="/Images/blue_star.png" style="width: 18px; height: 16px;" />
+                        <img src="/Images/remove.png" style="width: 14px; height: 14px; cursor: pointer;" onclick="removeUser('${email}')"/>
+                    </div>
+                `;
+        }
+        else {
+            userDiv.innerHTML = `
+                    <div style="display: flex; align-items: center;">
+                        <img src="/Images/big-ico.png" style="width: 20px; height: 20px; margin-right: 10px;" />
+                        <p style="font-size: 13px; color: #232323;">${name}</p>
+                    </div>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <img src="/Images/star.png" style="width: 18px; height: 16px;" />
+                        <img src="/Images/remove.png" style="width: 14px; height: 14px; cursor: pointer;" onclick="removeUser('${email}')"/>
+                    </div>
+                `;
+        }
 
-        userDiv.innerHTML = `
-                <div style="display: flex; align-items: center;">
-                    <img src="/Images/big-ico.png" style="width: 20px; height: 20px; margin-right: 10px;" />
-                    <p style="font-size: 13px; color: #232323;">${name}</p>
-                </div>
-                <div style="display: flex; gap: 10px; align-items: center;">
-                    <img src="/Images/star.png" style="width: 18px; height: 16px;" />
-                    <img src="/Images/remove.png" style="width: 14px; height: 14px; cursor: pointer;" onclick="removeUser('${email}')"/>
-                </div>
-            `;
 
         return userDiv;
     }
@@ -422,7 +435,7 @@
             return;
         }
 
-        const projectId = document.getElementById('projId').textContent.trim();
+        const projectId = document.getElementById('projId').value;
         if (!projectId) {
             console.error('ID проекта не найден');
             searchResultsTask.innerHTML = '<p>Ошибка: ID проекта не указан</p>';
@@ -472,6 +485,7 @@
                     userDiv.style.paddingRight = '0px';
                     userDiv.style.borderBottom = '1px solid #D2D2D2';
 
+                    
                     userDiv.innerHTML = `
                     <div style="display: flex; align-items: center;">
                         <img src="/Images/big-ico.png" style="width: 20px; height: 20px; margin-right: 10px;" />
@@ -489,32 +503,23 @@
             });
     });
 
-    function openEditTaskModal(id, name, description, status) {
-        document.getElementById("editTaskId").value = id;
-        document.getElementById("editTaskName").value = name;
-        document.getElementById("editTaskDescription").value = description;
-        document.getElementById("editTaskStatus").value = status;
-
-        document.getElementById("addTaskModalOverlay").style.display = "block";
-        document.getElementById("addTaskModal").style.display = "block";
-    }
 
     function handleTaskUpdateClick(id, name, description, status, projectId, access) {
         const usersInProjectTask = document.getElementById('usersInProjectTask');
         const canEdit = access === "True" || access === true || access === "1";
-        console.log(access);
-        console.log(canEdit);
         selectedTaskUsers.length = 0;
-
+        
         addTaskModalOverlay.style.display = 'block';
         addTaskModal.style.display = 'block';
 
         document.getElementById("editTaskName").value = name;
         document.getElementById("editTaskDescription").value = description;
         document.getElementById("projId").value = projectId;
+        console.log(document.getElementById("projId").value);
         document.getElementById("taskIdInput").value = id;
         document.getElementById("nameWindow").innerText = "Изменение задачи";
         document.getElementById("editButton").innerText = "Изменить";
+        document.getElementById("addSubTaskId").value = id;
 
         usersInProjectTask.innerHTML = '';
         loadUsersForProject(id);
@@ -533,7 +538,43 @@
             addSubtaskBtn.style.display = "none";
             addParticipantTaskBtn.style.display = "none";
         }
+
+        try{
+            fetch('/Tasks?handler=GetUsers', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: JSON.stringify({ taskId: id })
+            })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        const data = result.data;
+
+                        if (Array.isArray(data)) {
+                            currUsersInTask.length = 0;
+                            data.forEach(user => {
+                                currUsersInTask.push({
+                                    email: user.email,
+                                    name: user.name,
+                                    surname: user.surname
+                                });
+                            });
+                        } else {
+                            console.error('Ошибка: data не является массивом', data);
+                        }
+                    } else {
+                        console.error('Ошибка на стороне сервера:', result.message);
+                    }
+                });
+        } catch (error) {
+            console.error(error);
+            usersInProjectTask.innerHTML = '<p>Не удалось загрузить пользователей</p>';
+        }
     }
+
     async function loadUsersForProject(taskId) {
         const usersInProject = document.getElementById('usersInProjectTask');
         usersInProject.innerHTML = '<p>Загрузка пользователей...</p>';
@@ -560,7 +601,7 @@
             usersInProjectTask.innerHTML = '';
 
             result.users.forEach(user => {
-                addUser(user.email, user.name + ' ' + user.surname);
+                addUser(user.email, user.name + ' ' + user.surname, user.isResponsible)
             });
 
         } catch (error) {
@@ -568,6 +609,57 @@
             usersInProjectTask.innerHTML = '<p>Не удалось загрузить пользователей</p>';
         }
     }
+
+    function populateSubtaskUserSelect() {
+        const select = document.getElementById('subtaskResponsibleSelect');
+        select.innerHTML = ''; 
+        if (currUsersInTask.length === 0) {
+            const option = document.createElement('option');
+            option.value = '';
+            option.textContent = 'Нет пользователей';
+            option.disabled = true;
+            option.selected = true;
+            select.appendChild(option);
+        } else {
+            currUsersInTask.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.email; 
+                option.textContent = `${user.name} ${user.surname}`;
+                select.appendChild(option);
+            });
+        }
+    }
+
+    document.getElementById('addSubTaskForm').addEventListener('submit', async function (e) {
+        e.preventDefault(); 
+
+        const formData = new FormData(this); 
+
+        try {
+            const response = await fetch(this.action, {
+                method: 'POST',
+                headers: {
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: formData
+            });
+
+            const result = await response.json();
+
+
+            if (result.success) {
+                document.getElementById('addSubtaskModal').style.display = 'none';
+                document.getElementById('addSubtaskModalOverlay').style.display = 'none';
+
+                this.reset();
+            } else {
+                alert('Ошибка: ' + (result.message || 'Не удалось создать подзадачу'));
+            }
+        } catch (error) {
+            console.error('Ошибка:', error);
+            alert('Произошла ошибка при отправке формы.');
+        }
+    });
 
 </script>
 

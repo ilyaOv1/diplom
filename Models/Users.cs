@@ -7,6 +7,6 @@
         public string surname { get; set; }
         public string patronymic { get; set; }
         public string? description { get; set; }
-
+        public bool? IsResponsible { get; set; }
     }
 }

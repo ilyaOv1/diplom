@@ -5,6 +5,7 @@ using ProjManagmentSystem.Models;
 using ProjManagmentSystem.Services;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace ProjManagmentSystem.Pages
 {
@@ -129,15 +130,16 @@ namespace ProjManagmentSystem.Pages
                         var responseContent = await response.Content.ReadAsStringAsync();
                         var result = JsonSerializer.Deserialize<Tasks>(responseContent);
                         int taskId = result.id;
-                        List<string> emails = new List<string>();
-                        foreach (var i in selectedUsersToTask)
+                        var userEmails = selectedUsersToTask.Select(u => new UserWithResponsibilityDTO
                         {
-                            emails.Add(i.email);
-                        }
+                            Email = u.email,
+                            IsResponsible = u.IsResponsible.Value
+                        }).ToList();
+
                         var addUsersToProjectDTO = new AddUsersToTaskDTO
                         {
                             taskId = taskId,
-                            userIds = emails
+                            userIds = userEmails
                         };
 
                         var jsonContent = new StringContent(
@@ -161,12 +163,17 @@ namespace ProjManagmentSystem.Pages
                     {
                         int projectId = EditingTaskId.Value;
 
-                        List<string> emails = selectedUsersToTask.Select(u => u.email).ToList();
+
+                        var userEmails = selectedUsersToTask.Select(u => new UserWithResponsibilityDTO
+                        {
+                            Email = u.email,
+                            IsResponsible = u.IsResponsible ?? false
+                        }).ToList();
 
                         var addUsersToProjectDTO = new AddUsersToTaskDTO
                         {
                             taskId = projectId,
-                            userIds = emails
+                            userIds = userEmails
                         };
 
                         var jsonContent = new StringContent(
@@ -179,7 +186,7 @@ namespace ProjManagmentSystem.Pages
 
                         if (addUserResponse.IsSuccessStatusCode)
                         {
-                            return RedirectToPage();
+                            return RedirectToPage(new { projectName = ProjectName, projectId = ProjectId });
                         }
                         else
                         {
@@ -204,6 +211,41 @@ namespace ProjManagmentSystem.Pages
             }
 
 
+        }
+        public async Task<IActionResult> OnPostCreateSubTask([FromForm] Subtask subtask)
+        {
+            var isAuthenticated = await IsUserAuthenticated();
+
+            if (!isAuthenticated)
+            {
+                return HandleAuthorization(isAuthenticated);
+            }
+
+            var token = Request.Cookies["token"];
+            Token = token;
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            try
+            {
+                var formContent = new MultipartFormDataContent
+                {
+                    { new StringContent(subtask.name), "name" },
+
+                    { new StringContent(subtask.description), "description" },
+                    { new StringContent(subtask.task.ToString()), "task"},
+                    { new StringContent(subtask.responsible.ToString()), "responsible" }
+                };
+                var response = await _httpClient.PostAsync("tasks/add-subtask", formContent);
+                if (response.IsSuccessStatusCode)
+                {
+                    return new JsonResult(new { success = true });
+                }
+                return Page();
+            }
+            catch (Exception ex)
+            {
+                return Page();
+            }
         }
 
         public async Task<IActionResult> OnPostLoadTaskUsersAsync([FromQuery] int taskId)
@@ -240,6 +282,28 @@ namespace ProjManagmentSystem.Pages
             catch (Exception ex)
             {
                 return new JsonResult(new { success = false, message = "Ошибка: " + ex.Message });
+            }
+        }
+        public async Task<IActionResult> OnPostGetUsersAsync([FromBody] TaskIdDto dto)
+        {
+            try
+            {
+                var token = Request.Cookies["token"];
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                int taskId = dto.TaskId;
+                var response = await _httpClient.GetAsync($"user/task/{taskId}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var task = await response.Content.ReadFromJsonAsync<List<Users>>();
+                    return new JsonResult(new { success = true, data = task });
+                }
+
+                return new JsonResult(new { success = false, message = "Ошибка загрузки задачи." });
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(new { success = false, message = ex.Message });
             }
         }
     }
