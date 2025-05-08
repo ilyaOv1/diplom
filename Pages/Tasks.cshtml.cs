@@ -27,7 +27,7 @@ namespace ProjManagmentSystem.Pages
         [BindProperty(SupportsGet = true)]
         public int? ProjectId { get; set; }
         [BindProperty]
-        public List<Tasks> tasks { get; set; }
+        public List<TaskToGet> tasks { get; set; }
         public List<Users> TaskUsers { get; set; } = new();
 
         public static List<Users> selectedUsersToTask = new List<Users>();
@@ -55,7 +55,6 @@ namespace ProjManagmentSystem.Pages
             }
 
             var token = Request.Cookies["token"];
-            Token = token;
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
             try
@@ -64,7 +63,7 @@ namespace ProjManagmentSystem.Pages
 
                 if (response.IsSuccessStatusCode)
                 {
-                    var tasksList = await response.Content.ReadFromJsonAsync<List<Tasks>>();
+                    var tasksList = await response.Content.ReadFromJsonAsync<List<TaskToGet>>();
 
                     this.tasks = tasksList;
                 }
@@ -104,6 +103,8 @@ namespace ProjManagmentSystem.Pages
 
             try
             {
+
+                if (ProjectId == null || ProjectId == 0) return Redirect("/Tasks");
                 
                 var formContent = new MultipartFormDataContent
                 {
@@ -113,6 +114,7 @@ namespace ProjManagmentSystem.Pages
                     { new StringContent(task.status), "status"}
                 };
 
+
                 HttpResponseMessage response;
                 if (EditingTaskId.HasValue)
                 {
@@ -120,7 +122,7 @@ namespace ProjManagmentSystem.Pages
                 }
                 else
                 {
-                    response = await _httpClient.PostAsync("tasks/add", formContent);
+                    response = await _httpClient.PostAsync($"tasks/add/{ProjectId}", formContent);
                 }
 
                 if (response.IsSuccessStatusCode)

@@ -1,6 +1,6 @@
 ﻿namespace ProjManagmentSystem.Models
 {
-    public class Tasks
+    public class TaskToGet
     {
         public int id { get; set; }
         public string name { get; set; }
@@ -8,6 +8,6 @@
         public string description { get; set; }
         public string status { get; set; }
         public string creator { get; set; }
-        
+        public bool Access { get; set; }
     }
 }

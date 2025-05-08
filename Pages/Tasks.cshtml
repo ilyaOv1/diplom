@@ -33,11 +33,10 @@
                          onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 6px rgba(0,0,0,0.05)';">
                         <p style="color:#A0A0A0;font-size:12px;margin:0 0 8px 0;">№ @count</p>
                         <p style="font-size:18px;color:#333;font-weight:600;margin:0 0 12px 0;">@i.name</p>
-                        <p style="font-size:14px;color:#666;margin:0 0 12px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">@i.description</p>
                         <div style="display:flex;align-items:center;margin-bottom:12px;">
-                            <p style="font-size:14px;color:#333;margin:0;">Ответственный:</p>
+                            <p style="font-size:14px;color:#333;margin:0;">Создатель: @i.creator</p>
                         </div>
-                        <a href="#" style="color:#2954EC;text-decoration:none;font-size:13px;border-bottom:1px dashed #2954EC;" onclick="event.stopPropagation(); showSubtasks('@i.id')">Подзадачи</a>
+                        <a href="/Subtasks?taskName=@i.name&taskId=@i.id" style="color:#2954EC;text-decoration:none;font-size:13px;border-bottom:1px dashed #2954EC;" onclick="event.stopPropagation();">Подзадачи</a>
                     </div>
                 }
             }
@@ -61,7 +60,7 @@
                         <p style="font-size:18px;color:#333;font-weight:600;margin:0 0 12px 0;">@i.name</p>
                         <p style="font-size:14px;color:#666;margin:0 0 12px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">@i.description</p>
                         <div style="display:flex;align-items:center;margin-bottom:12px;">
-                            <p style="font-size:14px;color:#333;margin:0;">Ответственный:</p>
+                            <p style="font-size:14px;color:#333;margin:0;">Создатель: @i.creator</p>
                         </div>
                         <a href="#" style="color:#2954EC;text-decoration:none;font-size:13px;border-bottom:1px dashed #2954EC;" onclick="event.stopPropagation(); showSubtasks('@i.id')">Подзадачи</a>
                     </div>
@@ -87,7 +86,7 @@
                         <p style="font-size:18px;color:#333;font-weight:600;margin:0 0 12px 0;">@i.name</p>
                         <p style="font-size:14px;color:#666;margin:0 0 12px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">@i.description</p>
                         <div style="display:flex;align-items:center;margin-bottom:12px;">
-                            <p style="font-size:14px;color:#333;margin:0;">Ответственный:</p>
+                            <p style="font-size:14px;color:#333;margin:0;">Создатель: @i.creator</p>
                         </div>
                         <a href="#" style="color:#2954EC;text-decoration:none;font-size:13px;border-bottom:1px dashed #2954EC;" onclick="event.stopPropagation(); showSubtasks('@i.id')">Подзадачи</a>
                     </div>
@@ -113,7 +112,7 @@
                         <p style="font-size:18px;color:#333;font-weight:600;margin:0 0 12px 0;">@i.name</p>
                         <p style="font-size:14px;color:#666;margin:0 0 12px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">@i.description</p>
                         <div style="display:flex;align-items:center;margin-bottom:12px;">
-                            <p style="font-size:14px;color:#333;margin:0;">Ответственный:</p>
+                            <p style="font-size:14px;color:#333;margin:0;">Создатель: @i.creator</p>
                         </div>
                         <a href="#" style="color:#2954EC;text-decoration:none;font-size:13px;border-bottom:1px dashed #2954EC;" onclick="event.stopPropagation(); showSubtasks('@i.id')">Подзадачи</a>
                     </div>
@@ -160,7 +159,7 @@
                               name="Description"></textarea>
                 </div>
 
-                <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 16px;">Ответственный за задачу</h2>
+                <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 16px;">Ответственныe за задачу</h2>
                 <p id="addParticipantTaskBtn" style="color: #D9D9D9; font-size: 13px; margin-bottom: 8px; cursor: pointer;">+ Добавить участника</p>
                 <div style="margin-bottom: 8px;" id="usersInProjectTask">
                 </div>
@@ -338,7 +337,7 @@
         if (parts.length === 2) return parts.pop().split(';').shift();
     }
 
-    function addUser(email, name, isResponsible) {
+    function addUser(email, name, isResponsible, canEdit) {
         if (selectedTaskUsers.some(participant => participant.email === email)) {
             alert('Участник уже добавлен');
             return;
@@ -356,8 +355,7 @@
         searchResults.innerHTML = '';
 
         const usersInProjectTask = document.getElementById('usersInProjectTask');
-        const userElement = createUserElement(email, name, isResponsible);
-        usersInProjectTask.appendChild(userElement);
+        updateUI(canEdit);
     }
 
     async function sendArrayToServer() {
@@ -373,7 +371,33 @@
 
     }
 
-    function createUserElement(email, name, isResponsible) {
+    function toggleResponsibility(email, canEdit) {
+        const user = selectedTaskUsers.find(u => u.email === email);
+        if (!user) return;
+
+        user.isResponsible = !user.isResponsible;
+
+        updateUI(canEdit);
+
+        sendArrayToServer();
+    }
+
+    function updateUI(canEdit) {
+        const usersInProjectTask = document.getElementById('usersInProjectTask');
+        usersInProjectTask.innerHTML = '';
+
+        selectedTaskUsers.forEach(u => {
+            if (selectedTaskUsers.length <= 1){
+                const element = createUserElement(u.email, u.name, u.isResponsible, false);
+                usersInProjectTask.appendChild(element);
+            }else{
+                const element = createUserElement(u.email, u.name, u.isResponsible, canEdit);
+                usersInProjectTask.appendChild(element);
+            }
+        });
+    }
+
+    function createUserElement(email, name, isResponsible = false, canEdit = false) {
         const userDiv = document.createElement('div');
         userDiv.style.border = '1px solid #D2D2D2';
         userDiv.style.borderRadius = '8px';
@@ -383,34 +407,45 @@
         userDiv.style.justifyContent = 'space-between';
         userDiv.style.alignItems = 'center';
         userDiv.style.marginBottom = '5px';
-
         userDiv.setAttribute('data-email', email);
-        console.log(isResponsible);
-        if (isResponsible){
-            userDiv.innerHTML = `
-                    <div style="display: flex; align-items: center;">
-                        <img src="/Images/big-ico.png" style="width: 20px; height: 20px; margin-right: 10px;" />
-                        <p style="font-size: 13px; color: #232323;">${name}</p>
-                    </div>
-                    <div style="display: flex; gap: 10px; align-items: center;">
-                        <img src="/Images/blue_star.png" style="width: 18px; height: 16px;" />
-                        <img src="/Images/remove.png" style="width: 14px; height: 14px; cursor: pointer;" onclick="removeUser('${email}')"/>
-                    </div>
-                `;
-        }
-        else {
-            userDiv.innerHTML = `
-                    <div style="display: flex; align-items: center;">
-                        <img src="/Images/big-ico.png" style="width: 20px; height: 20px; margin-right: 10px;" />
-                        <p style="font-size: 13px; color: #232323;">${name}</p>
-                    </div>
-                    <div style="display: flex; gap: 10px; align-items: center;">
-                        <img src="/Images/star.png" style="width: 18px; height: 16px;" />
-                        <img src="/Images/remove.png" style="width: 14px; height: 14px; cursor: pointer;" onclick="removeUser('${email}')"/>
-                    </div>
-                `;
+
+        const starImg = document.createElement('img');
+        starImg.src = isResponsible ? '/Images/blue_star.png' : '/Images/star.png';
+        starImg.style.width = '18px';
+        starImg.style.height = '16px';
+        starImg.style.cursor = canEdit ? 'pointer' : 'auto';
+
+        if (canEdit) {
+            starImg.addEventListener('click', () => toggleResponsibility(email, canEdit));
         }
 
+        const removeImg = document.createElement('img');
+        removeImg.src = '/Images/remove.png';
+        removeImg.style.width = '14px';
+        removeImg.style.height = '14px';
+        removeImg.style.cursor = canEdit ? 'pointer' : 'auto';
+        if (canEdit) {
+            removeImg.addEventListener('click', () => removeUser(email));
+        }
+        
+
+        const rightContainer = document.createElement('div');
+        rightContainer.style.display = 'flex';
+        rightContainer.style.gap = '10px';
+        rightContainer.style.alignItems = 'center';
+        rightContainer.appendChild(starImg);
+        rightContainer.appendChild(removeImg);
+
+        const leftContainer = document.createElement('div');
+        leftContainer.style.display = 'flex';
+        leftContainer.style.alignItems = 'center';
+        leftContainer.innerHTML = `
+            <img src="/Images/big-ico.png" style="width: 20px; height: 20px; margin-right: 10px;" />
+            <p style="font-size: 13px; color: #232323;">${name}</p>
+        `;
+
+        userDiv.appendChild(leftContainer);
+        userDiv.appendChild(rightContainer);
 
         return userDiv;
     }
@@ -522,7 +557,7 @@
         document.getElementById("addSubTaskId").value = id;
 
         usersInProjectTask.innerHTML = '';
-        loadUsersForProject(id);
+        loadUsersForProject(id, canEdit);
 
         if (canEdit){
             document.getElementById("editTaskName").readOnly = false;
@@ -575,7 +610,7 @@
         }
     }
 
-    async function loadUsersForProject(taskId) {
+    async function loadUsersForProject(taskId, canEdit) {
         const usersInProject = document.getElementById('usersInProjectTask');
         usersInProject.innerHTML = '<p>Загрузка пользователей...</p>';
 
@@ -595,13 +630,14 @@
 
             if (!result.success) {
                 usersInProject.innerHTML = `<p>${result.message}</p>`;
+
                 return;
             }
 
             usersInProjectTask.innerHTML = '';
 
             result.users.forEach(user => {
-                addUser(user.email, user.name + ' ' + user.surname, user.isResponsible)
+                addUser(user.email, user.name + ' ' + user.surname, user.isResponsible, canEdit)
             });
 
         } catch (error) {
@@ -660,6 +696,8 @@
             alert('Произошла ошибка при отправке формы.');
         }
     });
+
+
 
 </script>
 

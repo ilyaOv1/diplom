@@ -1,0 +1,95 @@
+﻿@page
+@model ProjManagmentSystem.Pages.SubtasksModel
+@{
+	ViewData["Title"] = "Subtasks";
+}
+
+<div class="page-container">
+    <div class="header" style="margin-top: 80px;">
+        <h1>Доска подзадач @Model.TaskName</h1>
+
+        <form method="post">
+            <button id="addTaskButton" type="button" class="button">Добавить задачу</button>
+        </form>
+    </div>
+    <hr class="header-line">
+
+    <div class="status-columns">
+        <div class="status-column" style="background-color: #EBECF0; overflow-y: auto; padding-bottom: 200px;">
+            <div class="status-title">новыe</div>
+            @{
+                int count = 0;
+            }
+            @foreach (var i in Model.subtasks)
+            {
+                if (i.status == "Новая" && (!Model.TaskId.HasValue || i.task == Model.TaskId.Value))
+                {
+                    count++;
+                    <div style="background:#FFFFFF;border-radius:8px;width:100%;margin-right:9px;margin-top:10px;box-shadow:0 2px 6px rgba(0,0,0,0.05);padding:16px;cursor:pointer;transition:transform 0.2s ease,box-shadow 0.2s ease;border:1px solid #E0E0E0;"
+                         data-project-name="@i.name"
+                         onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';"
+                         onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 6px rgba(0,0,0,0.05)';">
+                        <p style="font-size:18px;color:#333;font-weight:600;margin:0 0 12px 0;">@i.name</p>
+                        <div style="display:flex;align-items:center;margin-bottom:12px;">
+                            <p style="font-size:14px;color:#333;margin:0;">Создатель:</p>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+        <div class="status-column" style="background-color: #EBECF0; overflow-y: auto; padding-bottom: 200px;">
+            <div class="status-title">в работе</div>
+            @foreach (var i in Model.subtasks)
+            {
+                if (i.status == "В процессе" && (!Model.TaskId.HasValue || i.task == Model.TaskId.Value))
+                {
+                    <div style="background:#FFFFFF;border-radius:8px;width:100%;margin-right:9px;margin-top:10px;box-shadow:0 2px 6px rgba(0,0,0,0.05);padding:16px;cursor:pointer;transition:transform 0.2s ease,box-shadow 0.2s ease;border:1px solid #E0E0E0;"
+                         data-project-name="@i.name"
+                         onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';"
+                         onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 6px rgba(0,0,0,0.05)';">
+                        <p style="font-size:18px;color:#333;font-weight:600;margin:0 0 12px 0;">@i.name</p>
+                        <div style="display:flex;align-items:center;margin-bottom:12px;">
+                            <p style="font-size:14px;color:#333;margin:0;">Создатель:</p>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+        <div class="status-column" style="background-color: #EBECF0; overflow-y: auto; padding-bottom: 200px;">
+            <div class="status-title">можно проверять</div>
+            @foreach (var i in Model.subtasks)
+            {
+                if (i.status == "Можно проверять" && (!Model.TaskId.HasValue || i.task == Model.TaskId.Value))
+                {
+                    <div style="background:#FFFFFF;border-radius:8px;width:100%;margin-right:9px;margin-top:10px;box-shadow:0 2px 6px rgba(0,0,0,0.05);padding:16px;cursor:pointer;transition:transform 0.2s ease,box-shadow 0.2s ease;border:1px solid #E0E0E0;"
+                         data-project-name="@i.name"
+                         onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';"
+                         onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 6px rgba(0,0,0,0.05)';">
+                        <p style="font-size:18px;color:#333;font-weight:600;margin:0 0 12px 0;">@i.name</p>
+                        <div style="display:flex;align-items:center;margin-bottom:12px;">
+                            <p style="font-size:14px;color:#333;margin:0;">Создатель:</p>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+        <div class="status-column" style="background-color: #EBECF0; overflow-y: auto; padding-bottom: 200px;">
+            <div class="status-title">готово</div>
+            @foreach (var i in Model.subtasks)
+            {
+                if (i.status == "Готово" && (!Model.TaskId.HasValue || i.task == Model.TaskId.Value))
+                {
+                    <div style="background:#FFFFFF;border-radius:8px;width:100%;margin-right:9px;margin-top:10px;box-shadow:0 2px 6px rgba(0,0,0,0.05);padding:16px;cursor:pointer;transition:transform 0.2s ease,box-shadow 0.2s ease;border:1px solid #E0E0E0;"
+                         data-project-name="@i.name"
+                         onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';"
+                         onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 6px rgba(0,0,0,0.05)';">
+                        <p style="font-size:18px;color:#333;font-weight:600;margin:0 0 12px 0;">@i.name</p>
+                        <div style="display:flex;align-items:center;margin-bottom:12px;">
+                            <p style="font-size:14px;color:#333;margin:0;">Создатель:</p>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>
