@@ -31,6 +31,7 @@
                     count++;
                     <div style="background:#FFFFFF;border-radius:8px;width:100%;margin-right:9px;margin-top:10px;box-shadow:0 2px 6px rgba(0,0,0,0.05);padding:16px;cursor:pointer;transition:transform 0.2s ease,box-shadow 0.2s ease;border:1px solid #E0E0E0;"
                          data-project-name="@i.name"
+                         onclick="handleSubtaskUpdateClick('@i.id','@i.name','@i.description','@i.status','@i.responsible', '@i.task')"
                          onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';"
                          onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 6px rgba(0,0,0,0.05)';">
                         <p style="color:#A0A0A0;font-size:12px;margin:0 0 8px 0;">№ @count</p>
@@ -114,7 +115,7 @@
 <div id="addSubtaskModalOverlay" class="modal-overlay" style="display: none;"></div>
 <div id="addSubtaskModal" class="modal-content" style="display: none;">
     <span id="addSubtaskCloseModal" class="close">&times;</span>
-    <p style="color: #ABABAB; font-size: 14px;">Добавление подзадачи</p>
+    <p style="color: #ABABAB; font-size: 14px;" id="nameWindow">Добавление подзадачи</p>
     <p id="currUserEmail" style="display: none">@Model._userService.email</p>
     <hr style="border: 0; height: 2px; background: #B5B5B5;">
     <form id="addSubTaskForm" method="post" asp-page-handler="CreateSubTask" enctype="multipart/form-data">
@@ -123,14 +124,17 @@
                 <p class="form-label">Наименование</p>
                 <input class="form-control addProjInput"
                        name="Name"
+                       id="nameInput"
                        placeholder="Введите название задачи" />
             </div>
 
             <div class="form-field">
                 <p class="form-label">Описание</p>
                 <textarea class="form-control addProjTextArea"
+                          id="descriptionInput"
                           name="Description"></textarea>
             </div>
+            <input type="hidden" id="subtaskId" name="EditingSubtaskId" />
 
             <input type="hidden" name="Task" id="addSubTaskId" value="@Model.TaskId"/>
             <input type="hidden" name="TaskId" value="@Model.TaskId" id="addSubTaskId" />
@@ -144,7 +148,7 @@
             <hr style="border: 0; height: 2px; background: #B5B5B5;">
             <div style="display: flex;">
                 <div style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
-                    <button type="submit" class="button">Создать</button>
+                    <button type="submit" class="button" id="createButton">Создать</button>
                 </div>
             </div>
         </div>
@@ -211,6 +215,7 @@
                                 });
                             });
                             const select = document.getElementById('subtaskResponsibleSelect');
+                            select.innerHTML = '';
                             currUsersInTask.forEach(user => {
                                 const option = document.createElement('option');
                                 option.value = user.email;
@@ -229,4 +234,19 @@
             usersInProjectTask.innerHTML = '<p>Не удалось загрузить пользователей</p>';
         }
     }
+
+    function handleSubtaskUpdateClick(id, name, description, status, responsible, task) {
+
+        addSubtaskModalOverlay.style.display = 'block';
+        addSubtaskModal.style.display = 'block';
+
+        document.getElementById("subtaskId").value = id;
+        document.getElementById("nameInput").value = name;
+        document.getElementById("descriptionInput").value = description;
+        document.getElementById("nameWindow").innerText = "Изменение подзадачи";
+        document.getElementById("createButton").innerText = "Изменить";
+
+        loadUsersToSelect();
+    }
+
 </script>

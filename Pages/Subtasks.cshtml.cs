@@ -17,6 +17,8 @@ namespace ProjManagmentSystem.Pages
         public List<Subtask> subtasks { get; set; }
         [BindProperty]
         public bool IsPermissionToCreateAndEdit { get; set; }
+        [BindProperty]
+        public int? EditingSubtaskId { get; set; }
         [BindProperty(SupportsGet = true)]
         public string TaskName { get; set; }
 
