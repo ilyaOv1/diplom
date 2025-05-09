@@ -8,9 +8,12 @@
     <div class="header" style="margin-top: 80px;">
         <h1>Доска подзадач @Model.TaskName</h1>
 
-        <form method="post">
-            <button id="addTaskButton" type="button" class="button">Добавить задачу</button>
-        </form>
+        @if (Model.IsPermissionToCreateAndEdit)
+        {
+            <form method="post">
+                <button id="addSubTaskButton" type="button" class="button">Добавить подзадачу</button>
+            </form>
+        }
     </div>
     <hr class="header-line">
 
@@ -29,9 +32,10 @@
                          data-project-name="@i.name"
                          onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';"
                          onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 6px rgba(0,0,0,0.05)';">
+                        <p style="color:#A0A0A0;font-size:12px;margin:0 0 8px 0;">№ @count</p>
                         <p style="font-size:18px;color:#333;font-weight:600;margin:0 0 12px 0;">@i.name</p>
                         <div style="display:flex;align-items:center;margin-bottom:12px;">
-                            <p style="font-size:14px;color:#333;margin:0;">Создатель:</p>
+                            <p style="font-size:14px;color:#333;margin:0;">Ответственный: @i.responsible</p>
                         </div>
                     </div>
                 }
@@ -39,6 +43,9 @@
         </div>
         <div class="status-column" style="background-color: #EBECF0; overflow-y: auto; padding-bottom: 200px;">
             <div class="status-title">в работе</div>
+            @{
+                count = 0;
+            }
             @foreach (var i in Model.subtasks)
             {
                 if (i.status == "В процессе" && (!Model.TaskId.HasValue || i.task == Model.TaskId.Value))
@@ -47,6 +54,7 @@
                          data-project-name="@i.name"
                          onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';"
                          onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 6px rgba(0,0,0,0.05)';">
+                        <p style="color:#A0A0A0;font-size:12px;margin:0 0 8px 0;">№ @count</p>
                         <p style="font-size:18px;color:#333;font-weight:600;margin:0 0 12px 0;">@i.name</p>
                         <div style="display:flex;align-items:center;margin-bottom:12px;">
                             <p style="font-size:14px;color:#333;margin:0;">Создатель:</p>
@@ -57,6 +65,9 @@
         </div>
         <div class="status-column" style="background-color: #EBECF0; overflow-y: auto; padding-bottom: 200px;">
             <div class="status-title">можно проверять</div>
+            @{
+                count = 0;
+            }
             @foreach (var i in Model.subtasks)
             {
                 if (i.status == "Можно проверять" && (!Model.TaskId.HasValue || i.task == Model.TaskId.Value))
@@ -65,6 +76,7 @@
                          data-project-name="@i.name"
                          onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';"
                          onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 6px rgba(0,0,0,0.05)';">
+                        <p style="color:#A0A0A0;font-size:12px;margin:0 0 8px 0;">№ @count</p>
                         <p style="font-size:18px;color:#333;font-weight:600;margin:0 0 12px 0;">@i.name</p>
                         <div style="display:flex;align-items:center;margin-bottom:12px;">
                             <p style="font-size:14px;color:#333;margin:0;">Создатель:</p>
@@ -75,6 +87,9 @@
         </div>
         <div class="status-column" style="background-color: #EBECF0; overflow-y: auto; padding-bottom: 200px;">
             <div class="status-title">готово</div>
+            @{
+                count = 0;
+            }
             @foreach (var i in Model.subtasks)
             {
                 if (i.status == "Готово" && (!Model.TaskId.HasValue || i.task == Model.TaskId.Value))
@@ -83,6 +98,7 @@
                          data-project-name="@i.name"
                          onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';"
                          onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 6px rgba(0,0,0,0.05)';">
+                        <p style="color:#A0A0A0;font-size:12px;margin:0 0 8px 0;">№ @count</p>
                         <p style="font-size:18px;color:#333;font-weight:600;margin:0 0 12px 0;">@i.name</p>
                         <div style="display:flex;align-items:center;margin-bottom:12px;">
                             <p style="font-size:14px;color:#333;margin:0;">Создатель:</p>
@@ -93,3 +109,76 @@
         </div>
     </div>
 </div>
+
+<div id="addSubtaskModalOverlay" class="modal-overlay" style="display: none;"></div>
+<div id="addSubtaskModal" class="modal-content" style="display: none;">
+    <span id="addSubtaskCloseModal" class="close">&times;</span>
+    <p style="color: #ABABAB; font-size: 14px;">Добавление подзадачи</p>
+    <p id="currUserEmail" style="display: none">@Model._userService.email</p>
+    <hr style="border: 0; height: 2px; background: #B5B5B5;">
+    <form id="addSubTaskForm" method="post" asp-page-handler="CreateSubTask" enctype="multipart/form-data">
+        <div style="">
+            <div class="form-field">
+                <p class="form-label">Наименование</p>
+                <input class="form-control addProjInput"
+                       name="Name"
+                       placeholder="Введите название задачи" />
+            </div>
+
+            <div class="form-field">
+                <p class="form-label">Описание</p>
+                <textarea class="form-control addProjTextArea"
+                          name="Description"></textarea>
+            </div>
+            <input type="hidden" name="Task" id="addSubTaskId" />
+            <div class="form-field">
+                <p class="form-label">Ответственный</p>
+                <select id="subtaskResponsibleSelect" name="Responsible" class="form-control">
+
+                    <option></option>
+                </select>
+            </div>
+            <hr style="border: 0; height: 2px; background: #B5B5B5;">
+            <div style="display: flex;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
+                    <button type="submit" class="button">Создать</button>
+                </div>
+            </div>
+        </div>
+    </form>
+    <div id="searchResultsTask" style="margin-top: 16px;">
+    </div>
+</div>
+
+<script>
+    const addSubtaskButton = document.getElementById('addSubTaskButton');
+    const addSubtaskBtn = document.getElementById('addSubtaskBtn');
+    const addSubtaskModalOverlay = document.getElementById('addSubtaskModalOverlay');
+    const addSubtaskModal = document.getElementById('addSubtaskModal');
+    const addSubtaskCloseModal = document.getElementById('addSubtaskCloseModal');
+
+    if (addSubtaskButton) {
+        addSubtaskButton.addEventListener('click', () => {
+            addSubtaskModalOverlay.style.display = 'block';
+            addSubtaskModal.style.display = 'block';
+
+        });
+    }
+
+    if (addSubtaskCloseModal) {
+        addSubtaskCloseModal.addEventListener('click', () => {
+            addSubtaskModalOverlay.style.display = 'none';
+            addSubtaskModal.style.display = 'none';
+        });
+    }
+
+    if (addSubtaskModalOverlay) {
+        addSubtaskModalOverlay.addEventListener('click', (event) => {
+            if (event.target === addSubtaskModalOverlay) {
+                addSubtaskModalOverlay.style.display = 'none';
+                addSubtaskModal.style.display = 'none';
+            }
+        });
+
+    }
+</script>

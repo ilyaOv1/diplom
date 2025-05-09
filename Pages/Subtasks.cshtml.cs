@@ -14,6 +14,8 @@ namespace ProjManagmentSystem.Pages
 
         [BindProperty]
         public List<Subtask> subtasks { get; set; }
+        [BindProperty]
+        public bool IsPermissionToCreateAndEdit { get; set; }
         [BindProperty(SupportsGet = true)]
         public string TaskName { get; set; }
 
@@ -52,6 +54,15 @@ namespace ProjManagmentSystem.Pages
                     var subtasksList = await response.Content.ReadFromJsonAsync<List<Subtask>>();
 
                     this.subtasks = subtasksList;
+
+                    response = await _httpClient.GetAsync($"tasks/subtasks/{TaskId}/permission");
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var hasPermission = await response.Content.ReadFromJsonAsync<bool>();
+
+                        this.IsPermissionToCreateAndEdit = hasPermission;
+                    }
                 }
                 else
                 {

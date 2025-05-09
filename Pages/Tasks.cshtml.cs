@@ -104,7 +104,7 @@ namespace ProjManagmentSystem.Pages
             try
             {
 
-                if (ProjectId == null || ProjectId == 0) return Redirect("/Tasks");
+                if ((ProjectId == null || ProjectId == 0) && !EditingTaskId.HasValue) return Redirect("/Tasks");
                 
                 var formContent = new MultipartFormDataContent
                 {

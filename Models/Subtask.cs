@@ -7,7 +7,7 @@
         public int task { get; set; }
         public string description { get; set; }
         public string status { get; set; }
-        public int responsible { get; set; }
+        public string responsible { get; set; }
         
     }
 }
