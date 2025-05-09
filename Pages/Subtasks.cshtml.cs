@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Newtonsoft.Json.Linq;
 using ProjManagmentSystem.Models;
 using ProjManagmentSystem.Services;
 using System.Net.Http;
@@ -75,6 +76,67 @@ namespace ProjManagmentSystem.Pages
             }
 
             return Page();
+        }
+
+        public async Task<IActionResult> OnPostGetUsersAsync([FromBody] TaskIdDto dto)
+        {
+            try
+            {
+
+                var token = Request.Cookies["token"];
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                int taskId = dto.TaskId;
+                var response = await _httpClient.GetAsync($"user/task/{taskId}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var task = await response.Content.ReadFromJsonAsync<List<Users>>();
+                    return new JsonResult(new { success = true, data = task });
+                }
+
+                return new JsonResult(new { success = false, message = "Ошибка загрузки задачи." });
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(new { success = false, message = ex.Message });
+            }
+        }
+
+        public async Task<IActionResult> OnPostCreateSubTask([FromForm] Subtask subtask)
+        {
+            var isAuthenticated = await IsUserAuthenticated();
+
+            if (!isAuthenticated)
+            {
+                return HandleAuthorization(isAuthenticated);
+            }
+
+            var token = Request.Cookies["token"];
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            try
+            {
+                var formContent = new MultipartFormDataContent
+                {
+                    { new StringContent("1"), "id" },
+                    { new StringContent(subtask.name), "name" },
+                    { new StringContent(subtask.task.ToString()), "task"},
+                    { new StringContent(subtask.description), "description" },
+                    { new StringContent(subtask.description), "status" },
+
+                    { new StringContent(subtask.responsible.ToString()), "responsible" }
+                };
+                var response = await _httpClient.PostAsync("tasks/add-subtask", formContent);
+                if (response.IsSuccessStatusCode)
+                {
+                    return RedirectToPage(new { taskName = TaskName, taskId = TaskId });
+                }
+                return Page();
+            }
+            catch (Exception ex)
+            {
+                return Page();
+            }
         }
     }
 }

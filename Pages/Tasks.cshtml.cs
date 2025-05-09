@@ -17,6 +17,8 @@ namespace ProjManagmentSystem.Pages
 
         public string Token { get; set; }
         [BindProperty]
+        public bool IsPermissionToCreateAndEdit { get; set; }
+        [BindProperty]
         public int? EditingTaskId { get; set; }
         [BindProperty]
         public List<Users> selectedUsers { get; set; } = new();
@@ -66,6 +68,19 @@ namespace ProjManagmentSystem.Pages
                     var tasksList = await response.Content.ReadFromJsonAsync<List<TaskToGet>>();
 
                     this.tasks = tasksList;
+
+                    response = await _httpClient.GetAsync($"tasks/{ProjectId}/permission");
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var hasPermission = await response.Content.ReadFromJsonAsync<bool>();
+
+                        this.IsPermissionToCreateAndEdit = hasPermission;
+                    }
+                    else
+                    {
+                        this.IsPermissionToCreateAndEdit = false;
+                    }
                 }
                 else
                 {

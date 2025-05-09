@@ -14,6 +14,7 @@
                 <button id="addSubTaskButton" type="button" class="button">Добавить подзадачу</button>
             </form>
         }
+        <input id="taskIdInput" style="display: none;" value="@Model.TaskId"/>
     </div>
     <hr class="header-line">
 
@@ -130,12 +131,14 @@
                 <textarea class="form-control addProjTextArea"
                           name="Description"></textarea>
             </div>
-            <input type="hidden" name="Task" id="addSubTaskId" />
+
+            <input type="hidden" name="Task" id="addSubTaskId" value="@Model.TaskId"/>
+            <input type="hidden" name="TaskId" value="@Model.TaskId" id="addSubTaskId" />
+            <input type="hidden" name="TaskName" value="@Model.TaskName" id="addSubTaskName" />
             <div class="form-field">
                 <p class="form-label">Ответственный</p>
                 <select id="subtaskResponsibleSelect" name="Responsible" class="form-control">
 
-                    <option></option>
                 </select>
             </div>
             <hr style="border: 0; height: 2px; background: #B5B5B5;">
@@ -156,12 +159,13 @@
     const addSubtaskModalOverlay = document.getElementById('addSubtaskModalOverlay');
     const addSubtaskModal = document.getElementById('addSubtaskModal');
     const addSubtaskCloseModal = document.getElementById('addSubtaskCloseModal');
+    const currUsersInTask = [];
 
     if (addSubtaskButton) {
         addSubtaskButton.addEventListener('click', () => {
             addSubtaskModalOverlay.style.display = 'block';
             addSubtaskModal.style.display = 'block';
-
+            loadUsersToSelect();
         });
     }
 
@@ -180,5 +184,49 @@
             }
         });
 
+    }
+
+    function loadUsersToSelect() {
+        try {
+            fetch('/Subtasks?handler=GetUsers', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: JSON.stringify({ taskId: document.getElementById("taskIdInput").value })
+            })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        const data = result.data;
+
+                        if (Array.isArray(data)) {
+                            currUsersInTask.length = 0;
+                            data.forEach(user => {
+                                currUsersInTask.push({
+                                    email: user.email,
+                                    name: user.name,
+                                    surname: user.surname
+                                });
+                            });
+                            const select = document.getElementById('subtaskResponsibleSelect');
+                            currUsersInTask.forEach(user => {
+                                const option = document.createElement('option');
+                                option.value = user.email;
+                                option.textContent = `${user.name} ${user.surname}`;
+                                select.appendChild(option);
+                            });
+                        } else {
+                            console.error('Ошибка: data не является массивом', data);
+                        }
+                    } else {
+                        console.error('Ошибка на стороне сервера:', result.message);
+                    }
+                });
+        } catch (error) {
+            console.error(error);
+            usersInProjectTask.innerHTML = '<p>Не удалось загрузить пользователей</p>';
+        }
     }
 </script>

@@ -8,10 +8,12 @@
 <div class="page-container" >
     <div class="header" style="margin-top: 80px;">
         <h1>Доска задач @Model.ProjectName</h1>
-        
-        <form method="post">
-            <button id="addTaskButton" type="button" class="button">Добавить задачу</button>
-        </form>
+        @if (Model.IsPermissionToCreateAndEdit)
+        {
+            <form method="post">
+                <button id="addTaskButton" type="button" class="button">Добавить задачу</button>
+            </form>
+        }
     </div>
     <hr class="header-line">
 
@@ -36,7 +38,7 @@
                         <div style="display:flex;align-items:center;margin-bottom:12px;">
                             <p style="font-size:14px;color:#333;margin:0;">Создатель: @i.creator</p>
                         </div>
-                        <a href="/Subtasks?taskName=@i.name&taskId=@i.id" style="color:#2954EC;text-decoration:none;font-size:13px;border-bottom:1px dashed #2954EC;" onclick="event.stopPropagation();">Подзадачи</a>
+                        <a style="color:#2954EC;text-decoration:none;font-size:13px;border-bottom:1px dashed #2954EC;" onclick="handleTaskClick(event, '@i.name', '@i.id');">Подзадачи</a>
                     </div>
                 }
             }
@@ -449,6 +451,7 @@
 
         return userDiv;
     }
+
     function removeUser(email) {
         const index = selectedTaskUsers.findIndex(participant => participant.email === email);
         if (index !== -1) {
@@ -537,7 +540,6 @@
                 searchResultsTask.innerHTML = `<p>${error.message}</p>`;
             });
     });
-
 
     function handleTaskUpdateClick(id, name, description, status, projectId, access) {
         const usersInProjectTask = document.getElementById('usersInProjectTask');
@@ -697,7 +699,11 @@
         }
     });
 
-
+    function handleTaskClick(event, taskName, taskId) {
+        event.stopPropagation();
+        const url = `/Subtasks?taskName=${encodeURIComponent(taskName)}&taskId=${encodeURIComponent(taskId)}`;
+        window.location.href = url;
+    }
 
 </script>
 
