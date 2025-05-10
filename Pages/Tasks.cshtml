@@ -14,11 +14,12 @@
                 <button id="addTaskButton" type="button" class="button">Добавить задачу</button>
             </form>
         }
+        <input hidden id="projectId" value="@Model.ProjectId"/>
     </div>
     <hr class="header-line">
 
     <div class="status-columns">
-        <div class="status-column" style="background-color: #EBECF0; overflow-y: auto; padding-bottom: 200px;">
+        <div id="status-new" class="status-column" style="background-color: #EBECF0; overflow-y: auto; padding-bottom: 200px;" ondrop="drop(event)" ondragover="allowDrop(event)">
             <div class="status-title">новыe</div>
             @{
                 int count = 0;
@@ -28,9 +29,10 @@
                 if (i.status == "Новая" && (!Model.ProjectId.HasValue || i.project == Model.ProjectId.Value))
                 {
                     count++;
-                    <div style="background:#FFFFFF;border-radius:8px;width:100%;margin-right:9px;margin-top:10px;box-shadow:0 2px 6px rgba(0,0,0,0.05);padding:16px;cursor:pointer;transition:transform 0.2s ease,box-shadow 0.2s ease;border:1px solid #E0E0E0;"
+                    <div id="task-@i.id"
+                         style="background:#FFFFFF;border-radius:8px;width:100%;margin-right:9px;margin-top:10px;box-shadow:0 2px 6px rgba(0,0,0,0.05);padding:16px;cursor:pointer;transition:transform 0.2s ease,box-shadow 0.2s ease;border:1px solid #E0E0E0;"
                          onclick="handleTaskUpdateClick('@i.id','@i.name','@i.description','@i.status','@i.project', '@i.Access')"
-                         data-project-name="@i.name"
+                         data-project-name="@i.name" draggable="true" ondragstart="dragStart(event)"
                          onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';"
                          onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 6px rgba(0,0,0,0.05)';">
                         <p style="color:#A0A0A0;font-size:12px;margin:0 0 8px 0;">№ @count</p>
@@ -43,19 +45,20 @@
                 }
             }
         </div>
-        <div class="status-column" style="background-color: #EBECF0; overflow-y: auto; padding-bottom: 200px;">
-            <div class="status-title">в работе</div>
+        <div  id="status-in-progress" class="status-column" style="background-color: #EBECF0; overflow-y: auto; padding-bottom: 200px;" ondrop="drop(event)" ondragover="allowDrop(event)">
+            <div  class="status-title">в работе</div>
             @{
                 count = 0;
             }
             @foreach (var i in Model.tasks)
             {
-                if (i.status == "В процессе" && (!Model.ProjectId.HasValue || i.project == Model.ProjectId.Value))
+                if (i.status == "В работе" && (!Model.ProjectId.HasValue || i.project == Model.ProjectId.Value))
                 {
                     count++;
-                    <div style="background:#FFFFFF;border-radius:8px;width:100%;margin-right:9px;margin-top:10px;box-shadow:0 2px 6px rgba(0,0,0,0.05);padding:16px;cursor:pointer;transition:transform 0.2s ease,box-shadow 0.2s ease;border:1px solid #E0E0E0;"
+                    <div id="task-@i.id"
+                         style="background:#FFFFFF;border-radius:8px;width:100%;margin-right:9px;margin-top:10px;box-shadow:0 2px 6px rgba(0,0,0,0.05);padding:16px;cursor:pointer;transition:transform 0.2s ease,box-shadow 0.2s ease;border:1px solid #E0E0E0;"
                          onclick="handleTaskUpdateClick('@i.id','@i.name','@i.description','@i.status','@i.project')"
-                         data-project-name="@i.name"
+                         data-project-name="@i.name" draggable="true" ondragstart="dragStart(event)"
                          onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';"
                          onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 6px rgba(0,0,0,0.05)';">
                         <p style="color:#A0A0A0;font-size:12px;margin:0 0 8px 0;">№ @count</p>
@@ -69,7 +72,7 @@
                 }
             }
         </div>
-        <div class="status-column" style="background-color: #EBECF0; overflow-y: auto; padding-bottom: 200px;">
+        <div id="status-testing" class="status-column" style="background-color: #EBECF0; overflow-y: auto; padding-bottom: 200px;" ondrop="drop(event)" ondragover="allowDrop(event)">
             <div class="status-title">можно проверять</div>
             @{
                 count = 0;
@@ -79,9 +82,10 @@
                 if (i.status == "Можно проверять" && (!Model.ProjectId.HasValue || i.project == Model.ProjectId.Value))
                 {
                     count++;
-                    <div style="background:#FFFFFF;border-radius:8px;width:100%;margin-right:9px;margin-top:10px;box-shadow:0 2px 6px rgba(0,0,0,0.05);padding:16px;cursor:pointer;transition:transform 0.2s ease,box-shadow 0.2s ease;border:1px solid #E0E0E0;"
+                    <div id="task-@i.id"
+                         style="background:#FFFFFF;border-radius:8px;width:100%;margin-right:9px;margin-top:10px;box-shadow:0 2px 6px rgba(0,0,0,0.05);padding:16px;cursor:pointer;transition:transform 0.2s ease,box-shadow 0.2s ease;border:1px solid #E0E0E0;"
                          onclick="handleTaskUpdateClick('@i.id','@i.name','@i.description','@i.status','@i.project')"
-                         data-project-name="@i.name"
+                         data-project-name="@i.name" draggable="true" ondragstart="dragStart(event)"
                          onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';"
                          onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 6px rgba(0,0,0,0.05)';">
                         <p style="color:#A0A0A0;font-size:12px;margin:0 0 8px 0;">№ @count</p>
@@ -95,7 +99,7 @@
                 }
             }
         </div>
-        <div class="status-column" style="background-color: #EBECF0; overflow-y: auto; padding-bottom: 200px;">
+        <div id="status-done" class="status-column" style="background-color: #EBECF0; overflow-y: auto; padding-bottom: 200px;" ondrop="drop(event)" ondragover="allowDrop(event)">
             <div class="status-title">готово</div>
             @{
                 count = 0;
@@ -105,9 +109,10 @@
                 if (i.status == "Готово" && (!Model.ProjectId.HasValue || i.project == Model.ProjectId.Value))
                 {
                     count++;
-                    <div style="background:#FFFFFF;border-radius:8px;width:100%;margin-right:9px;margin-top:10px;box-shadow:0 2px 6px rgba(0,0,0,0.05);padding:16px;cursor:pointer;transition:transform 0.2s ease,box-shadow 0.2s ease;border:1px solid #E0E0E0;"
+                    <div id="task-@i.id"
+                         style="background:#FFFFFF;border-radius:8px;width:100%;margin-right:9px;margin-top:10px;box-shadow:0 2px 6px rgba(0,0,0,0.05);padding:16px;cursor:pointer;transition:transform 0.2s ease,box-shadow 0.2s ease;border:1px solid #E0E0E0;"
                          onclick="handleTaskUpdateClick('@i.id','@i.name','@i.description','@i.status','@i.project')"
-                         data-project-name="@i.name"
+                         data-project-name="@i.name" draggable="true" ondragstart="dragStart(event)"
                          onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';"
                          onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 6px rgba(0,0,0,0.05)';">
                         <p style="color:#A0A0A0;font-size:12px;margin:0 0 8px 0;">№ @count</p>
@@ -253,6 +258,7 @@
     const searchResultsTask = document.getElementById('searchResultsTask');
     const selectedTaskUsers = [];
     const currUsersInTask = [];
+    let draggedTask = null;
 
     if (addTaskButton) {
         addTaskButton.addEventListener('click', () => {
@@ -438,6 +444,59 @@
             alert('Произошла ошибка при отправке формы.');
         }
     });
+
+    function dragStart(event) {
+        window.draggedTask = event.target;
+        event.dataTransfer.effectAllowed = 'move';
+        event.dataTransfer.setData('text/plain', event.target.id);
+    }
+
+    function allowDrop(event) {
+        event.preventDefault();
+        event.dataTransfer.dropEffect = 'move';
+    }
+
+    function drop(event) {
+        event.preventDefault();
+
+        const statusColumnId = event.currentTarget.id;
+        const newStatus = {
+            "status-new": "Новая",
+            "status-in-progress": "В работе",
+            "status-testing": "Можно проверять",
+            "status-done": "Готово"
+        }[statusColumnId];
+
+        if (!newStatus || !window.draggedTask) return;
+
+        const taskId = window.draggedTask.id.replace("task-", "");
+
+        window.draggedTask.remove();
+        event.currentTarget.appendChild(window.draggedTask); 
+        window.draggedTask = null; 
+
+        updateTaskStatusOnServer(taskId, newStatus).finally(() => {
+            updateTaskNumbers();
+        });;
+    }
+
+    function updateTaskNumbers() {
+        const columns = document.querySelectorAll('.status-column');
+
+        columns.forEach(column => {
+            let counter = 1;
+
+            const tasks = column.querySelectorAll('div[id^="task-"]');
+
+            tasks.forEach(taskDiv => {
+                const numberP = taskDiv.querySelector('p');
+
+                if (numberP && numberP.textContent.trim().startsWith('№')) {
+                    numberP.textContent = `№ ${counter++}`;
+                }
+            });
+        });
+    }
 
     function getCookie(name) {
         const value = `; ${document.cookie}`;
@@ -656,6 +715,7 @@
         window.location.href = url;
     }
 
+
     async function loadUsersForProject(taskId, canEdit) {
         const usersInProject = document.getElementById('usersInProjectTask');
         usersInProject.innerHTML = '<p>Загрузка пользователей...</p>';
@@ -705,6 +765,29 @@
 
     }
 
+    async function updateTaskStatusOnServer(taskId, newStatus) {
+        try {
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+            const response = await fetch('/Tasks?handler=UpdateTaskStatus', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': token
+                },
+                body: JSON.stringify({ taskId: parseInt(taskId), status: newStatus })
+            });
+
+            if (!response.ok) throw new Error('Не удалось обновить статус');
+
+            console.log(`Задача ${taskId} переведена в статус "${newStatus}"`);
+        } catch (err) {
+            alert('Ошибка при обновлении статуса');
+            console.error(err);
+        }
+    }
+
+    
 </script>
 
 

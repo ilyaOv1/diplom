@@ -229,6 +229,7 @@ namespace ProjManagmentSystem.Pages
 
 
         }
+
         public async Task<IActionResult> OnPostCreateSubTask([FromForm] Subtask subtask)
         {
             var isAuthenticated = await IsUserAuthenticated();
@@ -297,6 +298,7 @@ namespace ProjManagmentSystem.Pages
                 return new JsonResult(new { success = false, message = "Ошибка: " + ex.Message });
             }
         }
+
         public async Task<IActionResult> OnPostGetUsersAsync([FromBody] TaskIdDto dto)
         {
             try
@@ -313,6 +315,35 @@ namespace ProjManagmentSystem.Pages
                 }
 
                 return new JsonResult(new { success = false, message = "Ошибка загрузки задачи." });
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(new { success = false, message = ex.Message });
+            }
+        }
+
+        public async Task<IActionResult> OnPostUpdateTaskStatus([FromBody] UpdateTaskStatusDTO dto)
+        {
+            try
+            {
+                var token = Request.Cookies["token"];
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                var jsonContent = new StringContent(
+                    JsonSerializer.Serialize(dto),
+                    Encoding.UTF8,
+                    "application/json"
+                );
+                var response = await _httpClient.PutAsync($"tasks/update-status", jsonContent);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return new JsonResult(new { success = true });
+                }
+                else
+                {
+                    var errorText = await response.Content.ReadAsStringAsync();
+                    return new JsonResult(new { success = false, message = $"Ошибка сервера: {errorText}" });
+                }
             }
             catch (Exception ex)
             {
