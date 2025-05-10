@@ -123,15 +123,16 @@ namespace ProjManagmentSystem.Pages
                         var responseContent = await response.Content.ReadAsStringAsync();
                         var result = JsonSerializer.Deserialize<Project>(responseContent);
                         int projectId = result.id;
-                        List<string> emails = new List<string>();
-                        foreach (var i in selectedUsersToProject)
+                        var userEmails = selectedUsersToProject.Select(u => new UserWithResponsibilityDTO
                         {
-                            emails.Add(i.email);
-                        }
+                            Email = u.email,
+                            IsResponsible = u.IsResponsible ?? false
+                        }).ToList();
+
                         var addUsersToProjectDTO = new AddUsersToProjectDTO
                         {
                             ProjectId = projectId,
-                            UserIds = emails
+                            UserIds = userEmails
                         };
 
                         var jsonContent = new StringContent(
@@ -155,12 +156,16 @@ namespace ProjManagmentSystem.Pages
                     {
                         int projectId = EditingProjectId.Value;
 
-                        List<string> emails = selectedUsersToProject.Select(u => u.email).ToList();
+                        var userEmails = selectedUsersToProject.Select(u => new UserWithResponsibilityDTO
+                        {
+                            Email = u.email,
+                            IsResponsible = u.IsResponsible ?? false
+                        }).ToList();
 
                         var addUsersToProjectDTO = new AddUsersToProjectDTO
                         {
                             ProjectId = projectId,
-                            UserIds = emails
+                            UserIds = userEmails
                         };
 
                         var jsonContent = new StringContent(

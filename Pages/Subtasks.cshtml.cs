@@ -128,10 +128,22 @@ namespace ProjManagmentSystem.Pages
 
                     { new StringContent(subtask.responsible.ToString()), "responsible" }
                 };
-                var response = await _httpClient.PostAsync("tasks/add-subtask", formContent);
-                if (response.IsSuccessStatusCode)
+                HttpResponseMessage response;
+                if (!EditingSubtaskId.HasValue)
                 {
-                    return RedirectToPage(new { taskName = TaskName, taskId = TaskId });
+                    response = await _httpClient.PostAsync("tasks/add-subtask", formContent);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        return RedirectToPage(new { taskName = TaskName, taskId = TaskId });
+                    }
+                }
+                else
+                {
+                    response = await _httpClient.PostAsync($"tasks/update-subtask/{EditingSubtaskId.Value}", formContent);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        return RedirectToPage(new { taskName = TaskName, taskId = TaskId });
+                    }
                 }
                 return Page();
             }

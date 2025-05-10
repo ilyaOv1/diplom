@@ -212,53 +212,10 @@
         
     }
 
-    function getCookie(name) {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop().split(';').shift();
-    }
-
-    function addUser(email, name, access) {
-        if (selectedUsers.some(participant => participant.email === email)) {
-            alert('Участник уже добавлен');
-            return;
-        }
-
-        const participant = { email, name };
-        selectedUsers.push(participant);
-
-        sendArrayToServer();
-
-        addParticipantModal.style.display = 'none';
-        addParticipantModalOverlay.style.display = 'none';
-
-        const searchInput = document.getElementById('participantSearchInput');
-        searchInput.value = '';
-        const searchResults = document.getElementById('searchResults');
-        searchResults.innerHTML = '';
-
-        const usersInProject = document.getElementById('usersInProject');
-        const userElement = createUserElement(email, name); 
-        usersInProject.appendChild(userElement); 
-    }
-
-    async function sendArrayToServer() {
-
-        const response = await fetch('?handler=ProcessArray', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
-            },
-            body: JSON.stringify(selectedUsers)
-        });
-
-    }
-
     participantSearchInput.addEventListener('input', function () {
         const email = participantSearchInput.value.trim();
         if (!email) {
-            searchResults.innerHTML = ''; 
+            searchResults.innerHTML = '';
             return;
         }
 
@@ -266,7 +223,7 @@
         if (!token) {
             console.error('Токен не найден в cookies');
             searchResults.innerHTML = '<p>Ошибка авторизации</p>';
-            
+
             return;
         }
         console.log(token);
@@ -295,7 +252,7 @@
 
                 data.forEach(user => {
                     if (selectedUsers.some(participant => participant.email === user.email) || user.email === currUserEmail.textContent) {
-                        return; 
+                        return;
                     }
                     const userDiv = document.createElement('div');
                     userDiv.style.display = 'flex';
@@ -306,13 +263,13 @@
                     userDiv.style.borderBottom = '1px solid #D2D2D2';
 
                     userDiv.innerHTML = `
-                        <div style="display: flex; align-items: center;">
-                            <img src="/Images/big-ico.png" style="width: 20px; height: 20px; margin-right: 10px;" />
-                            <p style="font-size: 13px; color: #232323;">${user.name} </p>
-                            <p style="font-size: 13px; color: #232323;">${user.surname} </p>
-                        </div>
-                                    <button class="button" style="width: 100px;" onclick="addUser('${user.email}', '${user.name} ${user.surname}')">Добавить</button>
-                    `;
+                            <div style="display: flex; align-items: center;">
+                                <img src="/Images/big-ico.png" style="width: 20px; height: 20px; margin-right: 10px;" />
+                                <p style="font-size: 13px; color: #232323;">${user.name} </p>
+                                <p style="font-size: 13px; color: #232323;">${user.surname} </p>
+                            </div>
+                                        <button class="button" style="width: 100px;" onclick="addUser('${user.email}', '${user.name} ${user.surname}')">Добавить</button>
+                        `;
                     searchResults.appendChild(userDiv);
                 });
             })
@@ -321,10 +278,65 @@
                 searchResults.innerHTML = `<p>${error.message}</p>`;
             });
 
-        
+
     });
 
-    function createUserElement(email, name) {
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+
+    function addUser(email, name, isResponsible, canEdit) {
+        if (selectedUsers.some(participant => participant.email === email)) {
+            alert('Участник уже добавлен');
+            return;
+        }
+
+        const participant = { email, name, isResponsible };
+        selectedUsers.push(participant);
+
+        sendArrayToServer();
+
+        addParticipantModal.style.display = 'none';
+        addParticipantModalOverlay.style.display = 'none';
+
+        const searchInput = document.getElementById('participantSearchInput');
+        searchInput.value = '';
+        const searchResults = document.getElementById('searchResults');
+        searchResults.innerHTML = '';
+
+        const usersInProject = document.getElementById('usersInProject');
+        updateUI(canEdit);
+    }
+
+    function toggleResponsibility(email, canEdit) {
+        const user = selectedUsers.find(u => u.email === email);
+        if (!user) return;
+
+        user.isResponsible = !user.isResponsible;
+
+        updateUI(canEdit);
+
+        sendArrayToServer();
+    }
+
+    function updateUI(canEdit) {
+        const usersInProject = document.getElementById('usersInProject');
+        usersInProject.innerHTML = '';
+
+        selectedUsers.forEach(u => {
+            if (selectedUsers.length <= 1) {
+                const element = createUserElement(u.email, u.name, u.isResponsible, false);
+                usersInProject.appendChild(element);
+            } else {
+                const element = createUserElement(u.email, u.name, u.isResponsible, canEdit);
+                usersInProject.appendChild(element);
+            }
+        });
+    }
+
+    function createUserElement(email, name, isResponsible = false, canEdit = false) {
         const userDiv = document.createElement('div');
         userDiv.style.border = '1px solid #D2D2D2';
         userDiv.style.borderRadius = '8px';
@@ -334,19 +346,45 @@
         userDiv.style.justifyContent = 'space-between';
         userDiv.style.alignItems = 'center';
         userDiv.style.marginBottom = '5px';
-        
         userDiv.setAttribute('data-email', email);
 
-        userDiv.innerHTML = `
-                    <div style="display: flex; align-items: center;">
-                        <img src="/Images/big-ico.png" style="width: 20px; height: 20px; margin-right: 10px;" />
-                        <p style="font-size: 13px; color: #232323;">${name}</p>
-                    </div>
-                    <div style="display: flex; gap: 10px; align-items: center;">
-                        <img src="/Images/star.png" style="width: 18px; height: 16px;" />
-                        <img src="/Images/remove.png" id="deleteUserImg" style="width: 14px; height: 14px; cursor: pointer;" onclick="removeUser('${email}')"/>
-                    </div>
-                `;
+        const starImg = document.createElement('img');
+        starImg.src = isResponsible ? '/Images/blue_star.png' : '/Images/star.png';
+        starImg.style.width = '18px';
+        starImg.style.height = '16px';
+        starImg.style.cursor = canEdit ? 'pointer' : 'auto';
+
+        if (canEdit) {
+            starImg.addEventListener('click', () => toggleResponsibility(email, canEdit));
+        }
+
+        const removeImg = document.createElement('img');
+        removeImg.src = '/Images/remove.png';
+        removeImg.style.width = '14px';
+        removeImg.style.height = '14px';
+        removeImg.style.cursor = canEdit ? 'pointer' : 'auto';
+        if (canEdit) {
+            removeImg.addEventListener('click', () => removeUser(email));
+        }
+
+
+        const rightContainer = document.createElement('div');
+        rightContainer.style.display = 'flex';
+        rightContainer.style.gap = '10px';
+        rightContainer.style.alignItems = 'center';
+        rightContainer.appendChild(starImg);
+        rightContainer.appendChild(removeImg);
+
+        const leftContainer = document.createElement('div');
+        leftContainer.style.display = 'flex';
+        leftContainer.style.alignItems = 'center';
+        leftContainer.innerHTML = `
+                <img src="/Images/big-ico.png" style="width: 20px; height: 20px; margin-right: 10px;" />
+                <p style="font-size: 13px; color: #232323;">${name}</p>
+            `;
+
+        userDiv.appendChild(leftContainer);
+        userDiv.appendChild(rightContainer);
 
         return userDiv;
     }
@@ -370,6 +408,7 @@
         const url = `/Tasks?projectName=${encodeURIComponent(projectName)}&projectId=${encodeURIComponent(projectId)}`;
         window.location.href = url;
     }
+
     function handleProjectUpdateClick(projectId, name, description, isPrivate, creatorProj, access) {
 
         const isPrivateBool = isPrivate === "True" || isPrivate === "true" ? "1" : "0";
@@ -387,7 +426,7 @@
         document.getElementById("projectIdInput").value = projectId;
         document.getElementById('usersInProject').innerHTML = '';
 
-        loadUsersForProject(projectId);
+        loadUsersForProject(projectId, canEdit);
         if (canEdit) {
             document.getElementById("editName").readOnly = false;
             document.getElementById("editDescription").readOnly = false;
@@ -406,7 +445,20 @@
         
     }
 
-    async function loadUsersForProject(projectId) {
+    async function sendArrayToServer() {
+
+        const response = await fetch('?handler=ProcessArray', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+            },
+            body: JSON.stringify(selectedUsers)
+        });
+
+    }
+
+    async function loadUsersForProject(projectId, canEdit) {
         const usersInProject = document.getElementById('usersInProject');
         usersInProject.innerHTML = '<p>Загрузка пользователей...</p>';
 
@@ -432,7 +484,7 @@
             usersInProject.innerHTML = '';
 
             result.users.forEach(user => {
-                addUser(user.email, user.name + ' ' + user.surname);
+                addUser(user.email, user.name + ' ' + user.surname, user.isResponsible, canEdit);
             });
 
         } catch (error) {

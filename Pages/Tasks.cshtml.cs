@@ -278,14 +278,10 @@ namespace ProjManagmentSystem.Pages
             Token = token;
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-            var content = new FormUrlEncodedContent(new Dictionary<string, string>
-                    {
-                        { "taskId", taskId.ToString() }
-                    });
 
             try
             {
-                var response = await _httpClient.PostAsync("tasks/users-task", content);
+                var response = await _httpClient.GetAsync($"user/task/{taskId}");
                 if (response.IsSuccessStatusCode)
                 {
                     var users = await response.Content.ReadFromJsonAsync<List<Users>>();

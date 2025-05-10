@@ -333,6 +333,112 @@
 
     }
 
+    participantTaskSearchInput.addEventListener('input', function () {
+        const email = participantTaskSearchInput.value.trim();
+        if (!email) {
+            searchResultsTask.innerHTML = '';
+            return;
+        }
+
+        const projectId = document.getElementById('projId').value;
+        if (!projectId) {
+            console.error('ID проекта не найден');
+            searchResultsTask.innerHTML = '<p>Ошибка: ID проекта не указан</p>';
+            return;
+        }
+
+        const token = getCookie('token');
+        if (!token) {
+            console.error('Токен не найден в cookies');
+            searchResultsTask.innerHTML = '<p>Ошибка авторизации</p>';
+            return;
+        }
+
+        fetch(`https://localhost:7136/api/auth/search-project?email=${encodeURIComponent(email)}&project=${encodeURIComponent(projectId)}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            credentials: 'include'
+        })
+            .then(response => {
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        throw new Error('Не авторизован');
+                    }
+                    throw new Error('Ошибка сети');
+                }
+                return response.json();
+            })
+            .then(data => {
+                searchResultsTask.innerHTML = '';
+                const currUserEmail = document.getElementById('currUserEmail');
+                if (data.length === 0) {
+                    searchResultsTask.innerHTML = '<p>Пользователь не найден</p>';
+                    return;
+                }
+
+                data.forEach(user => {
+                    if (selectedTaskUsers.some(participant => participant.email === user.email)) {
+                        return;
+                    }
+                    const userDiv = document.createElement('div');
+                    userDiv.style.display = 'flex';
+                    userDiv.style.justifyContent = 'space-between';
+                    userDiv.style.alignItems = 'center';
+                    userDiv.style.padding = '8px';
+                    userDiv.style.paddingRight = '0px';
+                    userDiv.style.borderBottom = '1px solid #D2D2D2';
+
+
+                    userDiv.innerHTML = `
+                        <div style="display: flex; align-items: center;">
+                            <img src="/Images/big-ico.png" style="width: 20px; height: 20px; margin-right: 10px;" />
+                            <p style="font-size: 13px; color: #232323;">${user.name} </p>
+                            <p style="font-size: 13px; color: #232323;">${user.surname} </p>
+                        </div>
+                        <button class="button" style="width: 100px;" onclick="addUser('${user.email}', '${user.name} ${user.surname}')">Добавить</button>
+                    `;
+                    searchResultsTask.appendChild(userDiv);
+                });
+            })
+            .catch(error => {
+                console.error('Ошибка при поиске пользователя:', error);
+                searchResultsTask.innerHTML = `<p>${error.message}</p>`;
+            });
+    });
+
+    document.getElementById('addSubTaskForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+
+        try {
+            const response = await fetch(this.action, {
+                method: 'POST',
+                headers: {
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: formData
+            });
+
+            const result = await response.json();
+
+
+            if (result.success) {
+                document.getElementById('addSubtaskModal').style.display = 'none';
+                document.getElementById('addSubtaskModalOverlay').style.display = 'none';
+
+                this.reset();
+            } else {
+                alert('Ошибка: ' + (result.message || 'Не удалось создать подзадачу'));
+            }
+        } catch (error) {
+            console.error('Ошибка:', error);
+            alert('Произошла ошибка при отправке формы.');
+        }
+    });
+
     function getCookie(name) {
         const value = `; ${document.cookie}`;
         const parts = value.split(`; ${name}=`);
@@ -360,17 +466,24 @@
         updateUI(canEdit);
     }
 
-    async function sendArrayToServer() {
-
-        const response = await fetch('?handler=ProcessArray', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
-            },
-            body: JSON.stringify(selectedTaskUsers)
-        });
-
+    function populateSubtaskUserSelect() {
+        const select = document.getElementById('subtaskResponsibleSelect');
+        select.innerHTML = '';
+        if (currUsersInTask.length === 0) {
+            const option = document.createElement('option');
+            option.value = '';
+            option.textContent = 'Нет пользователей';
+            option.disabled = true;
+            option.selected = true;
+            select.appendChild(option);
+        } else {
+            currUsersInTask.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.email;
+                option.textContent = `${user.name} ${user.surname}`;
+                select.appendChild(option);
+            });
+        }
     }
 
     function toggleResponsibility(email, canEdit) {
@@ -466,81 +579,6 @@
         sendArrayToServer();
     }
 
-    participantTaskSearchInput.addEventListener('input', function () {
-        const email = participantTaskSearchInput.value.trim();
-        if (!email) {
-            searchResultsTask.innerHTML = '';
-            return;
-        }
-
-        const projectId = document.getElementById('projId').value;
-        if (!projectId) {
-            console.error('ID проекта не найден');
-            searchResultsTask.innerHTML = '<p>Ошибка: ID проекта не указан</p>';
-            return;
-        }
-
-        const token = getCookie('token');
-        if (!token) {
-            console.error('Токен не найден в cookies');
-            searchResultsTask.innerHTML = '<p>Ошибка авторизации</p>';
-            return;
-        }
-
-        fetch(`https://localhost:7136/api/auth/search-project?email=${encodeURIComponent(email)}&project=${encodeURIComponent(projectId)}`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            },
-            credentials: 'include'
-        })
-            .then(response => {
-                if (!response.ok) {
-                    if (response.status === 401) {
-                        throw new Error('Не авторизован');
-                    }
-                    throw new Error('Ошибка сети');
-                }
-                return response.json();
-            })
-            .then(data => {
-                searchResultsTask.innerHTML = '';
-                const currUserEmail = document.getElementById('currUserEmail');
-                if (data.length === 0) {
-                    searchResultsTask.innerHTML = '<p>Пользователь не найден</p>';
-                    return;
-                }
-
-                data.forEach(user => {
-                    if (selectedTaskUsers.some(participant => participant.email === user.email)) {
-                        return;
-                    }
-                    const userDiv = document.createElement('div');
-                    userDiv.style.display = 'flex';
-                    userDiv.style.justifyContent = 'space-between';
-                    userDiv.style.alignItems = 'center';
-                    userDiv.style.padding = '8px';
-                    userDiv.style.paddingRight = '0px';
-                    userDiv.style.borderBottom = '1px solid #D2D2D2';
-
-                    
-                    userDiv.innerHTML = `
-                    <div style="display: flex; align-items: center;">
-                        <img src="/Images/big-ico.png" style="width: 20px; height: 20px; margin-right: 10px;" />
-                        <p style="font-size: 13px; color: #232323;">${user.name} </p>
-                        <p style="font-size: 13px; color: #232323;">${user.surname} </p>
-                    </div>
-                    <button class="button" style="width: 100px;" onclick="addUser('${user.email}', '${user.name} ${user.surname}')">Добавить</button>
-                `;
-                    searchResultsTask.appendChild(userDiv);
-                });
-            })
-            .catch(error => {
-                console.error('Ошибка при поиске пользователя:', error);
-                searchResultsTask.innerHTML = `<p>${error.message}</p>`;
-            });
-    });
-
     function handleTaskUpdateClick(id, name, description, status, projectId, access) {
         const usersInProjectTask = document.getElementById('usersInProjectTask');
         const canEdit = access === "True" || access === true || access === "1";
@@ -612,6 +650,12 @@
         }
     }
 
+    function handleTaskClick(event, taskName, taskId) {
+        event.stopPropagation();
+        const url = `/Subtasks?taskName=${encodeURIComponent(taskName)}&taskId=${encodeURIComponent(taskId)}`;
+        window.location.href = url;
+    }
+
     async function loadUsersForProject(taskId, canEdit) {
         const usersInProject = document.getElementById('usersInProjectTask');
         usersInProject.innerHTML = '<p>Загрузка пользователей...</p>';
@@ -648,61 +692,17 @@
         }
     }
 
-    function populateSubtaskUserSelect() {
-        const select = document.getElementById('subtaskResponsibleSelect');
-        select.innerHTML = ''; 
-        if (currUsersInTask.length === 0) {
-            const option = document.createElement('option');
-            option.value = '';
-            option.textContent = 'Нет пользователей';
-            option.disabled = true;
-            option.selected = true;
-            select.appendChild(option);
-        } else {
-            currUsersInTask.forEach(user => {
-                const option = document.createElement('option');
-                option.value = user.email; 
-                option.textContent = `${user.name} ${user.surname}`;
-                select.appendChild(option);
-            });
-        }
-    }
+    async function sendArrayToServer() {
 
-    document.getElementById('addSubTaskForm').addEventListener('submit', async function (e) {
-        e.preventDefault(); 
+        const response = await fetch('?handler=ProcessArray', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+            },
+            body: JSON.stringify(selectedTaskUsers)
+        });
 
-        const formData = new FormData(this); 
-
-        try {
-            const response = await fetch(this.action, {
-                method: 'POST',
-                headers: {
-                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
-                },
-                body: formData
-            });
-
-            const result = await response.json();
-
-
-            if (result.success) {
-                document.getElementById('addSubtaskModal').style.display = 'none';
-                document.getElementById('addSubtaskModalOverlay').style.display = 'none';
-
-                this.reset();
-            } else {
-                alert('Ошибка: ' + (result.message || 'Не удалось создать подзадачу'));
-            }
-        } catch (error) {
-            console.error('Ошибка:', error);
-            alert('Произошла ошибка при отправке формы.');
-        }
-    });
-
-    function handleTaskClick(event, taskName, taskId) {
-        event.stopPropagation();
-        const url = `/Subtasks?taskName=${encodeURIComponent(taskName)}&taskId=${encodeURIComponent(taskId)}`;
-        window.location.href = url;
     }
 
 </script>

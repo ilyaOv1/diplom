@@ -169,6 +169,8 @@
         addSubtaskButton.addEventListener('click', () => {
             addSubtaskModalOverlay.style.display = 'block';
             addSubtaskModal.style.display = 'block';
+            document.getElementById("nameWindow").innerText = "Добавление подзадачи";
+            document.getElementById("createButton").innerText = "Добавить";
             loadUsersToSelect();
         });
     }
@@ -177,6 +179,8 @@
         addSubtaskCloseModal.addEventListener('click', () => {
             addSubtaskModalOverlay.style.display = 'none';
             addSubtaskModal.style.display = 'none';
+            document.getElementById("nameWindow").innerText = "Добавление подзадачи";
+            document.getElementById("createButton").innerText = "Добавить";
         });
     }
 
@@ -243,7 +247,7 @@
         document.getElementById("subtaskId").value = id;
         document.getElementById("nameInput").value = name;
         document.getElementById("descriptionInput").value = description;
-        document.getElementById("nameWindow").innerText = "Изменение подзадачи";
+        document.getElementById("nameWindow").innerText = "Подробности подзадачи";
         document.getElementById("createButton").innerText = "Изменить";
 
         loadUsersToSelect();
