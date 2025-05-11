@@ -5,6 +5,8 @@ using ProjManagmentSystem.Models;
 using ProjManagmentSystem.Services;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
+using System.Text.Json;
 
 namespace ProjManagmentSystem.Pages
 {
@@ -150,6 +152,35 @@ namespace ProjManagmentSystem.Pages
             catch (Exception ex)
             {
                 return Page();
+            }
+        }
+
+        public async Task<IActionResult> OnPostUpdateSubtaskStatus([FromBody] UpdateTaskStatusDTO dto)
+        {
+            try
+            {
+                var token = Request.Cookies["token"];
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                var jsonContent = new StringContent(
+                    JsonSerializer.Serialize(dto),
+                    Encoding.UTF8,
+                    "application/json"
+                );
+                var response = await _httpClient.PutAsync($"tasks/subtask/update-status", jsonContent);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return new JsonResult(new { success = true });
+                }
+                else
+                {
+                    var errorText = await response.Content.ReadAsStringAsync();
+                    return new JsonResult(new { success = false, message = $"Ошибка сервера: {errorText}" });
+                }
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(new { success = false, message = ex.Message });
             }
         }
     }

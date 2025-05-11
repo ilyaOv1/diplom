@@ -125,8 +125,7 @@ namespace ProjManagmentSystem.Pages
                 {
                     { new StringContent(task.name), "name" },
 
-                    { new StringContent(task.description), "description" },
-                    { new StringContent(task.status), "status"}
+                    { new StringContent(task.description), "description" }
                 };
 
 
@@ -287,6 +286,39 @@ namespace ProjManagmentSystem.Pages
                 {
                     var users = await response.Content.ReadFromJsonAsync<List<Users>>();
                     return new JsonResult(new { success = true, users });
+                }
+                else
+                {
+                    return new JsonResult(new { success = false, message = "Ошибка загрузки пользователей" });
+                }
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(new { success = false, message = "Ошибка: " + ex.Message });
+            }
+        }
+
+        public async Task<IActionResult> OnPostLoadSubTaskAsync([FromQuery] int taskId)
+        {
+            var isAuthenticated = await IsUserAuthenticated();
+
+            if (!isAuthenticated)
+            {
+                return HandleAuthorization(isAuthenticated);
+            }
+
+            var token = Request.Cookies["token"];
+            Token = token;
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+
+            try
+            {
+                var response = await _httpClient.GetAsync($"tasks/subtasks/{taskId}");
+                if (response.IsSuccessStatusCode)
+                {
+                    var subtasks = await response.Content.ReadFromJsonAsync<List<Subtask>>();
+                    return new JsonResult(new { success = true, subtasks });
                 }
                 else
                 {

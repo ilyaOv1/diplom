@@ -57,17 +57,16 @@
                     count++;
                     <div id="task-@i.id"
                          style="background:#FFFFFF;border-radius:8px;width:100%;margin-right:9px;margin-top:10px;box-shadow:0 2px 6px rgba(0,0,0,0.05);padding:16px;cursor:pointer;transition:transform 0.2s ease,box-shadow 0.2s ease;border:1px solid #E0E0E0;"
-                         onclick="handleTaskUpdateClick('@i.id','@i.name','@i.description','@i.status','@i.project')"
+                         onclick="handleTaskUpdateClick('@i.id','@i.name','@i.description','@i.status','@i.project', '@i.Access')"
                          data-project-name="@i.name" draggable="true" ondragstart="dragStart(event)"
                          onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';"
                          onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 6px rgba(0,0,0,0.05)';">
                         <p style="color:#A0A0A0;font-size:12px;margin:0 0 8px 0;">№ @count</p>
                         <p style="font-size:18px;color:#333;font-weight:600;margin:0 0 12px 0;">@i.name</p>
-                        <p style="font-size:14px;color:#666;margin:0 0 12px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">@i.description</p>
                         <div style="display:flex;align-items:center;margin-bottom:12px;">
                             <p style="font-size:14px;color:#333;margin:0;">Создатель: @i.creator</p>
                         </div>
-                        <a href="#" style="color:#2954EC;text-decoration:none;font-size:13px;border-bottom:1px dashed #2954EC;" onclick="event.stopPropagation(); showSubtasks('@i.id')">Подзадачи</a>
+                        <a style="color:#2954EC;text-decoration:none;font-size:13px;border-bottom:1px dashed #2954EC;" onclick="handleTaskClick(event, '@i.name', '@i.id');">Подзадачи</a>
                     </div>
                 }
             }
@@ -84,17 +83,16 @@
                     count++;
                     <div id="task-@i.id"
                          style="background:#FFFFFF;border-radius:8px;width:100%;margin-right:9px;margin-top:10px;box-shadow:0 2px 6px rgba(0,0,0,0.05);padding:16px;cursor:pointer;transition:transform 0.2s ease,box-shadow 0.2s ease;border:1px solid #E0E0E0;"
-                         onclick="handleTaskUpdateClick('@i.id','@i.name','@i.description','@i.status','@i.project')"
+                         onclick="handleTaskUpdateClick('@i.id','@i.name','@i.description','@i.status','@i.project', '@i.Access')"
                          data-project-name="@i.name" draggable="true" ondragstart="dragStart(event)"
                          onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';"
                          onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 6px rgba(0,0,0,0.05)';">
                         <p style="color:#A0A0A0;font-size:12px;margin:0 0 8px 0;">№ @count</p>
                         <p style="font-size:18px;color:#333;font-weight:600;margin:0 0 12px 0;">@i.name</p>
-                        <p style="font-size:14px;color:#666;margin:0 0 12px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">@i.description</p>
                         <div style="display:flex;align-items:center;margin-bottom:12px;">
                             <p style="font-size:14px;color:#333;margin:0;">Создатель: @i.creator</p>
                         </div>
-                        <a href="#" style="color:#2954EC;text-decoration:none;font-size:13px;border-bottom:1px dashed #2954EC;" onclick="event.stopPropagation(); showSubtasks('@i.id')">Подзадачи</a>
+                        <a href="#" style="color:#2954EC;text-decoration:none;font-size:13px;border-bottom:1px dashed #2954EC;" onclick="handleTaskClick(event, '@i.name', '@i.id');">Подзадачи</a>
                     </div>
                 }
             }
@@ -111,17 +109,16 @@
                     count++;
                     <div id="task-@i.id"
                          style="background:#FFFFFF;border-radius:8px;width:100%;margin-right:9px;margin-top:10px;box-shadow:0 2px 6px rgba(0,0,0,0.05);padding:16px;cursor:pointer;transition:transform 0.2s ease,box-shadow 0.2s ease;border:1px solid #E0E0E0;"
-                         onclick="handleTaskUpdateClick('@i.id','@i.name','@i.description','@i.status','@i.project')"
+                         onclick="handleTaskUpdateClick('@i.id','@i.name','@i.description','@i.status','@i.project', '@i.Access')"
                          data-project-name="@i.name" draggable="true" ondragstart="dragStart(event)"
                          onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';"
                          onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 6px rgba(0,0,0,0.05)';">
                         <p style="color:#A0A0A0;font-size:12px;margin:0 0 8px 0;">№ @count</p>
                         <p style="font-size:18px;color:#333;font-weight:600;margin:0 0 12px 0;">@i.name</p>
-                        <p style="font-size:14px;color:#666;margin:0 0 12px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">@i.description</p>
                         <div style="display:flex;align-items:center;margin-bottom:12px;">
                             <p style="font-size:14px;color:#333;margin:0;">Создатель: @i.creator</p>
                         </div>
-                        <a href="#" style="color:#2954EC;text-decoration:none;font-size:13px;border-bottom:1px dashed #2954EC;" onclick="event.stopPropagation(); showSubtasks('@i.id')">Подзадачи</a>
+                        <a style="color:#2954EC;text-decoration:none;font-size:13px;border-bottom:1px dashed #2954EC;" onclick="handleTaskClick(event, '@i.name', '@i.id');">Подзадачи</a>
                     </div>
                 }
             }
@@ -172,6 +169,8 @@
                 </div>
                 <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 16px; ">Подзадачи</h2>
                 <p id="addSubtaskBtn" style="color: #D9D9D9; font-size: 13px; margin-bottom: 8px; cursor: pointer;">+ Добавить подзадачу</p>
+                <div style="margin-bottom: 8px;" id="listOfSubtasks">
+                </div>
             </div>
             <hr style="border: 0; height: 2px; background: #B5B5B5;">
             <div style="display: flex;">
@@ -257,6 +256,7 @@
     const addSubtaskCloseModal = document.getElementById('addSubtaskCloseModal');
     const searchResultsTask = document.getElementById('searchResultsTask');
     const selectedTaskUsers = [];
+    const subtasksList = [];
     const currUsersInTask = [];
     let draggedTask = null;
 
@@ -267,6 +267,15 @@
             document.getElementById("editButton").innerText = "Создать";
             document.getElementById("taskIdInput").value = "";
             document.getElementById("nameWindow").innerText = "Создание задачи";
+            document.getElementById("editTaskName").value = "";
+            document.getElementById("editTaskDescription").value = "";
+            document.getElementById("usersInProjectTask").innerHTML = '';
+            document.getElementById("listOfSubtasks").innerHTML = '';
+            document.getElementById("editTaskName").readOnly = false;
+            document.getElementById("editTaskDescription").readOnly = false;
+            document.getElementById("editButton").style.display = "";
+            addSubtaskBtn.style.display = "";
+            addParticipantTaskBtn.style.display = "";
         });
     }
 
@@ -525,6 +534,12 @@
         updateUI(canEdit);
     }
 
+    function addSubtask(name, responsible) {
+
+        const subtask = { name, responsible };
+        subtasksList.push(subtask);
+    }
+
     function populateSubtaskUserSelect() {
         const select = document.getElementById('subtaskResponsibleSelect');
         select.innerHTML = '';
@@ -558,9 +573,14 @@
 
     function updateUI(canEdit) {
         const usersInProjectTask = document.getElementById('usersInProjectTask');
+        const listOfSubtasks = document.getElementById('listOfSubtasks');
         usersInProjectTask.innerHTML = '';
-
+        listOfSubtasks.innerHTML = '';
+        let count = 0;
+        const maxToShow = 3;
         selectedTaskUsers.forEach(u => {
+            if (count >= maxToShow) return;
+
             if (selectedTaskUsers.length <= 1){
                 const element = createUserElement(u.email, u.name, u.isResponsible, false);
                 usersInProjectTask.appendChild(element);
@@ -568,7 +588,18 @@
                 const element = createUserElement(u.email, u.name, u.isResponsible, canEdit);
                 usersInProjectTask.appendChild(element);
             }
+            count++;
         });
+
+        console.log(subtasksList.length);
+        count = 0;
+        subtasksList.forEach(s => {
+            if (count >= maxToShow) return;
+            const element = createSubtaskElement(s.name, s.responsible);
+            listOfSubtasks.appendChild(element);
+            count++;
+        })
+
     }
 
     function createUserElement(email, name, isResponsible = false, canEdit = false) {
@@ -624,6 +655,63 @@
         return userDiv;
     }
 
+    function createSubtaskElement(title, responsibleUser = 'Не назначен', canEdit = false) {
+        const subtaskDiv = document.createElement('div');
+        subtaskDiv.style.border = '1px solid #D2D2D2';
+        subtaskDiv.style.borderRadius = '8px';
+        subtaskDiv.style.background = '#FCFCFC';
+        subtaskDiv.style.display = 'flex';
+        subtaskDiv.style.alignItems = 'center';
+        subtaskDiv.style.padding = '9px 16px';
+        subtaskDiv.style.marginBottom = '5px';
+        subtaskDiv.style.position = 'relative';
+
+        const leftContainer = document.createElement('div');
+        leftContainer.style.display = 'flex';
+        leftContainer.style.alignItems = 'center';
+        leftContainer.style.gap = '10px';
+        leftContainer.style.paddingRight = '20px'; 
+        leftContainer.style.flex = '1'; 
+
+        const taskText = document.createElement('p');
+        taskText.textContent = title;
+        taskText.style.fontSize = '13px';
+        taskText.style.color = '#232323';
+        taskText.style.margin = '0';
+
+        leftContainer.appendChild(taskText);
+
+        const line = document.createElement('div');
+        line.style.width = '1px';
+        line.style.height = '24px';
+        line.style.backgroundColor = '#C0C0C0';
+        line.style.position = 'absolute';
+        line.style.left = '50%';
+        line.style.transform = 'translateX(-50%)';
+
+        const rightContainer = document.createElement('div');
+        rightContainer.style.display = 'flex';
+        rightContainer.style.alignItems = 'center';
+        rightContainer.style.gap = '10px';
+        rightContainer.style.paddingLeft = '20px';
+        rightContainer.style.flex = '1'; 
+        rightContainer.style.justifyContent = 'flex-end';
+
+        const userDisplay = document.createElement('p');
+        userDisplay.textContent = responsibleUser;
+        userDisplay.style.fontSize = '13px';
+        userDisplay.style.color = '#232323';
+        userDisplay.style.margin = '0';
+
+        rightContainer.appendChild(userDisplay);
+
+        subtaskDiv.appendChild(leftContainer);
+        subtaskDiv.appendChild(line);
+        subtaskDiv.appendChild(rightContainer);
+
+        return subtaskDiv;
+    }
+
     function removeUser(email) {
         const index = selectedTaskUsers.findIndex(participant => participant.email === email);
         if (index !== -1) {
@@ -638,11 +726,13 @@
         sendArrayToServer();
     }
 
-    function handleTaskUpdateClick(id, name, description, status, projectId, access) {
+    async function handleTaskUpdateClick(id, name, description, status, projectId, access) {
         const usersInProjectTask = document.getElementById('usersInProjectTask');
+        const listOfSubtasks = document.getElementById('listOfSubtasks');
         const canEdit = access === "True" || access === true || access === "1";
         selectedTaskUsers.length = 0;
-        
+        subtasksList.length = 0;
+        console.log(access);
         addTaskModalOverlay.style.display = 'block';
         addTaskModal.style.display = 'block';
 
@@ -657,7 +747,10 @@
 
         usersInProjectTask.innerHTML = '';
         loadUsersForProject(id, canEdit);
+        listOfSubtasks.innerHTML = '';
+        await loadSubTasks(id);
 
+        updateUI(canEdit);
         if (canEdit){
             document.getElementById("editTaskName").readOnly = false;
             document.getElementById("editTaskDescription").readOnly = false;
@@ -744,6 +837,42 @@
 
             result.users.forEach(user => {
                 addUser(user.email, user.name + ' ' + user.surname, user.isResponsible, canEdit)
+            });
+
+        } catch (error) {
+            console.error(error);
+            usersInProjectTask.innerHTML = '<p>Не удалось загрузить пользователей</p>';
+        }
+    }
+
+    async function loadSubTasks(taskId) {
+        const listOfSubtasks = document.getElementById('listOfSubtasks');
+        listOfSubtasks.innerHTML = '<p>Загрузка подзадач...</p>';
+
+        try {
+            const response = await fetch(`/Tasks?handler=LoadSubTask&taskId=${taskId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: JSON.stringify({ taskId })
+            });
+
+            if (!response.ok) throw new Error("Ошибка сети");
+
+            const result = await response.json();
+
+            if (!result.success) {
+                listOfSubtasks.innerHTML = `<p>${result.message}</p>`;
+
+                return;
+            }
+
+            listOfSubtasks.innerHTML = '';
+            console.log(result);
+            result.subtasks.forEach(subtask1 => {
+                addSubtask(subtask1.name, subtask1.responsible);
             });
 
         } catch (error) {
