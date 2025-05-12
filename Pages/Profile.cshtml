@@ -19,7 +19,12 @@
             </div>
         </div>
         <p style="color: #232323; font-size: 13px;">@Model.user.email</p>
-        <p style="color: #AEAEAE; font-size: 11px;">Последняя активность: </p>
+        @if (Model.user.last_activity.HasValue)
+        {
+            <p style="color: #AEAEAE; font-size: 11px;">
+                Последняя активность: @Model.user.last_activity.Value.ToString("dd.MM.yyyy HH:mm")
+            </p>
+        }
         <hr style="border: 0; height: 2px; background: #2954EC;">
         <h3 style="font-size: 14px;">О себе</h3>
         <p style="color: #8E8E8E; font-size: 14px;">@Model.user.description</p>
