@@ -246,10 +246,12 @@ namespace ProjManagmentSystem.Pages
             {
                 var formContent = new MultipartFormDataContent
                 {
+                    { new StringContent("1"), "id" },
                     { new StringContent(subtask.name), "name" },
-
-                    { new StringContent(subtask.description), "description" },
                     { new StringContent(subtask.task.ToString()), "task"},
+                    { new StringContent(subtask.description), "description" },
+                    { new StringContent(subtask.description), "status" },
+
                     { new StringContent(subtask.responsible.ToString()), "responsible" }
                 };
                 var response = await _httpClient.PostAsync("tasks/add-subtask", formContent);
