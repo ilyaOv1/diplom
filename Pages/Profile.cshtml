@@ -7,7 +7,15 @@
 
 
 <div class="image-info">
-    <img src="Images/big-ico.png" style="width: 180px; height: 210px; margin-right: 32px; "></img>
+    @if(Model.user.image == null)
+    {
+        <img src="Images/big-ico.png" style="width: 180px; height: 210px; margin-right: 32px; "></img>
+    }
+    else
+    {
+        <img src="data:image/jpeg;base64,@Convert.ToBase64String(Model.user.image)" style="width: 180px; height: 210px; margin-right: 32px; "></img>
+    }
+    
     <div class="info">
         <div style="display: flex; justify-content: space-between;">
             <h1 style="font-weight: bold; font-size: 32px; margin-right: 10px;">@Model.user.surname @Model.user.name @Model.user.patronymic</h1>
@@ -38,12 +46,21 @@
         <span id="closeModal" class="close">&times;</span>
         <p style="color: #ABABAB; font-size: 14px;">Изменение личных данных</p>
         <hr style="border: 0; height: 2px; background: #B5B5B5;">
-        <form id="editProfileForm" method="post" asp-page-handler="UpdateProfile">
+        <form id="editProfileForm" method="post" asp-page-handler="UpdateProfile" enctype="multipart/form-data" onsubmit="return prepareForm()">
             <div style="display: flex; gap: 80px;">
-                <div>
-                    <img src="Images/big-ico.png" style="width: 150px; height: 180px; "></img>
-                    <div style="display: flex; gap: 8px;">
-                        <a style="color: #2954EC; font-size: 13px;">Изменить</a>
+                <div style="text-align: center;">
+                    @if (Model.user.image == null)
+                    {
+                        <img id="profileImage" src="Images/big-ico.png" name="image" style="width: 150px; height: 180px; display: block; margin: 0 auto;">
+                    }
+                    else
+                    {
+                        <img id="profileImage" src="data:image/jpeg;base64,@Convert.ToBase64String(Model.user.image)" name="image" style="width: 150px; height: 180px; display: block; margin: 0 auto;">
+                    }
+
+                    <div style="display: flex; justify-content: center; gap: 8px; margin-top: 13px;">
+                        <input type="file" id="imageInput" accept="image/*" onchange="previewImage(event)" hidden />
+                        <label for="imageInput" style="color: #2954EC; font-size: 13px; cursor: pointer; margin-top: 0;">Изменить</label>
                         <a style="color: #EB0000; font-size: 13px;">Удалить</a>
                     </div>
                 </div>
@@ -178,7 +195,48 @@
             }
         });
     }
-    
+
+    function previewImage(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                // Обновляем src у img
+                document.getElementById('profileImage').src = e.target.result;
+            };
+
+            reader.readAsDataURL(file); // Преобразуем файл в Data URL
+        }
+    }
+
+    function prepareForm() {
+        const imageInput = document.getElementById('imageInput');
+        const form = document.getElementById('editProfileForm');
+
+        // Если выбрано новое изображение, добавляем его в форму
+        if (imageInput.files.length > 0) {
+            const formData = new FormData(form);
+            formData.append('imageFile', imageInput.files[0]);
+
+            // Отправляем форму с помощью fetch
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                }
+            }).then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                }
+            });
+
+            return false; // Предотвращаем стандартную отправку формы
+        }
+
+        return true; // Продолжаем стандартную отправку формы, если изображение не изменилось
+    }
 
 </script>
 

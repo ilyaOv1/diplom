@@ -8,7 +8,14 @@
         <a asp-page="/Profile" class="block-link @(ViewContext.RouteData.Values["Page"]?.ToString() == "/Profile" ? "active" : "")">
             <div class="user-info">
                 <div class="user-info-content" style="display: flex;">
-                    <img class="menu-ico" style="width: 30px; height: 30px;" src="Images/ico.png" />
+                    @if (@UserService.image == null)
+                    {
+                        <img class="menu-ico" style="width: 30px; height: 30px;" src="Images/ico.png" />
+                    }
+                    else
+                    {
+                        <img class="menu-ico" style="width: 30px; height: 30px;" src="data:image/jpeg;base64,@Convert.ToBase64String(@UserService.image)" />
+                    }
                     <p>@UserService.FIO</p>
                 </div>
             </div>

@@ -60,16 +60,6 @@ namespace ProjManagmentSystem.Pages
 
                     this.projects = projectsList;
 
-                    //var content = new FormUrlEncodedContent(new Dictionary<string, string>
-                    //{
-                    //    { "projectId", projectId.ToString() }
-                    //});
-
-                    //var usersResponse = await _httpClient.PostAsync("users-project", content);
-                    //if (usersResponse.IsSuccessStatusCode)
-                    //{
-                    //    ProjectUsers = await usersResponse.Content.ReadFromJsonAsync<List<Users>>();
-                    //}
                 }
                 else
                 {

@@ -8,6 +8,7 @@
         public string patronymic { get; set; }
         public string? description { get; set; }
         public bool? IsResponsible { get; set; }
+        public byte[]? image { get; set; }
         public DateTime? last_activity { get; set; }
     }
 }

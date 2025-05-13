@@ -14,6 +14,8 @@ namespace ProjManagmentSystem.Pages
 		private readonly UserService _userService;
 		public string Token { get; set; }
 		public Users user = new Users();
+
+
 		
 
         public ProfileModel(IHttpClientFactory httpClientFactory, UserService userService) : base(httpClientFactory) 
@@ -43,7 +45,7 @@ namespace ProjManagmentSystem.Pages
 				{
 					var user = await response.Content.ReadFromJsonAsync<Users>();
 					this.user = user;
-					_userService.SetUserData(user.email, $"{user.surname} {user.name} {user.patronymic}", token);
+					_userService.SetUserData(user.email, $"{user.surname} {user.name} {user.patronymic}", token, user.image);
 
 					ViewData["SideBarFIO"] = _userService.FIO;
 				}
@@ -68,7 +70,7 @@ namespace ProjManagmentSystem.Pages
             return RedirectToPage("/Authorization");
         }
 
-        public async Task<IActionResult> OnPostUpdateProfile([FromForm] Users updatedUser)
+        public async Task<IActionResult> OnPostUpdateProfile([FromForm] Users updatedUser, [FromForm] IFormFile imageFile)
         {
             var isAuthenticated = await IsUserAuthenticated();
 
@@ -93,6 +95,26 @@ namespace ProjManagmentSystem.Pages
                     { new StringContent(updatedUser.patronymic), "patronymic" },
                     { new StringContent(updatedUser.description), "description" }
                 };
+                
+                if (imageFile != null && imageFile.Length > 0)
+                {
+                    byte[] fileBytes;
+                    using (var ms = new MemoryStream())
+                    {
+                        await imageFile.CopyToAsync(ms);
+                        fileBytes = ms.ToArray();
+                    }
+                    var imageContent = new MultipartFormDataContent();
+                    imageContent.Add(new ByteArrayContent(fileBytes), "imageFile", imageFile.FileName);
+                    var imageResponse = await _httpClient.PostAsync("upload-image", imageContent);
+
+                    if (!imageResponse.IsSuccessStatusCode)
+                    {
+                        var errorContent = await imageResponse.Content.ReadAsStringAsync();
+                        Console.WriteLine($"Ошибка при загрузке изображения: {imageResponse.StatusCode}, {errorContent}");
+                        return Page();
+                    }
+                }
 
                 var response = await _httpClient.PutAsync("update-profile", formContent);
 
@@ -103,7 +125,7 @@ namespace ProjManagmentSystem.Pages
                     user.patronymic = updatedUser.patronymic;
                     user.description = updatedUser.description;
 
-                    _userService.SetUserData(updatedUser.email, $"{updatedUser.surname} {updatedUser.name} {updatedUser.patronymic}", Token);
+                    _userService.SetUserData(updatedUser.email, $"{updatedUser.surname} {updatedUser.name} {updatedUser.patronymic}", Token, updatedUser.image);
 
                     ViewData["SideBarFIO"] = _userService.FIO;
 
