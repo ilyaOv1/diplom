@@ -97,7 +97,7 @@
             <hr style="border: 0; height: 2px; background: #B5B5B5;">
             <div style="display: flex;">
                 <div style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
-                    <button type="submit" class="button" id="buttonUpdateCreateProj">Создать</button>
+                    <button type="button" class="button" id="buttonUpdateCreateProj">Создать</button>
                 </div>
             </div>
 
@@ -281,6 +281,35 @@
 
     });
 
+
+    document.getElementById("buttonUpdateCreateProj").addEventListener("click", async function (e) {
+        e.preventDefault();
+
+        const form = document.getElementById("addProjForm");
+        const formData = new FormData(form);
+
+        formData.append("SelectedUsersToProject", JSON.stringify(selectedUsers));
+
+        try {
+            const response = await fetch(form.action, {
+                method: "POST",
+                headers: {
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: formData
+            });
+
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                alert("Ошибка при создании проекта");
+            }
+        } catch (error) {
+            console.error("Ошибка:", error);
+            alert("Произошла сетевая ошибка");
+        }
+    });
+
     function getCookie(name) {
         const value = `; ${document.cookie}`;
         const parts = value.split(`; ${name}=`);
@@ -288,12 +317,12 @@
     }
 
     function addUser(email, name, isResponsible, canEdit) {
-        if (selectedUsers.some(participant => participant.email === email)) {
+        if (selectedUsers.some(participant => participant.Email === email)) {
             alert('Участник уже добавлен');
             return;
         }
 
-        const participant = { email, name, isResponsible };
+        const participant = { Email: email, Name: name, IsResponsible: isResponsible };
         selectedUsers.push(participant);
 
         sendArrayToServer();
@@ -311,7 +340,7 @@
     }
 
     function toggleResponsibility(email, canEdit) {
-        const user = selectedUsers.find(u => u.email === email);
+        const user = selectedUsers.find(u => u.Email === email);
         if (!user) return;
 
         user.isResponsible = !user.isResponsible;
@@ -327,10 +356,10 @@
 
         selectedUsers.forEach(u => {
             if (selectedUsers.length <= 1) {
-                const element = createUserElement(u.email, u.name, u.isResponsible, false);
+                const element = createUserElement(u.Email, u.Name, u.IsResponsible, false);
                 usersInProject.appendChild(element);
             } else {
-                const element = createUserElement(u.email, u.name, u.isResponsible, canEdit);
+                const element = createUserElement(u.Email, u.Name, u.IsResponsible, canEdit);
                 usersInProject.appendChild(element);
             }
         });

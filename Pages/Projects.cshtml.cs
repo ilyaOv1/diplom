@@ -21,8 +21,10 @@ namespace ProjManagmentSystem.Pages
         public List<Users> selectedUsers { get; set; } = new();
         [BindProperty]
         public List<Project> projects { get; set; }
-        public static List<Users> selectedUsersToProject = new List<Users>();
+        public List<Users> selectedUsersToProject = new List<Users>();
         public List<Users> ProjectUsers { get; set; } = new();
+        [BindProperty]
+        public string SelectedUsersToProject { get; set; }
 
         public ProjectsModel(IHttpClientFactory httpClientFactory, UserService userService) : base(httpClientFactory)
         {
@@ -88,6 +90,11 @@ namespace ProjManagmentSystem.Pages
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             try
             {
+                var users = new List<UserWithResponsibilityDTO>();
+                if (!string.IsNullOrEmpty(SelectedUsersToProject))
+                {
+                    users = JsonSerializer.Deserialize<List<UserWithResponsibilityDTO>>(SelectedUsersToProject);
+                }
                 project.IsPrivate = Request.Form["IsPrivate"] == "1";
                 var formContent = new MultipartFormDataContent
                 {
@@ -113,10 +120,10 @@ namespace ProjManagmentSystem.Pages
                         var responseContent = await response.Content.ReadAsStringAsync();
                         var result = JsonSerializer.Deserialize<Project>(responseContent);
                         int projectId = result.id;
-                        var userEmails = selectedUsersToProject.Select(u => new UserWithResponsibilityDTO
+                        var userEmails = users.Select(u => new UserWithResponsibilityDTO
                         {
-                            Email = u.email,
-                            IsResponsible = u.IsResponsible ?? false
+                            Email = u.Email,
+                            IsResponsible = u.IsResponsible
                         }).ToList();
 
                         var addUsersToProjectDTO = new AddUsersToProjectDTO
@@ -146,10 +153,10 @@ namespace ProjManagmentSystem.Pages
                     {
                         int projectId = EditingProjectId.Value;
 
-                        var userEmails = selectedUsersToProject.Select(u => new UserWithResponsibilityDTO
+                        var userEmails = users.Select(u => new UserWithResponsibilityDTO
                         {
-                            Email = u.email,
-                            IsResponsible = u.IsResponsible ?? false
+                            Email = u.Email,
+                            IsResponsible = u.IsResponsible
                         }).ToList();
 
                         var addUsersToProjectDTO = new AddUsersToProjectDTO

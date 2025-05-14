@@ -153,7 +153,7 @@ namespace ProjManagmentSystem.Pages
                         var userEmails = selectedUsersToTask.Select(u => new UserWithResponsibilityDTO
                         {
                             Email = u.email,
-                            IsResponsible = u.IsResponsible.Value
+                            IsResponsible = u.IsResponsible.GetValueOrDefault(false)
                         }).ToList();
 
                         var addUsersToProjectDTO = new AddUsersToTaskDTO
@@ -187,7 +187,7 @@ namespace ProjManagmentSystem.Pages
                         var userEmails = selectedUsersToTask.Select(u => new UserWithResponsibilityDTO
                         {
                             Email = u.email,
-                            IsResponsible = u.IsResponsible ?? false
+                            IsResponsible = u.IsResponsible.GetValueOrDefault(false)
                         }).ToList();
 
                         var addUsersToProjectDTO = new AddUsersToTaskDTO
