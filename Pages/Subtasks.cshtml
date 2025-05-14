@@ -30,15 +30,26 @@
                 {
                     count++;
                     <div id="subtask-@i.id"
-                         style="background:#FFFFFF;border-radius:8px;width:100%;margin-right:9px;margin-top:10px;box-shadow:0 2px 6px rgba(0,0,0,0.05);padding:16px;cursor:pointer;transition:transform 0.2s ease,box-shadow 0.2s ease;border:1px solid #E0E0E0;"
+                         style="background:#FFFFFF;border-radius:8px;width:100%;margin-right:9px;margin-top:10px;box-shadow:0 2px 6px rgba(0,0,0,0.05);padding:16px;cursor:pointer;transition:transform 0.2s ease,box-shadow 0.2s ease;border:1px solid #E0E0E0;position:relative;"
                          data-project-name="@i.name" draggable="true" ondragstart="dragStart(event)"
-                         onclick="handleSubtaskUpdateClick('@i.id','@i.name','@i.description','@i.status','@i.responsible', '@i.task')"
+                         onclick="handleSubtaskUpdateClick('@i.id','@i.name','@i.description','@i.status','@i.responsible', '@i.task', '@i.expected_date.ToString("dd.MM.yyyy")')"
                          onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';"
                          onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 6px rgba(0,0,0,0.05)';">
+                        @if (i.IsUrgent)
+                        {
+                            <img src="~/Images/fire.png"
+                                 style="position: absolute; top: 8px; right: 12px; width: 40px; height: 40px;"
+                                 alt="Срочно" />
+                        }
                         <p style="color:#A0A0A0;font-size:12px;margin:0 0 8px 0;">№ @count</p>
                         <p style="font-size:18px;color:#333;font-weight:600;margin:0 0 12px 0;">@i.name</p>
                         <div style="display:flex;align-items:center;margin-bottom:12px;">
                             <p style="font-size:14px;color:#333;margin:0;">Ответственный: @i.responsible</p>
+                        </div>
+                        <div style="display:flex;align-items:center;margin-bottom:12px;">
+                            <p style="font-size:14px;color:#333;margin:0;">
+                                Ожидаемая дата: @i.expected_date.ToString("dd.MM.yyyy")
+                            </p>
                         </div>
                     </div>
                 }
@@ -55,14 +66,26 @@
                 {
                     count++;
                     <div id="subtask-@i.id"
-                        style="background:#FFFFFF;border-radius:8px;width:100%;margin-right:9px;margin-top:10px;box-shadow:0 2px 6px rgba(0,0,0,0.05);padding:16px;cursor:pointer;transition:transform 0.2s ease,box-shadow 0.2s ease;border:1px solid #E0E0E0;"
+                         style="background:#FFFFFF;border-radius:8px;width:100%;margin-right:9px;margin-top:10px;box-shadow:0 2px 6px rgba(0,0,0,0.05);padding:16px;cursor:pointer;transition:transform 0.2s ease,box-shadow 0.2s ease;border:1px solid #E0E0E0;position:relative;"
                          data-project-name="@i.name" draggable="true" ondragstart="dragStart(event)"
+                         onclick="handleSubtaskUpdateClick('@i.id','@i.name','@i.description','@i.status','@i.responsible', '@i.task', '@i.expected_date.ToString("dd.MM.yyyy")')"
                          onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';"
                          onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 6px rgba(0,0,0,0.05)';">
+                        @if (i.IsUrgent)
+                        {
+                            <img src="~/Images/fire.png"
+                                 style="position: absolute; top: 8px; right: 12px; width: 40px; height: 40px;"
+                                 alt="Срочно" />
+                        }
                         <p style="color:#A0A0A0;font-size:12px;margin:0 0 8px 0;">№ @count</p>
                         <p style="font-size:18px;color:#333;font-weight:600;margin:0 0 12px 0;">@i.name</p>
                         <div style="display:flex;align-items:center;margin-bottom:12px;">
                             <p style="font-size:14px;color:#333;margin:0;">Ответственный: @i.responsible</p>
+                        </div>
+                        <div style="display:flex;align-items:center;margin-bottom:12px;">
+                            <p style="font-size:14px;color:#333;margin:0;">
+                                Ожидаемая дата: @i.expected_date.ToString("dd.MM.yyyy")
+                            </p>
                         </div>
                     </div>
                 }
@@ -79,14 +102,26 @@
                 {
                     count++;
                     <div id="subtask-@i.id"
-                        style="background:#FFFFFF;border-radius:8px;width:100%;margin-right:9px;margin-top:10px;box-shadow:0 2px 6px rgba(0,0,0,0.05);padding:16px;cursor:pointer;transition:transform 0.2s ease,box-shadow 0.2s ease;border:1px solid #E0E0E0;"
+                         style="background:#FFFFFF;border-radius:8px;width:100%;margin-right:9px;margin-top:10px;box-shadow:0 2px 6px rgba(0,0,0,0.05);padding:16px;cursor:pointer;transition:transform 0.2s ease,box-shadow 0.2s ease;border:1px solid #E0E0E0;position:relative;"
                          data-project-name="@i.name" draggable="true" ondragstart="dragStart(event)"
+                         onclick="handleSubtaskUpdateClick('@i.id','@i.name','@i.description','@i.status','@i.responsible', '@i.task', '@i.expected_date.ToString("dd.MM.yyyy")')"
                          onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';"
                          onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 6px rgba(0,0,0,0.05)';">
+                        @if (i.IsUrgent)
+                        {
+                            <img src="~/Images/fire.png"
+                                 style="position: absolute; top: 8px; right: 12px; width: 40px; height: 40px;"
+                                 alt="Срочно" />
+                        }
                         <p style="color:#A0A0A0;font-size:12px;margin:0 0 8px 0;">№ @count</p>
                         <p style="font-size:18px;color:#333;font-weight:600;margin:0 0 12px 0;">@i.name</p>
                         <div style="display:flex;align-items:center;margin-bottom:12px;">
                             <p style="font-size:14px;color:#333;margin:0;">Ответственный: @i.responsible</p>
+                        </div>
+                        <div style="display:flex;align-items:center;margin-bottom:12px;">
+                            <p style="font-size:14px;color:#333;margin:0;">
+                                Ожидаемая дата: @i.expected_date.ToString("dd.MM.yyyy")
+                            </p>
                         </div>
                     </div>
                 }
@@ -103,14 +138,26 @@
                 {
                     count++;
                     <div id="subtask-@i.id"
-                         style="background:#FFFFFF;border-radius:8px;width:100%;margin-right:9px;margin-top:10px;box-shadow:0 2px 6px rgba(0,0,0,0.05);padding:16px;cursor:pointer;transition:transform 0.2s ease,box-shadow 0.2s ease;border:1px solid #E0E0E0;"
+                         style="background:#FFFFFF;border-radius:8px;width:100%;margin-right:9px;margin-top:10px;box-shadow:0 2px 6px rgba(0,0,0,0.05);padding:16px;cursor:pointer;transition:transform 0.2s ease,box-shadow 0.2s ease;border:1px solid #E0E0E0;position:relative;"
                          data-project-name="@i.name" draggable="true" ondragstart="dragStart(event)"
+                         onclick="handleSubtaskUpdateClick('@i.id','@i.name','@i.description','@i.status','@i.responsible', '@i.task', '@i.expected_date.ToString("dd.MM.yyyy")')"
                          onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';"
                          onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 6px rgba(0,0,0,0.05)';">
+                        @if (i.IsUrgent)
+                        {
+                            <img src="~/Images/fire.png"
+                                 style="position: absolute; top: 8px; right: 12px; width: 40px; height: 40px;"
+                                 alt="Срочно" />
+                        }
                         <p style="color:#A0A0A0;font-size:12px;margin:0 0 8px 0;">№ @count</p>
                         <p style="font-size:18px;color:#333;font-weight:600;margin:0 0 12px 0;">@i.name</p>
                         <div style="display:flex;align-items:center;margin-bottom:12px;">
                             <p style="font-size:14px;color:#333;margin:0;">Ответственный: @i.responsible</p>
+                        </div>
+                        <div style="display:flex;align-items:center;margin-bottom:12px;">
+                            <p style="font-size:14px;color:#333;margin:0;">
+                                Ожидаемая дата: @i.expected_date.ToString("dd.MM.yyyy")
+                            </p>
                         </div>
                     </div>
                 }
@@ -151,6 +198,15 @@
                 <select id="subtaskResponsibleSelect" name="Responsible" class="form-control">
 
                 </select>
+            </div>
+            <div class="form-field">
+                <p class="form-label">Ожидаемая дата</p>
+                <input class="form-control"
+                       type="date"
+                       name="expected_date"
+                       id="editSubtaskExpectedDate"
+                       min="@DateTime.Now.ToString("yyyy-MM-dd")"
+                       style="padding: 8px 12px;" />
             </div>
             <hr style="border: 0; height: 2px; background: #B5B5B5;">
             <div style="display: flex;">
@@ -299,7 +355,7 @@
         }
     }
 
-    function handleSubtaskUpdateClick(id, name, description, status, responsible, task) {
+    function handleSubtaskUpdateClick(id, name, description, status, responsible, task, expected_date) {
 
         addSubtaskModalOverlay.style.display = 'block';
         addSubtaskModal.style.display = 'block';
@@ -309,7 +365,11 @@
         document.getElementById("descriptionInput").value = description;
         document.getElementById("nameWindow").innerText = "Подробности подзадачи";
         document.getElementById("createButton").innerText = "Изменить";
-
+        if (expected_date) {
+            const [day, month, year] = expected_date.split('.');
+            const formattedDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+            document.getElementById("editSubtaskExpectedDate").value = formattedDate;
+        }
         loadUsersToSelect();
     }
 

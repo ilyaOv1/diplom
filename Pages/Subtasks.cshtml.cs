@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace ProjManagmentSystem.Pages
 {
@@ -130,6 +131,12 @@ namespace ProjManagmentSystem.Pages
 
                     { new StringContent(subtask.responsible.ToString()), "responsible" }
                 };
+
+                var expectedDate = subtask.expected_date == DateTime.Today
+                                ? DateTime.Now.AddDays(7)
+                                : subtask.expected_date;
+
+                formContent.Add(new StringContent(expectedDate.ToString("yyyy-MM-dd")), "expected_date");
                 HttpResponseMessage response;
                 if (!EditingSubtaskId.HasValue)
                 {

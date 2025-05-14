@@ -127,7 +127,11 @@ namespace ProjManagmentSystem.Pages
 
                     { new StringContent(task.description), "description" }
                 };
+                var expectedDate = task.expected_date == DateTime.Today
+                    ? DateTime.Now.AddDays(7)
+                    : task.expected_date;
 
+                formContent.Add(new StringContent(expectedDate.ToString("yyyy-MM-dd")), "expected_date");
 
                 HttpResponseMessage response;
                 if (EditingTaskId.HasValue)
@@ -254,6 +258,11 @@ namespace ProjManagmentSystem.Pages
 
                     { new StringContent(subtask.responsible.ToString()), "responsible" }
                 };
+                var expectedDate = subtask.expected_date == DateTime.Today
+                                    ? DateTime.Now.AddDays(7)
+                                    : subtask.expected_date;
+
+                formContent.Add(new StringContent(expectedDate.ToString("yyyy-MM-dd")), "expected_date");
                 var response = await _httpClient.PostAsync("tasks/add-subtask", formContent);
                 if (response.IsSuccessStatusCode)
                 {

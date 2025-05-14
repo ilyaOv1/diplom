@@ -9,5 +9,9 @@
         public string status { get; set; }
         public string creator { get; set; }
         public bool Access { get; set; }
+        public DateTime expected_date { get; set; }
+        public bool IsUrgent =>
+                                 (expected_date - DateTime.UtcNow).TotalDays <= 3 &&
+                                 (expected_date - DateTime.UtcNow).TotalDays >= 0;
     }
 }
