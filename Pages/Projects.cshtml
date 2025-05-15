@@ -130,11 +130,17 @@
     const addProjModalOverlay = document.getElementById('addProjModalOverlay');
     const addProjModal = document.getElementById('addProjModal');
     const addProjCloseModal = document.getElementById('addProjCloseModal');
-
+    const addParticipantBtn = document.getElementById('addParticipantBtn');
+    const addParticipantModalOverlay = document.getElementById('addParticipantModalOverlay');
+    const addParticipantModal = document.getElementById('addParticipantModal');
+    const addParticipantCloseModal = document.getElementById('addParticipantCloseModal');
+    const closeParticipantModalBtn = document.getElementById('closeParticipantModalBtn');
+    const selectedUsers = [];
 
     if (addProjButton) {
         addProjButton.addEventListener('click', () => {
-            
+            selectedUsers.length = 0;
+            console.log(selectedUsers);
             addProjModalOverlay.style.display = 'block';
             addProjModal.style.display = 'block';
             document.getElementById("buttonUpdateCreateProj").innerText = "Создать";
@@ -145,7 +151,8 @@
 
     if (addProjButton2) {
         addProjButton2.addEventListener('click', () => {
-
+            selectedUsers.length = 0;
+            console.log(selectedUsers);
             addProjModalOverlay.style.display = 'block';
             addProjModal.style.display = 'block';
             document.getElementById("editName").value = "";
@@ -172,13 +179,6 @@
             }
         });
     }
-
-    const addParticipantBtn = document.getElementById('addParticipantBtn'); 
-    const addParticipantModalOverlay = document.getElementById('addParticipantModalOverlay');
-    const addParticipantModal = document.getElementById('addParticipantModal');
-    const addParticipantCloseModal = document.getElementById('addParticipantCloseModal');
-    const closeParticipantModalBtn = document.getElementById('closeParticipantModalBtn');
-    const selectedUsers = [];
 
     if (addParticipantBtn) {
         addParticipantBtn.addEventListener('click', () => {
@@ -289,7 +289,9 @@
         const formData = new FormData(form);
 
         formData.append("SelectedUsersToProject", JSON.stringify(selectedUsers));
-
+        for (let [key, value] of formData.entries()) {
+            console.log("FormData:", key, value);
+        }
         try {
             const response = await fetch(form.action, {
                 method: "POST",
@@ -419,11 +421,10 @@
     }
 
     function removeUser(email) {
-        const index = selectedUsers.findIndex(participant => participant.email === email);
+        const index = selectedUsers.findIndex(participant => participant.Email === email);
         if (index !== -1) {
             selectedUsers.splice(index, 1); 
         }
-
         const usersInProject = document.getElementById('usersInProject');
         const userElement = usersInProject.querySelector(`div[data-email="${email}"]`);
         if (userElement) {
