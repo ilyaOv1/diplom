@@ -40,6 +40,12 @@
                     <span>Задачи</span>
                 </a>
             </li>
+            <li class="menu-elements @(ViewContext.RouteData.Values["Page"]?.ToString() == "/Calendar" ? "active" : "")">
+                <a asp-page="/Calendar" class="menu-link">
+                    <img class="menu-ico" src="~/Images/tasks.png" alt="Calendar" />
+                    <span>Календарь</span>
+                </a>
+            </li>
         </ul>
     </div>
 }
