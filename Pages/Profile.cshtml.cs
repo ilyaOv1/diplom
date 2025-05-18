@@ -32,8 +32,7 @@ namespace ProjManagmentSystem.Pages
 			{
 				return HandleAuthorization(isAuthenticated);
 			}
-
-			var token = Request.Cookies["token"];
+            var token = Request.Cookies["token"];
             Token = token;
 			_httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
@@ -134,6 +133,7 @@ namespace ProjManagmentSystem.Pages
                 else
                 {
                     Console.WriteLine($"Ошибка при обновлении данных: {response.StatusCode}");
+                    TempData["ErrorMessage"] = $"Ошибка при обновлении данных: {response.StatusCode}";
                     return Page();
                 }
             }

@@ -50,6 +50,7 @@ namespace ProjManagmentSystem.Pages
                 else if (response.StatusCode == System.Net.HttpStatusCode.Forbidden)
                 {
                     ViewData["ShowSidebar"] = false;
+                    TempData["ErrorMessage"] = "Неверный логин или пароль.";
                     Message = "Неверный email или пароль.";
                 }
                 else

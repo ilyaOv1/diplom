@@ -1,6 +1,6 @@
 ﻿@{
     var showSidebar = ViewData["ShowSidebar"] as bool? ?? true; 
-    var centeredPages = new[] { "/Authorization", "/Registration" };
+    var centeredPages = new[] { "/Authorization", "/Registration", "/ForgotPassword" };
     var isLoginPage = centeredPages.Contains(ViewContext.RouteData.Values["Page"]?.ToString());
     var isProfilePage = ViewContext.RouteData.Values["Page"]?.ToString() == "/Profile";
 }
@@ -13,7 +13,6 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/ProjManagmentSystem.styles.css" asp-append-version="true" />
-
 
 </head>
 <body >
@@ -31,10 +30,19 @@
             @Html.Partial("Sidebar")
         }
 
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div id="errorAlert" class="custom-alert alert alert-danger d-flex align-items-center justify-content-between" role="alert">
+                <span>@TempData["ErrorMessage"]</span>
+                <button type="button" class="btn-close ms-3" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
 
         <div class="@(isLoginPage ? "authreg" : "") @(isProfilePage ? "auth-page" : "content")">
             @RenderBody()
         </div>
+
+
     </div>
 
     <footer class="border-top footer text-muted">

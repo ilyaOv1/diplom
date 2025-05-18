@@ -4,6 +4,7 @@ using System.Net;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorPages();
+builder.Services.AddSession();
 
 builder.Services.AddHttpClient("AuthClient", client =>
 {
@@ -34,6 +35,8 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthorization();
+
+app.UseSession();
 
 app.MapRazorPages();
 app.MapGet("/", () => Results.Redirect("/Index"));
