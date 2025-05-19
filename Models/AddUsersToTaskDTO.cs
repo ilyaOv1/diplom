@@ -2,7 +2,7 @@
 {
     public class AddUsersToTaskDTO
     {
-        public int taskId { get; set; }
-        public List<UserWithResponsibilityDTO> userIds { get; set; }
+        public int TaskId { get; set; }
+        public List<UserWithResponsibilityDTO> UserIds { get; set; }
     }
 }

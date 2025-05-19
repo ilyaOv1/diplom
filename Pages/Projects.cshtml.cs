@@ -34,12 +34,7 @@ namespace ProjManagmentSystem.Pages
 
         public async Task<IActionResult> OnPostProcessArrayAsync([FromBody] Users[] users)
         {
-            selectedUsers = users.ToList();
-            var usersList = new List<UserWithResponsibilityDTO>();
-            if (!string.IsNullOrEmpty(SelectedUsersToProject))
-            {
-                usersList = JsonSerializer.Deserialize<List<UserWithResponsibilityDTO>>(SelectedUsersToProject);
-            }
+
             return new JsonResult(new { success = true, message = "Массив получен" });
         }
 

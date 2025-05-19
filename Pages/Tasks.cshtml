@@ -241,7 +241,7 @@
                    onclick="hideTask()">Скрыть</a>
 
                 <div style="display: flex; align-items: center; gap: 8px;">
-                    <button type="submit" class="button" id="editButton">Создать</button>
+                    <button type="button" class="button" id="editButton">Создать</button>
                 </div>
             </div>
 
@@ -336,6 +336,7 @@
 
     if (addTaskButton) {
         addTaskButton.addEventListener('click', () => {
+            selectedTaskUsers.length = 0;
             addTaskModalOverlay.style.display = 'block';
             addTaskModal.style.display = 'block';
             document.getElementById("editButton").innerText = "Создать";
@@ -421,6 +422,32 @@
         });
 
     }
+
+    document.getElementById("editButton").addEventListener("click", async function (e) {
+        e.preventDefault();
+
+        const form = document.getElementById("addTaskForm");
+        const formData = new FormData(form);
+        formData.append("SelectedUsersToTask", JSON.stringify(selectedTaskUsers));
+        try {
+            const response = await fetch(form.action, {
+                method: "POST",
+                headers: {
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: formData
+            });
+
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                alert("Ошибка при создании проекта");
+            }
+        } catch (error) {
+            console.error("Ошибка:", error);
+            alert("Произошла сетевая ошибка");
+        }
+    });
 
     participantTaskSearchInput.addEventListener('input', function () {
         const email = participantTaskSearchInput.value.trim();
@@ -586,12 +613,12 @@
     }
 
     function addUser(email, name, isResponsible, canEdit) {
-        if (selectedTaskUsers.some(participant => participant.email === email)) {
+        if (selectedTaskUsers.some(participant => participant.Email === email)) {
             alert('Участник уже добавлен');
             return;
         }
 
-        const participant = { email, name, isResponsible };
+        const participant = { Email: email, Name: name, IsResponsible: isResponsible };
         selectedTaskUsers.push(participant);
         sendArrayToServer();
         addParticipantTaskModal.style.display = 'none';
@@ -654,10 +681,10 @@
             if (count >= maxToShow) return;
 
             if (selectedTaskUsers.length <= 1){
-                const element = createUserElement(u.email, u.name, u.isResponsible, false);
+                const element = createUserElement(u.Email, u.Name, u.IsResponsible, false);
                 usersInProjectTask.appendChild(element);
             }else{
-                const element = createUserElement(u.email, u.name, u.isResponsible, canEdit);
+                const element = createUserElement(u.Email, u.Name, u.IsResponsible, canEdit);
                 usersInProjectTask.appendChild(element);
             }
             count++;
@@ -786,7 +813,7 @@
     }
 
     function removeUser(email) {
-        const index = selectedTaskUsers.findIndex(participant => participant.email === email);
+        const index = selectedTaskUsers.findIndex(participant => participant.Email === email);
         if (index !== -1) {
             selectedTaskUsers.splice(index, 1);
         }
@@ -960,7 +987,6 @@
     }
 
     async function sendArrayToServer() {
-
         const response = await fetch('?handler=ProcessArray', {
             method: 'POST',
             headers: {

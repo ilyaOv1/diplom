@@ -32,7 +32,8 @@ namespace ProjManagmentSystem.Pages
         public List<TaskToGet> tasks { get; set; }
         public List<Users> TaskUsers { get; set; } = new();
 
-        public static List<Users> selectedUsersToTask = new List<Users>();
+        [BindProperty]
+        public string SelectedUsersToTask { get; set; }
 
         public TasksModel(IHttpClientFactory httpClientFactory, UserService userService) : base(httpClientFactory)
         {
@@ -43,7 +44,11 @@ namespace ProjManagmentSystem.Pages
         public async Task<IActionResult> OnPostProcessArrayAsync([FromBody] Users[] users)
         {
             selectedUsers = users.ToList();
-            selectedUsersToTask = users.ToList();
+            var usersList = new List<UserWithResponsibilityDTO>();
+            if (!string.IsNullOrEmpty(SelectedUsersToTask))
+            {
+                usersList = JsonSerializer.Deserialize<List<UserWithResponsibilityDTO>>(SelectedUsersToTask);
+            }
             return new JsonResult(new { success = true, message = "Массив получен" });
         }
 
@@ -120,7 +125,12 @@ namespace ProjManagmentSystem.Pages
             {
 
                 if ((ProjectId == null || ProjectId == 0) && !EditingTaskId.HasValue) return Redirect("/Tasks");
-                
+
+                var users = new List<UserWithResponsibilityDTO>();
+                if (!string.IsNullOrEmpty(SelectedUsersToTask))
+                {
+                    users = JsonSerializer.Deserialize<List<UserWithResponsibilityDTO>>(SelectedUsersToTask);
+                }
                 var formContent = new MultipartFormDataContent
                 {
                     { new StringContent(task.name), "name" },
@@ -150,16 +160,16 @@ namespace ProjManagmentSystem.Pages
                         var responseContent = await response.Content.ReadAsStringAsync();
                         var result = JsonSerializer.Deserialize<Tasks>(responseContent);
                         int taskId = result.id;
-                        var userEmails = selectedUsersToTask.Select(u => new UserWithResponsibilityDTO
+                        var userEmails = users.Select(u => new UserWithResponsibilityDTO
                         {
-                            Email = u.email,
-                            IsResponsible = u.IsResponsible.GetValueOrDefault(false)
+                            Email = u.Email,
+                            IsResponsible = u.IsResponsible
                         }).ToList();
 
                         var addUsersToProjectDTO = new AddUsersToTaskDTO
                         {
-                            taskId = taskId,
-                            userIds = userEmails
+                            TaskId = taskId,
+                            UserIds = userEmails
                         };
 
                         var jsonContent = new StringContent(
@@ -184,16 +194,16 @@ namespace ProjManagmentSystem.Pages
                         int projectId = EditingTaskId.Value;
 
 
-                        var userEmails = selectedUsersToTask.Select(u => new UserWithResponsibilityDTO
+                        var userEmails = users.Select(u => new UserWithResponsibilityDTO
                         {
-                            Email = u.email,
-                            IsResponsible = u.IsResponsible.GetValueOrDefault(false)
+                            Email = u.Email,
+                            IsResponsible = u.IsResponsible
                         }).ToList();
 
                         var addUsersToProjectDTO = new AddUsersToTaskDTO
                         {
-                            taskId = projectId,
-                            userIds = userEmails
+                            TaskId = projectId,
+                            UserIds = userEmails
                         };
 
                         var jsonContent = new StringContent(
