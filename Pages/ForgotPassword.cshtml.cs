@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using ProjManagmentSystem.Services;
+using System.Reflection;
 
 namespace ProjManagmentSystem.Pages
 {
@@ -47,6 +48,16 @@ namespace ProjManagmentSystem.Pages
                 switch (currentStep)
                 {
                     case 1:
+                        if (!RegexService.IsValidEmail(Email))
+                        {
+                            TempData["ErrorMessage"] = "Введите почту в формате xx@xx.xx.";
+                            Console.WriteLine(Email);
+                            ViewData["CurrentStep"] = 1;
+
+                            Email = null;
+
+                            return Page();
+                        }
                         var emailContent = new FormUrlEncodedContent(new[]
                         {
                             new KeyValuePair<string, string>("email", Email)
@@ -80,13 +91,20 @@ namespace ProjManagmentSystem.Pages
                         else
                         {
                             TempData["ErrorMessage"] = "Код введен неверно.";
+                            ViewData["CurrentStep"] = 2;
                         }
                         break;
 
                     case 3:
-                        if (NewPassword != ConfirmPassword)
+                        if ( NewPassword != ConfirmPassword)
                         {
                             TempData["ErrorMessage"] = "Пароли не совпадают.";
+                            ViewData["CurrentStep"] = 3;
+                            return Page();
+                        }
+                        else if (!RegexService.IsValidPassword(NewPassword))
+                        {
+                            TempData["ErrorMessage"] = "Пароль должен содержать в себе не менее 8 символов, а также как минимум 1 цифру и 1 заглавную букву.";
                             ViewData["CurrentStep"] = 3;
                             return Page();
                         }

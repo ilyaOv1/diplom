@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using ProjManagmentSystem.Services;
 
 namespace ProjManagmentSystem.Pages
 {
@@ -14,7 +15,7 @@ namespace ProjManagmentSystem.Pages
         [BindProperty]
         public string Email { get; set; }
         [BindProperty]
-		public string Password { get; set; }
+        public string Password { get; set; }
         [BindProperty]
         public string RepeatPassword { get; set; }
 
@@ -37,6 +38,8 @@ namespace ProjManagmentSystem.Pages
         {
             try
             {
+                ViewData["ShowSidebar"] = false;
+                if (!ValidateForm()) return Page();
                 var content = new FormUrlEncodedContent(new[]
                 {
                     new KeyValuePair<string, string>("email", Email),
@@ -45,19 +48,16 @@ namespace ProjManagmentSystem.Pages
                     new KeyValuePair<string, string>("surname", Surname),
                     new KeyValuePair<string, string>("patronymic", LastName)
                 });
-                if (Password != RepeatPassword)
-                {
-                    ModelState.AddModelError("RepeatPassword", "Пароли не совпадают.");
-                    return Page();
-                }
+
                 var response = await _httpClient.PostAsync("registr", content);
                 if (response.IsSuccessStatusCode)
                 {
                     return Redirect("/Authorization");
                 }
-                else if (response.StatusCode == System.Net.HttpStatusCode.Forbidden)
+                else if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
                 {
-                    return StatusCode(500);
+                    TempData["ErrorMessage"] = "Такой пользователь уже существует.";
+                    return Page();
                 }
                 else
                 {
@@ -71,6 +71,46 @@ namespace ProjManagmentSystem.Pages
 
 
             return Page();
+        }
+
+        private bool ValidateForm()
+        {
+            if (!RegexService.IsValidLatinName(Name))
+            {
+                TempData["ErrorMessage"] = "Имя должно включать только латинские буквы.";
+                return false;
+            }
+            else if (!RegexService.IsValidLatinName(Surname))
+            {
+                TempData["ErrorMessage"] = "Фамилия должна включать только латинские буквы.";
+                return false;
+            }
+            else if (!RegexService.IsValidLatinName(LastName))
+            {
+                TempData["ErrorMessage"] = "Отчество должно включать только латинские буквы.";
+                return false;
+            }
+            else if (!RegexService.IsValidEmail(Email))
+            {
+                TempData["ErrorMessage"] = "Введите почту в формате xx@xx.xx";
+                return false;
+            }
+            else if (!RegexService.IsValidPassword(Password))
+            {
+                TempData["ErrorMessage"] = "Пароль должен содержать в себе не менее 8 символов, а также как минимум 1 цифру и 1 заглавную букву.";
+                return false;
+            }
+            else if (Password != RepeatPassword)
+            {
+                TempData["ErrorMessage"] = "Пароли не совпадают.";
+                return false;
+            }
+            else if (String.IsNullOrEmpty(Name) || String.IsNullOrEmpty(Surname) || String.IsNullOrEmpty(LastName) || String.IsNullOrEmpty(Email) || String.IsNullOrEmpty(Password) || String.IsNullOrEmpty(RepeatPassword))
+            {
+                TempData["ErrorMessage"] = "Заполните все поля.";
+                return false;
+            }
+            else return true;
         }
     }
 }
