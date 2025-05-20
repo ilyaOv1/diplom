@@ -1,9 +1,11 @@
 ﻿@page
+@using ProjManagmentSystem.Services
 @model ProjectsModel
 @{
     ViewData["Title"] = "Projects";
     bool isEditMode = false;
     var isProjectPage = ViewContext.RouteData.Values["Page"]?.ToString() == "/Projects";
+    @inject UserService UserService
 }
 
 
@@ -41,7 +43,7 @@
             {
                 count++;
                 <div style="background: #FFFFFF; width: calc(33% - 16px); height: 150px; padding: 8px; box-sizing: border-box; border-radius: 10px; box-shadow:0 2px 6px rgba(0,0,0,0.05);cursor:pointer;"
-                     onclick="handleProjectUpdateClick('@i.id', '@i.Name', '@i.Description', '@i.IsPrivate', '@i.creatorProj', '@i.Access')" data-project-name="@i.Name"
+                     onclick="handleProjectUpdateClick('@i.id', '@i.Name', '@i.Description', '@i.creatorProj', '@i.Access')" data-project-name="@i.Name"
                      onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';"
                      onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 6px rgba(0,0,0,0.05)';">
                     <p style="color: #D2D2D2; font-size: 11px; margin-left: 16px; margin-top: 8px;">№ @count</p>
@@ -73,20 +75,12 @@
                            id="editName"
                            placeholder="Введите название проекта" />
                 </div>
-
+                <input id="currentUserEmail" hidden value="@UserService.Email" />
                 <div class="form-field">
                     <p class="form-label">Описание</p>
                     <textarea class="form-control addProjTextArea"
                                 id="editDescription"
                                 name="Description"></textarea>
-                </div>
-
-                <div class="form-field">
-                    <p class="form-label">Публичность</p>
-                    <select name="IsPrivate" id="editPublic" class="form-control">
-                        <option value="0">Публичный</option>
-                        <option value="1">Приватный</option>
-                    </select>
                 </div>
                 <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 16px;">Участники проекта</h2>
                 <p id="addParticipantBtn" style="color: #D9D9D9; font-size: 13px; margin-bottom: 8px; cursor: pointer;">+ Добавить участника</p>
@@ -109,7 +103,7 @@
     <div id="addParticipantModal" class="modal-content" style="display: none; width: 700px">
         <span id="addParticipantCloseModal" class="close">&times;</span>
         <p style="color: #ABABAB; font-size: 14px;">Добавление участника</p>
-        <p id="currUserEmail" style="display: none">@Model._userService.email</p>
+        <p id="currUserEmail" style="display: none">@Model._userService.Email</p>
         <hr style="border: 0; height: 2px; background: #B5B5B5;">
         <div style="display: flex; align-content: center; align-items: center; justify-content:center;">
             <input id="participantSearchInput" class="form-control" placeholder="Введите почту пользователя" />
@@ -309,7 +303,7 @@
             }
         } catch (error) {
             console.error("Ошибка:", error);
-            alert("Произошла сетевая ошибка");
+            alert(error);
         }
     });
 
@@ -344,9 +338,14 @@
 
     function toggleResponsibility(email, canEdit) {
         const user = selectedUsers.find(u => u.Email === email);
+        const currentUserEmail = document.getElementById("currentUserEmail")?.value;
+        if (email === currentUserEmail) {
+
+            return;
+        }
         if (!user) return;
 
-        user.isResponsible = !user.isResponsible;
+        user.IsResponsible = !user.IsResponsible;
 
         updateUI(canEdit);
 
@@ -360,9 +359,13 @@
         selectedUsers.forEach(u => {
             if (selectedUsers.length <= 1) {
                 const element = createUserElement(u.Email, u.Name, u.IsResponsible, false);
+                console.log(u.Email);
+                console.log(u.IsResponsible);
                 usersInProject.appendChild(element);
             } else {
                 const element = createUserElement(u.Email, u.Name, u.IsResponsible, canEdit);
+                console.log(u.Email);
+                console.log(u.IsResponsible);
                 usersInProject.appendChild(element);
             }
         });
@@ -423,6 +426,11 @@
 
     function removeUser(email) {
         const index = selectedUsers.findIndex(participant => participant.Email === email);
+        const currentUserEmail = document.getElementById("currentUserEmail")?.value;
+        if (email === currentUserEmail) {
+            
+            return;
+        }
         if (index !== -1) {
             selectedUsers.splice(index, 1); 
         }
@@ -440,9 +448,8 @@
         window.location.href = url;
     }
 
-    function handleProjectUpdateClick(projectId, name, description, isPrivate, creatorProj, access) {
+    function handleProjectUpdateClick(projectId, name, description, creatorProj, access) {
 
-        const isPrivateBool = isPrivate === "True" || isPrivate === "true" ? "1" : "0";
         const canEdit = access === "True" || access === true || access === "1";
         selectedUsers.length = 0;
 
@@ -453,7 +460,6 @@
         document.getElementById("editDescription").value = description;
         document.getElementById("nameWindow").innerText = "Изменение проекта";
         document.getElementById("buttonUpdateCreateProj").innerText = "Изменить";
-        document.getElementById("editPublic").value = isPrivateBool;
         document.getElementById("projectIdInput").value = projectId;
         document.getElementById('usersInProject').innerHTML = '';
 

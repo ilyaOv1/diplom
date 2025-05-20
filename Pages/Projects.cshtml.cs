@@ -94,13 +94,11 @@ namespace ProjManagmentSystem.Pages
                 {
                     users = JsonSerializer.Deserialize<List<UserWithResponsibilityDTO>>(SelectedUsersToProject);
                 }
-                project.IsPrivate = Request.Form["IsPrivate"] == "1";
                 var formContent = new MultipartFormDataContent
                 {
                     { new StringContent(project.Name), "Name" },
 
-                    { new StringContent(project.Description), "Description" },
-                    { new StringContent((project.IsPrivate ? "true" : "false")), "IsPrivate" }
+                    { new StringContent(project.Description), "Description" }
                 };
 
                 HttpResponseMessage response;

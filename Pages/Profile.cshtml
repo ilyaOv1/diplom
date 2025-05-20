@@ -78,16 +78,7 @@
                         <p style="font-size: 14px;">Отчество</p>
                         <input class="modal-input" name="patronymic" value="@Model.user.patronymic"></input>
                     </div>
-                    <h2 style="font-weight: 600; font-size: 16px;">Данные для входа</h2>
-                    <div style="display: flex; gap: 70px; align-items: center;margin-bottom: 7px;">
-                        <p style="font-size: 14px;">Почта</p>
-                        <input class="modal-input" disabled value="@Model.user.email"></input>
-                        <input type="hidden" name="email" value="@Model.user.email">
-                    </div>
-                    <div style="display: flex; gap: 70px; align-items: center;margin-bottom: 28px;">
-                        <p style="font-size: 14px;">Пароль</p>
-                        <input class="modal-input" disabled type="password"></input>
-                    </div>
+                    <input type="hidden" name="email" value="@Model.user.email">
                     <h2 style="font-weight: 600; font-size: 16px;">Краткая информация</h2>
                     <textarea id="description" name="description" style="height: 80px;">@Model?.user?.description</textarea><br>
                 </div>

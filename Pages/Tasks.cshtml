@@ -1,8 +1,10 @@
 ﻿@page
+@using ProjManagmentSystem.Services
 @model TasksModel
 @{
 	ViewData["Title"] = "Tasks";
     var isTaskPage = ViewContext.RouteData.Values["Page"]?.ToString() == "/Tasks";
+    @inject UserService UserService
 }
 
 <div class="page-container" >
@@ -207,7 +209,7 @@
                 </div>
                 <input type="hidden" name="ProjectId" id="projId" value="@Model.ProjectId" />
                 <input type="hidden" name="ProjectName" value="@Model.ProjectName" />
-                <input id="currUserEmail" style="display: none" value="@Model._userService.email" />
+                <input id="currentUserEmail" hidden value="@UserService.Email" />
                 <div class="form-field">
                     <p class="form-label">Описание</p>
                     <textarea class="form-control"
@@ -660,10 +662,15 @@
     }
 
     function toggleResponsibility(email, canEdit) {
-        const user = selectedTaskUsers.find(u => u.email === email);
+        const user = selectedTaskUsers.find(u => u.Email === email);
+        const currentUserEmail = document.getElementById("currentUserEmail")?.value;
+        if (email === currentUserEmail) {
+
+            return;
+        }
         if (!user) return;
 
-        user.isResponsible = !user.isResponsible;
+        user.IsResponsible = !user.IsResponsible;
 
         updateUI(canEdit);
 
@@ -814,6 +821,11 @@
 
     function removeUser(email) {
         const index = selectedTaskUsers.findIndex(participant => participant.Email === email);
+        const currentUserEmail = document.getElementById("currentUserEmail")?.value;
+        if (email === currentUserEmail) {
+
+            return;
+        }
         if (index !== -1) {
             selectedTaskUsers.splice(index, 1);
         }

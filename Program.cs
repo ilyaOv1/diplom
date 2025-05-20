@@ -18,7 +18,15 @@ builder.Services.AddHttpClient("AuthClient", client =>
     AllowAutoRedirect = true,
     UseDefaultCredentials = true
 });
-builder.Services.AddSingleton<UserService>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<UserService>();
+
+builder.Services.AddDistributedMemoryCache(); // требуется для сессии
+builder.Services.AddSession(options =>
+{
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
 
 
 var app = builder.Build();

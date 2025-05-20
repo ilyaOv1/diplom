@@ -113,6 +113,7 @@ namespace ProjManagmentSystem.Pages
                         Console.WriteLine($"Ошибка при загрузке изображения: {imageResponse.StatusCode}, {errorContent}");
                         return Page();
                     }
+                    updatedUser.image = fileBytes;
                 }
 
                 var response = await _httpClient.PutAsync("update-profile", formContent);
@@ -123,10 +124,6 @@ namespace ProjManagmentSystem.Pages
                     user.name = updatedUser.name;
                     user.patronymic = updatedUser.patronymic;
                     user.description = updatedUser.description;
-
-                    _userService.SetUserData(updatedUser.email, $"{updatedUser.surname} {updatedUser.name} {updatedUser.patronymic}", Token, updatedUser.image);
-
-                    ViewData["SideBarFIO"] = _userService.FIO;
 
                     return RedirectToPage("/Profile");
                 }
