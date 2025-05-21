@@ -237,10 +237,17 @@
             </div>
             <hr style="border: 0; height: 2px; background: #B5B5B5;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
-                <a href="#"
-                   style="color:#EB0000;text-decoration:none;font-size:13px; display: none;"
-                   id="buttonHide"
-                   onclick="hideTask()">Скрыть</a>
+                <div style="display: flex; align-items: center; gap: 16px;" id="RemoveAndArchiveButtons">
+                    <a
+                       id="openModalConfirm"
+                       style="color: #EB0000; text-decoration: none; font-size: 14px; cursor: pointer;">
+                        Удалить
+                    </a>
+
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <button type="button" class="button" id="inArchive">В архив</button>
+                    </div>
+                </div>
 
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <button type="button" class="button" id="editButton">Создать</button>
@@ -257,10 +264,6 @@
         <p style="color: #ABABAB; font-size: 14px;">Добавление участника</p>
         
         <hr style="border: 0; height: 2px; background: #B5B5B5;">
-        <div style="display: flex; align-content: center; align-items: center; justify-content:center;">
-            <input id="participantTaskSearchInput" class="form-control" placeholder="Введите почту пользователя" />
-
-        </div>
         <div id="searchResultsTask" style="margin-top: 16px;">
         </div>
     </div>
@@ -316,6 +319,22 @@
 
 
     <div id="participantsTaskList"></div>
+
+
+    <div id="modalConfirmOverlay" class="modal-overlay" style="display: none;"></div>
+
+    <div id="modalConfirm" class="modal-content" style="display: none;">
+        <span id="closeModalConfirm" class="close">&times;</span>
+        <h2 style="font-weight: 600; font-size: 18px;">Подтверждение удаления задачи</h2>
+        <p style="font-size: 14px;">Вы уверены, что хотите удалить задачу? Это действие нельзя отменить.</p>
+        <div style="display: flex; margin-top: 20px; justify-content: center; gap: 30px;">
+            <button id="cancelDelete" style="background-color: #2954EC; border: none; padding: 10px 20px; border-radius: 14px; cursor: pointer;">Отмена</button>
+            <form method="post">
+                <input type="hidden" id="taskIdToDelete" name="taskId" />
+                <button type="submit" asp-page-handler="DeleteTask" id="confirmDelete" style="background-color: white; color: #EB0000; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;">Удалить</button>
+            </form>
+        </div>
+    </div>
 }
 <script>
     const addTaskButton = document.getElementById('addTaskButton');
@@ -331,6 +350,12 @@
     const addSubtaskModal = document.getElementById('addSubtaskModal');
     const addSubtaskCloseModal = document.getElementById('addSubtaskCloseModal');
     const searchResultsTask = document.getElementById('searchResultsTask');
+    const openModalConfirm = document.getElementById('openModalConfirm');
+    const modalConfirm = document.getElementById('modalConfirm');
+    const modalConfirmOverlay = document.getElementById('modalConfirmOverlay');
+    const cancelDelete = document.getElementById('cancelDelete');
+    const closeModalConfirm = document.getElementById('closeModalConfirm');
+    const RemoveAndArchiveButtons = document.getElementById('RemoveAndArchiveButtons');
     const selectedTaskUsers = [];
     const subtasksList = [];
     const currUsersInTask = [];
@@ -351,6 +376,8 @@
             document.getElementById("editTaskName").readOnly = false;
             document.getElementById("editTaskDescription").readOnly = false;
             document.getElementById("editButton").style.display = "";
+            RemoveAndArchiveButtons.style.visibility = "hidden";
+            RemoveAndArchiveButtons.style.width = "0";
             addSubtaskBtn.style.display = "";
             addParticipantTaskBtn.style.display = "";
         });
@@ -376,6 +403,7 @@
         addParticipantTaskBtn.addEventListener('click', () => {
             addParticipantTaskModalOverlay.style.display = 'block';
             addParticipantTaskModal.style.display = 'block';
+            LoadUsersByProject();
         });
     }
 
@@ -383,7 +411,6 @@
         addParticipantTaskCloseModal.addEventListener('click', () => {
             addParticipantTaskModalOverlay.style.display = 'none';
             addParticipantTaskModal.style.display = 'none';
-            document.getElementById("participantTaskSearchInput").value = "";
             document.getElementById("searchResultsTask").innerHTML = "";
         });
     }
@@ -393,7 +420,6 @@
             if (event.target === addParticipantTaskModalOverlay) {
                 addParticipantTaskModalOverlay.style.display = 'none';
                 addParticipantTaskModal.style.display = 'none';
-                document.getElementById("participantTaskSearchInput").value = "";
                 document.getElementById("searchResultsTask").innerHTML = "";
             }
         });
@@ -425,6 +451,42 @@
 
     }
 
+    if (openModalConfirm) {
+        openModalConfirm.addEventListener('click', (event) => {
+            if (event.target === openModalConfirm) {
+                const taskId = document.getElementById("taskIdInput").value;
+                document.getElementById("taskIdToDelete").value = taskId;
+                modalConfirm.style.display = 'block';
+                modalConfirmOverlay.style.display = 'block';
+            }
+        });
+    }
+
+    if (cancelDelete) {
+        cancelDelete.addEventListener('click', (event) => {
+            if (event.target === cancelDelete) {
+                modalConfirm.style.display = 'none';
+                modalConfirmOverlay.style.display = 'none';
+            }
+        });
+    }
+
+    if (closeModalConfirm) {
+        closeModalConfirm.addEventListener('click', () => {
+            modalConfirmOverlay.style.display = 'none';
+            modalConfirm.style.display = 'none';
+        });
+    }
+
+    if (modalConfirmOverlay) {
+        modalConfirmOverlay.addEventListener('click', (event) => {
+            if (event.target === modalConfirmOverlay) {
+                modalConfirmOverlay.style.display = 'none';
+                modalConfirm.style.display = 'none';
+            }
+        });
+    }
+
     document.getElementById("editButton").addEventListener("click", async function (e) {
         e.preventDefault();
 
@@ -451,13 +513,7 @@
         }
     });
 
-    participantTaskSearchInput.addEventListener('input', function () {
-        const email = participantTaskSearchInput.value.trim();
-        if (!email) {
-            searchResultsTask.innerHTML = '';
-            return;
-        }
-
+    function LoadUsersByProject(){
         const projectId = document.getElementById('projId').value;
         if (!projectId) {
             console.error('ID проекта не найден');
@@ -471,7 +527,7 @@
             return;
         }
 
-        fetch(`https://localhost:7136/api/auth/search-project?email=${encodeURIComponent(email)}&project=${encodeURIComponent(projectId)}`, {
+        fetch(`https://localhost:7136/api/auth/search-project?project=${encodeURIComponent(projectId)}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -495,7 +551,7 @@
                 }
 
                 data.forEach(user => {
-                    if (selectedTaskUsers.some(participant => participant.email === user.email)) {
+                    if (selectedTaskUsers.some(participant => participant.Email === user.email)) {
                         return;
                     }
                     const userDiv = document.createElement('div');
@@ -508,13 +564,13 @@
 
 
                     userDiv.innerHTML = `
-                        <div style="display: flex; align-items: center;">
-                            <img src="/Images/big-ico.png" style="width: 20px; height: 20px; margin-right: 10px;" />
-                            <p style="font-size: 13px; color: #232323;">${user.name} </p>
-                            <p style="font-size: 13px; color: #232323;">${user.surname} </p>
-                        </div>
-                        <button class="button" style="width: 100px;" onclick="addUser('${user.email}', '${user.name} ${user.surname}')">Добавить</button>
-                    `;
+                            <div style="display: flex; align-items: center;">
+                                <img src="/Images/big-ico.png" style="width: 20px; height: 20px; margin-right: 10px;" />
+                                <p style="font-size: 13px; color: #232323;">${user.name} </p>
+                                <p style="font-size: 13px; color: #232323;">${user.surname} </p>
+                            </div>
+                            <button class="button" style="width: 100px;" onclick="addUser('${user.email}', '${user.name} ${user.surname}')">Добавить</button>
+                        `;
                     searchResultsTask.appendChild(userDiv);
                 });
             })
@@ -522,7 +578,9 @@
                 console.error('Ошибка при поиске пользователя:', error);
                 searchResultsTask.innerHTML = `<p>${error.message}</p>`;
             });
-    });
+    }
+
+   
 
     document.getElementById('addSubTaskForm').addEventListener('submit', async function (e) {
         e.preventDefault();
@@ -626,8 +684,6 @@
         addParticipantTaskModal.style.display = 'none';
         addParticipantTaskModalOverlay.style.display = 'none';
 
-        const searchInput = document.getElementById('participantTaskSearchInput');
-        searchInput.value = '';
         const searchResults = document.getElementById('searchResultsTask');
         searchResults.innerHTML = '';
 
@@ -688,16 +744,17 @@
             if (count >= maxToShow) return;
 
             if (selectedTaskUsers.length <= 1){
+                console.log(u.Email);
                 const element = createUserElement(u.Email, u.Name, u.IsResponsible, false);
                 usersInProjectTask.appendChild(element);
             }else{
+                console.log(u.Email);
                 const element = createUserElement(u.Email, u.Name, u.IsResponsible, canEdit);
                 usersInProjectTask.appendChild(element);
             }
             count++;
         });
 
-        console.log(subtasksList.length);
         count = 0;
         subtasksList.forEach(s => {
             if (count >= maxToShow) return;
@@ -710,7 +767,7 @@
 
     function createUserElement(email, name, isResponsible = false, canEdit = false) {
         const userDiv = document.createElement('div');
-        const currUser = document.getElementById("currUserEmail");
+        const currUser = document.getElementById("currentUserEmail");
         userDiv.style.border = '1px solid #D2D2D2';
         userDiv.style.borderRadius = '8px';
         userDiv.style.background = '#FCFCFC';
@@ -845,18 +902,18 @@
         const isHide = status == "Готово";
         selectedTaskUsers.length = 0;
         subtasksList.length = 0;
-        console.log(access);
         addTaskModalOverlay.style.display = 'block';
         addTaskModal.style.display = 'block';
 
         document.getElementById("editTaskName").value = name;
         document.getElementById("editTaskDescription").value = description;
         document.getElementById("projId").value = projectId;
-        console.log(document.getElementById("projId").value);
         document.getElementById("taskIdInput").value = id;
         document.getElementById("nameWindow").innerText = "Изменение задачи";
         document.getElementById("editButton").innerText = "Изменить";
         document.getElementById("addSubTaskId").value = id;
+        RemoveAndArchiveButtons.style.visibility = "";
+        RemoveAndArchiveButtons.style.width = "";
         if (expected_date) {
             const [day, month, year] = expected_date.split('.');
             const formattedDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
@@ -987,7 +1044,6 @@
             }
 
             listOfSubtasks.innerHTML = '';
-            console.log(result);
             result.subtasks.forEach(subtask1 => {
                 addSubtask(subtask1.name, subtask1.responsible);
             });
@@ -1025,7 +1081,6 @@
 
             if (!response.ok) throw new Error('Не удалось обновить статус');
 
-            console.log(`Задача ${taskId} переведена в статус "${newStatus}"`);
         } catch (err) {
             alert('Ошибка при обновлении статуса');
             console.error(err);

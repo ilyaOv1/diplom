@@ -6,6 +6,7 @@ using System.Net.Http.Headers;
 using System.Net.Http;
 using System.Text.Json;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace ProjManagmentSystem.Pages
 {
@@ -25,6 +26,8 @@ namespace ProjManagmentSystem.Pages
         public List<Users> ProjectUsers { get; set; } = new();
         [BindProperty]
         public string SelectedUsersToProject { get; set; }
+        [BindProperty]
+        public int ProjectId { get; set; }
 
         public ProjectsModel(IHttpClientFactory httpClientFactory, UserService userService) : base(httpClientFactory)
         {
@@ -231,6 +234,39 @@ namespace ProjManagmentSystem.Pages
             catch (Exception ex)
             {
                 return new JsonResult(new { success = false, message = "Ошибка: " + ex.Message });
+            }
+        }
+
+        public async Task<IActionResult> OnPostDeleteProject()
+        {
+            var isAuthenticated = await IsUserAuthenticated();
+
+            if (!isAuthenticated)
+            {
+                return HandleAuthorization(isAuthenticated);
+            }
+
+            var token = Request.Cookies["token"];
+            Token = token;
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            try
+            {
+                var response = await _httpClient.DeleteAsync($"project/remove/{ProjectId}");
+                if (response.IsSuccessStatusCode)
+                {
+                    return RedirectToPage("/Projects");
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = $"Ошибка при удалении проекта: {response.StatusCode}.";
+                    return Page();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Исключение при обновлении данных: {ex.Message}");
+                return Page();
             }
         }
     }

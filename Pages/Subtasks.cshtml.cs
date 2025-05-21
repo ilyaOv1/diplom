@@ -27,6 +27,8 @@ namespace ProjManagmentSystem.Pages
 
         [BindProperty(SupportsGet = true)]
         public int? TaskId { get; set; }
+        [BindProperty]
+        public int SubtaskId { get; set; }
 
         public SubtasksModel(IHttpClientFactory httpClientFactory, UserService userService) : base(httpClientFactory)
         {
@@ -188,6 +190,38 @@ namespace ProjManagmentSystem.Pages
             catch (Exception ex)
             {
                 return new JsonResult(new { success = false, message = ex.Message });
+            }
+        }
+
+        public async Task<IActionResult> OnPostDeleteSubtask()
+        {
+            var isAuthenticated = await IsUserAuthenticated();
+
+            if (!isAuthenticated)
+            {
+                return HandleAuthorization(isAuthenticated);
+            }
+
+            var token = Request.Cookies["token"];
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            try
+            {
+                var response = await _httpClient.DeleteAsync($"tasks/remove-subtask/{SubtaskId}");
+                if (response.IsSuccessStatusCode)
+                {
+                    return RedirectToPage("/Tasks");
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = $"Ошибка при удалении подзадачи: {response.StatusCode}.";
+                    return Page();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Исключение при обновлении данных: {ex.Message}");
+                return Page();
             }
         }
     }

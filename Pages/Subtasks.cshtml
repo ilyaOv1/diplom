@@ -209,8 +209,16 @@
                        style="padding: 8px 12px;" />
             </div>
             <hr style="border: 0; height: 2px; background: #B5B5B5;">
-            <div style="display: flex;">
-                <div style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 16px;" id="RemoveAndArchiveButtons">
+                    <a id="openModalConfirm"
+                       style="color: #EB0000; text-decoration: none; font-size: 14px; cursor: pointer;">
+                        Удалить
+                    </a>
+
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 8px;">
                     <button type="submit" class="button" id="createButton">Создать</button>
                 </div>
             </div>
@@ -220,12 +228,33 @@
     </div>
 </div>
 
+<div id="modalConfirmOverlay" class="modal-overlay" style="display: none;"></div>
+
+<div id="modalConfirm" class="modal-content" style="display: none;">
+    <span id="closeModalConfirm" class="close">&times;</span>
+    <h2 style="font-weight: 600; font-size: 18px;">Подтверждение удаления подзадачи</h2>
+    <p style="font-size: 14px;">Вы уверены, что хотите удалить подзадачу? Это действие нельзя отменить.</p>
+    <div style="display: flex; margin-top: 20px; justify-content: center; gap: 30px;">
+        <button id="cancelDelete" style="background-color: #2954EC; border: none; padding: 10px 20px; border-radius: 14px; cursor: pointer;">Отмена</button>
+        <form method="post">
+            <input type="hidden" id="subtaskIdToDelete" name="subtaskId" />
+            <button type="submit" asp-page-handler="DeleteSubtask" id="confirmDelete" style="background-color: white; color: #EB0000; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;">Удалить</button>
+        </form>
+    </div>
+</div>
+
 <script>
     const addSubtaskButton = document.getElementById('addSubTaskButton');
     const addSubtaskBtn = document.getElementById('addSubtaskBtn');
     const addSubtaskModalOverlay = document.getElementById('addSubtaskModalOverlay');
     const addSubtaskModal = document.getElementById('addSubtaskModal');
     const addSubtaskCloseModal = document.getElementById('addSubtaskCloseModal');
+    const openModalConfirm = document.getElementById('openModalConfirm');
+    const modalConfirm = document.getElementById('modalConfirm');
+    const modalConfirmOverlay = document.getElementById('modalConfirmOverlay');
+    const cancelDelete = document.getElementById('cancelDelete');
+    const closeModalConfirm = document.getElementById('closeModalConfirm');
+    const RemoveAndArchiveButtons = document.getElementById('RemoveAndArchiveButtons');
     const currUsersInTask = [];
 
     if (addSubtaskButton) {
@@ -234,6 +263,10 @@
             addSubtaskModal.style.display = 'block';
             document.getElementById("nameWindow").innerText = "Добавление подзадачи";
             document.getElementById("createButton").innerText = "Добавить";
+            document.getElementById("nameInput").value = "";
+            document.getElementById("descriptionInput").value = "";
+            RemoveAndArchiveButtons.style.visibility = "hidden";
+            RemoveAndArchiveButtons.style.width = "0";
             loadUsersToSelect();
         });
     }
@@ -244,6 +277,10 @@
             addSubtaskModal.style.display = 'none';
             document.getElementById("nameWindow").innerText = "Добавление подзадачи";
             document.getElementById("createButton").innerText = "Добавить";
+            document.getElementById("nameInput").value = "";
+            document.getElementById("descriptionInput").value = "";
+            RemoveAndArchiveButtons.style.visibility = "hidden";
+            RemoveAndArchiveButtons.style.width = "0";
         });
     }
 
@@ -255,6 +292,42 @@
             }
         });
 
+    }
+
+    if (openModalConfirm) {
+        openModalConfirm.addEventListener('click', (event) => {
+            if (event.target === openModalConfirm) {
+                const subtaskId = document.getElementById("subtaskId").value;
+                document.getElementById("subtaskIdToDelete").value = subtaskId;
+                modalConfirm.style.display = 'block';
+                modalConfirmOverlay.style.display = 'block';
+            }
+        });
+    }
+
+    if (cancelDelete) {
+        cancelDelete.addEventListener('click', (event) => {
+            if (event.target === cancelDelete) {
+                modalConfirm.style.display = 'none';
+                modalConfirmOverlay.style.display = 'none';
+            }
+        });
+    }
+
+    if (closeModalConfirm) {
+        closeModalConfirm.addEventListener('click', () => {
+            modalConfirmOverlay.style.display = 'none';
+            modalConfirm.style.display = 'none';
+        });
+    }
+
+    if (modalConfirmOverlay) {
+        modalConfirmOverlay.addEventListener('click', (event) => {
+            if (event.target === modalConfirmOverlay) {
+                modalConfirmOverlay.style.display = 'none';
+                modalConfirm.style.display = 'none';
+            }
+        });
     }
 
     function dragStart(event) {
@@ -365,6 +438,8 @@
         document.getElementById("descriptionInput").value = description;
         document.getElementById("nameWindow").innerText = "Подробности подзадачи";
         document.getElementById("createButton").innerText = "Изменить";
+        RemoveAndArchiveButtons.style.visibility = "";
+        RemoveAndArchiveButtons.style.width = "";
         if (expected_date) {
             const [day, month, year] = expected_date.split('.');
             const formattedDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;

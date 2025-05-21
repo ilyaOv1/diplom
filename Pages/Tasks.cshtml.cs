@@ -34,6 +34,8 @@ namespace ProjManagmentSystem.Pages
 
         [BindProperty]
         public string SelectedUsersToTask { get; set; }
+        [BindProperty]
+        public int TaskId { get; set; }
 
         public TasksModel(IHttpClientFactory httpClientFactory, UserService userService) : base(httpClientFactory)
         {
@@ -401,6 +403,39 @@ namespace ProjManagmentSystem.Pages
             catch (Exception ex)
             {
                 return new JsonResult(new { success = false, message = ex.Message });
+            }
+        }
+
+        public async Task<IActionResult> OnPostDeleteTask()
+        {
+            var isAuthenticated = await IsUserAuthenticated();
+
+            if (!isAuthenticated)
+            {
+                return HandleAuthorization(isAuthenticated);
+            }
+
+            var token = Request.Cookies["token"];
+            Token = token;
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            try
+            {
+                var response = await _httpClient.DeleteAsync($"tasks/remove/{TaskId}");
+                if (response.IsSuccessStatusCode)
+                {
+                    return RedirectToPage("/Tasks");
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = $"Ошибка при удалении задачи: {response.StatusCode}.";
+                    return Page();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Исключение при обновлении данных: {ex.Message}");
+                return Page();
             }
         }
     }
