@@ -613,6 +613,30 @@
         }
     });
 
+    document.getElementById("inArchive").addEventListener("click", async function () {
+        const taskId = document.getElementById("taskIdInput").value;
+
+        if (!taskId) {
+            alert("Задача не выбрана");
+            return;
+        }
+
+        const response = await fetch(`/Tasks?handler=ChangeArchiveTask&taskId=${taskId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            window.location.reload(); 
+        } else {
+            alert("Ошибка при изменении статуса архива");
+        }
+    });
+
     function dragStart(event) {
         window.draggedTask = event.target;
         event.dataTransfer.effectAllowed = 'move';

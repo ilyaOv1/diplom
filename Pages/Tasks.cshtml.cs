@@ -438,5 +438,39 @@ namespace ProjManagmentSystem.Pages
                 return Page();
             }
         }
+
+        public async Task<IActionResult> OnGetChangeArchiveTask(int taskId)
+        {
+
+            var isAuthenticated = await IsUserAuthenticated();
+
+            if (!isAuthenticated)
+            {
+                return HandleAuthorization(isAuthenticated);
+            }
+
+            var token = Request.Cookies["token"];
+            Token = token;
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            try
+            {
+                var response = await _httpClient.GetAsync($"tasks/update-archive/{taskId}");
+                if (response.IsSuccessStatusCode)
+                {
+                    return new JsonResult(new { success = true, taskId = taskId });
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = $"Ошибка при перенесе задачи в архив: {response.StatusCode}.";
+                    return Page();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Исключение при обновлении данных: {ex.Message}");
+                return Page();
+            }
+        }
     }
 }
