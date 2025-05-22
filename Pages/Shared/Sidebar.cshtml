@@ -46,6 +46,12 @@
                     <span>Календарь</span>
                 </a>
             </li>
+            <li class="menu-elements @(ViewContext.RouteData.Values["Page"]?.ToString() == "/Archive" ? "active" : "")">
+                <a asp-page="/Archive" class="menu-link">
+                    <img class="menu-ico" src="~/Images/archive.png" alt="Archive" />
+                    <span>Архив</span>
+                </a>
+            </li>
         </ul>
     </div>
 }

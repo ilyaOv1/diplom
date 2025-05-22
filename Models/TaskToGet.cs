@@ -8,6 +8,7 @@
         public string description { get; set; }
         public string status { get; set; }
         public string creator { get; set; }
+        public string creatorName { get; set; }
         public bool Access { get; set; }
         public DateTime expected_date { get; set; }
         public bool IsUrgent =>

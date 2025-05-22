@@ -8,6 +8,7 @@
         public string description { get; set; }
         public string status { get; set; }
         public string responsible { get; set; }
+        public string responsibleName { get; set; }
         public DateTime expected_date { get; set; }
         public bool IsUrgent =>
                                  (expected_date - DateTime.UtcNow).TotalDays <= 3 &&

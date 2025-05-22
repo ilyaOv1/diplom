@@ -1,0 +1,94 @@
+﻿@page
+@using ProjManagmentSystem.Services
+@model ProjManagmentSystem.Pages.ArchiveModel
+@{
+    ViewData["Title"] = "Archive";
+    var isTaskPage = ViewContext.RouteData.Values["Page"]?.ToString() == "/Archive";
+    @inject UserService UserService
+}
+<div class="page-container">
+    <div class="header" style="margin-top: 80px;">
+        <h1>Архив</h1>
+    </div>
+    <hr class="header-line">
+
+    <div style="overflow-y: auto; display: flex; flex-wrap: wrap; gap: 16px; padding: 20px; background-color: #FAFAFA; border-radius: 10px; margin-top: 25px;">
+        @{
+            int count = 0;
+        }
+        @foreach (var i in Model.tasks)
+        {
+            count++;
+
+            <div id="task-@i.id"
+                 class="task-item"
+                 style="box-shadow:0 2px 6px rgba(0,0,0,0.05); border:1px solid #E0E0E0; position:relative; padding:16px; cursor:pointer; background:#FFFFFF; border-radius:8px; width: calc(25% - 12px); transition:transform 0.2s ease, box-shadow 0.2s ease;"
+                 data-project-name="@i.name" 
+                 onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';"
+                 onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 6px rgba(0,0,0,0.05)';">
+
+                <p style="color:#A0A0A0;font-size:12px;margin:0 0 8px 0;">№ @count</p>
+                <p style="font-size:18px;color:#333;font-weight:600;margin:0 0 12px 0;">@i.name</p>
+
+                <div style="display:flex;align-items:center;margin-bottom:12px;">
+                    <p style="font-size:14px;color:#333;margin:0;">Создатель: @i.creator</p>
+                </div>
+
+                <div style="display:flex;align-items:center;margin-bottom:12px;">
+                    <p style="font-size:14px;color:#333;margin:0;">
+                        Ожидаемая дата: @(i.expected_date.ToString("dd.MM.yyyy"))
+                    </p>
+                </div>
+
+                <div style="position: absolute; top: 10px; right: 10px; display: flex; gap: 8px;">
+                    <button type="button"
+                            onclick="restoreTask(@i.id)"
+                            style="background-color: #2954EC; color: white; border: none; padding: 4px 10px; font-size: 12px; border-radius: 4px; cursor: pointer;">
+                        Вернуть
+                    </button>
+                    <button type="button"
+                            onclick="deleteTask(@i.id)"
+                            style="background-color: #EB0000; color: white; border: none; padding: 4px 10px; font-size: 12px; border-radius: 4px; cursor: pointer;">
+                        Удалить
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    async function restoreTask(taskId) {
+        const response = await fetch(`/Archive?handler=ChangeArchiveTask&taskId=${taskId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            window.location.reload();
+        } else {
+            alert("Ошибка при изменении статуса архива");
+        }
+    }
+
+    async function deleteTask(taskId) {
+        const response = await fetch(`/Archive?handler=DeleteTask&taskId=${taskId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            window.location.reload();
+        } else {
+            alert("Ошибка при изменении удалении задачи");
+        }
+    }
+</script>
