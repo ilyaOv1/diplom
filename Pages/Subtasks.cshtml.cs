@@ -125,13 +125,12 @@ namespace ProjManagmentSystem.Pages
             {
                 var formContent = new MultipartFormDataContent
                 {
-                    { new StringContent("1"), "id" },
                     { new StringContent(subtask.name), "name" },
-                    { new StringContent(subtask.task.ToString()), "task"},
-                    { new StringContent(subtask.description), "description" },
-                    { new StringContent(subtask.description), "status" },
-
-                    { new StringContent(subtask.responsible.ToString()), "responsible" }
+                    { new StringContent(subtask.task.ToString()), "task" },
+                    { new StringContent(subtask.description ?? string.Empty), "description" },
+                    { new StringContent("Новая"), "status" },
+                    { new StringContent(subtask.responsible ?? string.Empty), "responsible" },
+                    { new StringContent(subtask.responsible ?? string.Empty), "responsibleName" },
                 };
 
                 var expectedDate = subtask.expected_date == DateTime.Today

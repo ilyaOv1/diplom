@@ -6,6 +6,7 @@ using ProjManagmentSystem.Services;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using System.Net;
 
 namespace ProjManagmentSystem.Pages
 {
@@ -34,6 +35,8 @@ namespace ProjManagmentSystem.Pages
 
         [BindProperty]
         public string SelectedUsersToTask { get; set; }
+        [BindProperty]
+        public string SelectedSubtasks { get; set; }
         [BindProperty]
         public int TaskId { get; set; }
 
@@ -133,6 +136,11 @@ namespace ProjManagmentSystem.Pages
                 {
                     users = JsonSerializer.Deserialize<List<UserWithResponsibilityDTO>>(SelectedUsersToTask);
                 }
+                var subtasks = new List<SubtaskDTO>();
+                if (!string.IsNullOrEmpty(SelectedSubtasks))
+                {
+                    subtasks = JsonSerializer.Deserialize<List<SubtaskDTO>>(SelectedSubtasks);
+                }
                 var formContent = new MultipartFormDataContent
                 {
                     { new StringContent(task.name), "name" },
@@ -159,70 +167,50 @@ namespace ProjManagmentSystem.Pages
                 {
                     if (!EditingTaskId.HasValue)
                     {
-                        var responseContent = await response.Content.ReadAsStringAsync();
-                        var result = JsonSerializer.Deserialize<Tasks>(responseContent);
-                        int taskId = result.id;
-                        var userEmails = users.Select(u => new UserWithResponsibilityDTO
-                        {
-                            Email = u.Email,
-                            IsResponsible = u.IsResponsible
-                        }).ToList();
 
-                        var addUsersToProjectDTO = new AddUsersToTaskDTO
-                        {
-                            TaskId = taskId,
-                            UserIds = userEmails
-                        };
+                        HttpResponseMessage response2 = await AddUsersToTask(response, users);
 
-                        var jsonContent = new StringContent(
-                            JsonSerializer.Serialize(addUsersToProjectDTO),
-                            Encoding.UTF8,
-                            "application/json"
-                        );
-                        var addUserResponse = await _httpClient.PostAsync("tasks/add-users-task", jsonContent);
-
-                        if (addUserResponse.IsSuccessStatusCode)
+                        if (response2.IsSuccessStatusCode)
                         {
-                            return RedirectToPage(new { projectName = ProjectName, projectId = ProjectId });
+                            response2 = await AddSubtaskToTask(subtasks, response);
+
+                            if (response2.IsSuccessStatusCode)
+                            {
+                                return RedirectToPage(new { projectName = ProjectName, projectId = ProjectId });
+                            }
+                            else
+                            {
+                                Console.WriteLine($"Ошибка при добавлении подзадач: {response2.StatusCode}");
+                                return RedirectToPage(new { projectName = ProjectName, projectId = ProjectId });
+                            }
                         }
                         else
                         {
-                            Console.WriteLine($"Ошибка при добавлении пользователей: {addUserResponse.StatusCode}");
+                            Console.WriteLine($"Ошибка при добавлении пользователей: {response2.StatusCode}");
                             return RedirectToPage(new { projectName = ProjectName, projectId = ProjectId });
                         }
                     }
                     else
                     {
-                        int projectId = EditingTaskId.Value;
+                        HttpResponseMessage response2 = await UpdateUsersToTask(users);
 
-
-                        var userEmails = users.Select(u => new UserWithResponsibilityDTO
+                        if (response2.IsSuccessStatusCode)
                         {
-                            Email = u.Email,
-                            IsResponsible = u.IsResponsible
-                        }).ToList();
+                            response2 = await AddSubtaskToTask(subtasks, response);
 
-                        var addUsersToProjectDTO = new AddUsersToTaskDTO
-                        {
-                            TaskId = projectId,
-                            UserIds = userEmails
-                        };
-
-                        var jsonContent = new StringContent(
-                            JsonSerializer.Serialize(addUsersToProjectDTO),
-                            Encoding.UTF8,
-                            "application/json"
-                        );
-
-                        var addUserResponse = await _httpClient.PutAsync("tasks/update-users-tasks", jsonContent);
-
-                        if (addUserResponse.IsSuccessStatusCode)
-                        {
-                            return RedirectToPage(new { projectName = ProjectName, projectId = ProjectId });
+                            if (response2.IsSuccessStatusCode)
+                            {
+                                return RedirectToPage(new { projectName = ProjectName, projectId = ProjectId });
+                            }
+                            else
+                            {
+                                Console.WriteLine($"Ошибка при добавлении подзадач: {response2.StatusCode}");
+                                return RedirectToPage(new { projectName = ProjectName, projectId = ProjectId });
+                            }
                         }
                         else
                         {
-                            Console.WriteLine($"Ошибка при обновлении пользователей: {addUserResponse.StatusCode}");
+                            Console.WriteLine($"Ошибка при обновлении пользователей: {response2.StatusCode}");
                             ModelState.AddModelError(string.Empty, "Ошибка при обновлении пользователей");
                             return Page();
                         }
@@ -268,7 +256,8 @@ namespace ProjManagmentSystem.Pages
                     { new StringContent(subtask.description), "description" },
                     { new StringContent(subtask.description), "status" },
 
-                    { new StringContent(subtask.responsible.ToString()), "responsible" }
+                    { new StringContent(subtask.responsible.ToString()), "responsible" },
+                    { new StringContent(subtask.responsible.ToString()), "responsibleName"  }
                 };
                 var expectedDate = subtask.expected_date == DateTime.Today
                                     ? DateTime.Now.AddDays(7)
@@ -471,6 +460,110 @@ namespace ProjManagmentSystem.Pages
                 Console.WriteLine($"Исключение при обновлении данных: {ex.Message}");
                 return Page();
             }
+        }
+
+        public async Task<HttpResponseMessage> AddUsersToTask(HttpResponseMessage response, List<UserWithResponsibilityDTO> users)
+        {
+            var responseContent = await response.Content.ReadAsStringAsync();
+            var result = JsonSerializer.Deserialize<Tasks>(responseContent);
+            int taskId = result.id;
+
+            var userEmails = users.Select(u => new UserWithResponsibilityDTO
+            {
+                Email = u.Email,
+                IsResponsible = u.IsResponsible
+            }).ToList();
+
+            var addUsersToProjectDTO = new AddUsersToTaskDTO
+            {
+                TaskId = taskId,
+                UserIds = userEmails
+            };
+
+            var jsonContent = new StringContent(
+                JsonSerializer.Serialize(addUsersToProjectDTO),
+                Encoding.UTF8,
+                "application/json"
+            );
+
+            var addUserResponse = await _httpClient.PostAsync("tasks/add-users-task", jsonContent);
+
+            return addUserResponse;
+        }
+
+        public async Task<HttpResponseMessage> UpdateUsersToTask(List<UserWithResponsibilityDTO> users)
+        {
+            int projectId = EditingTaskId.Value;
+
+
+            var userEmails = users.Select(u => new UserWithResponsibilityDTO
+            {
+                Email = u.Email,
+                IsResponsible = u.IsResponsible
+            }).ToList();
+
+            var addUsersToProjectDTO = new AddUsersToTaskDTO
+            {
+                TaskId = projectId,
+                UserIds = userEmails
+            };
+
+            var jsonContent = new StringContent(
+                JsonSerializer.Serialize(addUsersToProjectDTO),
+                Encoding.UTF8,
+                "application/json"
+            );
+
+            var addUserResponse = await _httpClient.PutAsync("tasks/update-users-tasks", jsonContent);
+
+            return addUserResponse;
+        }
+
+        public async Task<HttpResponseMessage> AddSubtaskToTask(List<SubtaskDTO> subtasks, HttpResponseMessage response)
+        {
+            int taskId;
+
+            if (!EditingTaskId.HasValue)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<Tasks>(responseContent);
+                taskId = result.id;
+            }
+            else
+            {
+                taskId = EditingTaskId.Value;
+            }
+
+            if (subtasks == null || !subtasks.Any())
+            {
+                return new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent("Нет подзадач для добавления", Encoding.UTF8, "text/plain")
+                };
+            }
+
+            foreach (var subtask in subtasks)
+            {
+                var formContent = new MultipartFormDataContent
+                {
+                    { new StringContent(subtask.Name), "name" },
+                    { new StringContent(taskId.ToString()), "task" },
+                    { new StringContent(subtask.Description ?? string.Empty), "description" },
+                    { new StringContent("Новая"), "status" },
+                    { new StringContent(subtask.ResponsibleEmail ?? string.Empty), "responsible" },
+                    { new StringContent(subtask.ResponsibleEmail ?? string.Empty), "responsibleName" },
+                    { new StringContent(subtask.ExpectedDate.ToString("yyyy-MM-dd")), "expected_date" }
+                };
+
+                response = await _httpClient.PostAsync("tasks/add-subtask", formContent);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return response; 
+                }
+            }
+
+            return response;
         }
     }
 }

@@ -7,6 +7,7 @@
     @inject UserService UserService
 }
 
+
 <div class="page-container" >
     <div class="header" style="margin-top: 80px;">
         <h1>Доска задач @Model.ProjectName</h1>
@@ -273,18 +274,20 @@
         <span id="addSubtaskCloseModal" class="close">&times;</span>
         <p style="color: #ABABAB; font-size: 14px;">Добавление подзадачи</p>
         <hr style="border: 0; height: 2px; background: #B5B5B5;">
-        <form id="addSubTaskForm" method="post" asp-page-handler="CreateSubTask" enctype="multipart/form-data">
+        <form id="addSubTaskForm" method="post" enctype="multipart/form-data">
             <div style="">
                 <div class="form-field">
                     <p class="form-label">Наименование</p>
                     <input class="form-control addProjInput"
                            name="Name"
+                           id="subtaskName"
                            placeholder="Введите название задачи" />
                 </div>
 
                 <div class="form-field">
                     <p class="form-label">Описание</p>
                     <textarea class="form-control addProjTextArea"
+                              id="subtaskDescription"
                               name="Description"></textarea>
                 </div>
                 <input type="hidden" name="Task" id="addSubTaskId" />
@@ -359,6 +362,7 @@
     const selectedTaskUsers = [];
     const subtasksList = [];
     const currUsersInTask = [];
+    const originalSubtasks = [];
     let draggedTask = null;
 
     if (addTaskButton) {
@@ -493,6 +497,16 @@
         const form = document.getElementById("addTaskForm");
         const formData = new FormData(form);
         formData.append("SelectedUsersToTask", JSON.stringify(selectedTaskUsers));
+        const newSubtasks = subtasksList.filter(newSubtask => {
+            if (!newSubtask.Id) {
+                return true;
+            }
+            else{
+                return false;
+            }
+        });
+        console.log(newSubtasks);
+        formData.append("SelectedSubtasks", JSON.stringify(newSubtasks));
         try {
             const response = await fetch(form.action, {
                 method: "POST",
@@ -585,32 +599,27 @@
     document.getElementById('addSubTaskForm').addEventListener('submit', async function (e) {
         e.preventDefault();
 
-        const formData = new FormData(this);
+        const name = document.getElementById('subtaskName').value;
+        const description = document.getElementById('subtaskDescription').value;
+        const responsible = document.getElementById('subtaskResponsibleSelect').value;
+        const expectedDate = document.getElementById('editSubtaskExpectedDate').value;
 
-        try {
-            const response = await fetch(this.action, {
-                method: 'POST',
-                headers: {
-                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
-                },
-                body: formData
-            });
-
-            const result = await response.json();
-
-
-            if (result.success) {
-                document.getElementById('addSubtaskModal').style.display = 'none';
-                document.getElementById('addSubtaskModalOverlay').style.display = 'none';
-
-                this.reset();
-            } else {
-                alert('Ошибка: ' + (result.message || 'Не удалось создать подзадачу'));
-            }
-        } catch (error) {
-            console.error('Ошибка:', error);
-            alert('Произошла ошибка при отправке формы.');
+        if (!name || !responsible) {
+            alert("Заполните обязательные поля");
+            return;
         }
+        subtasksList.push({
+            Id: null,
+            Name: name,
+            Description: description,
+            ResponsibleEmail: responsible,
+            ExpectedDate: expectedDate
+        });
+
+        updateUI();
+        this.reset();
+        addSubtaskModal.style.display = 'none';
+        addSubtaskModalOverlay.style.display = 'none';
     });
 
     document.getElementById("inArchive").addEventListener("click", async function () {
@@ -715,9 +724,15 @@
         updateUI(canEdit);
     }
 
-    function addSubtask(name, responsible) {
+    function addSubtask(id, name, description, responsible, expected_date) {
 
-        const subtask = { name, responsible };
+        const subtask = {
+            Id: id,
+            Name: name,
+            Description: description,
+            ResponsibleEmail: responsible,
+            ExpectedDate: expected_date
+        };
         subtasksList.push(subtask);
     }
 
@@ -782,7 +797,7 @@
         count = 0;
         subtasksList.forEach(s => {
             if (count >= maxToShow) return;
-            const element = createSubtaskElement(s.name, s.responsible);
+            const element = createSubtaskElement(s.Name, s.ResponsibleEmail);
             listOfSubtasks.appendChild(element);
             count++;
         })
@@ -1064,12 +1079,26 @@
             if (!result.success) {
                 listOfSubtasks.innerHTML = `<p>${result.message}</p>`;
 
+
+
+
                 return;
             }
 
             listOfSubtasks.innerHTML = '';
             result.subtasks.forEach(subtask1 => {
-                addSubtask(subtask1.name, subtask1.responsible);
+                addSubtask(subtask1.id, subtask1.name, subtask1.description, subtask1.responsible, subtask1.expectedDate);
+            });
+            originalSubtasks = result.subtasks.map(st => ({
+                Name: st.name,
+                Description: st.description,
+                ResponsibleEmail: st.responsible,
+                ExpectedDate: st.expected_date
+            }));
+
+            subtasksList.length = 0;
+            originalSubtasks.forEach(st => {
+                subtasksList.push({ ...st });
             });
 
         } catch (error) {
@@ -1113,5 +1142,3 @@
 
     
 </script>
-
-
