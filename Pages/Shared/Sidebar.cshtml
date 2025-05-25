@@ -2,8 +2,9 @@
 
 @{
     @inject UserService UserService
-    
+
     <div id="sidebar" class="sidebar">
+        <div class="sidebar-close-btn" onclick="toggleSidebar()">&times;</div>
         <h1>TASKA</h1>
         <a asp-page="/Profile" class="block-link @(ViewContext.RouteData.Values["Page"]?.ToString() == "/Profile" ? "active" : "")">
             <div class="user-info">

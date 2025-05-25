@@ -1,5 +1,5 @@
 ﻿@{
-    var showSidebar = ViewData["ShowSidebar"] as bool? ?? true; 
+    var showSidebar = ViewData["ShowSidebar"] as bool? ?? true;
     var centeredPages = new[] { "/Authorization", "/Registration", "/ForgotPassword" };
     var isLoginPage = centeredPages.Contains(ViewContext.RouteData.Values["Page"]?.ToString());
     var isProfilePage = ViewContext.RouteData.Values["Page"]?.ToString() == "/Profile";
@@ -13,12 +13,17 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/ProjManagmentSystem.styles.css" asp-append-version="true" />
-
 </head>
-<body >
+<body>
     <header>
-
+        <!-- Добавляем кнопку меню для мобильных -->
+        <div class="mobile-menu-btn" onclick="toggleSidebar()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
     </header>
+
     <div class="container">
         @if (ViewContext.RouteData.Values["Page"]?.ToString() == "/Profile")
         {
@@ -41,8 +46,6 @@
         <div class="@(isLoginPage ? "authreg" : "") @(isProfilePage ? "auth-page" : "content")">
             @RenderBody()
         </div>
-
-
     </div>
 
     <footer class="border-top footer text-muted">
@@ -52,6 +55,40 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
 
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('active');
+        }
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+
+<script>
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        sidebar.classList.toggle('active');
+
+        const overlay = document.querySelector('.sidebar-overlay');
+        if (overlay) {
+            overlay.classList.toggle('active');
+        }
+
+        if (overlay && overlay.classList.contains('active')) {
+            overlay.addEventListener('click', function () {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            });
+        }
+    }
+
+    document.querySelectorAll('.menu-link').forEach(link => {
+        link.addEventListener('click', function () {
+            if (window.innerWidth <= 768) {
+                toggleSidebar();
+            }
+        });
+    });
+</script>
