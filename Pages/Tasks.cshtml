@@ -1140,5 +1140,20 @@
         }
     }
 
+    document.addEventListener("DOMContentLoaded", function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        const taskId = urlParams.get('taskId');
+
+        if (taskId) {
+            const taskElement = document.getElementById('task-' + taskId);
+
+            if (taskElement) {
+                taskElement.click();
+            } else {
+                console.warn("Задача с ID " + taskId + " не найдена");
+            }
+        }
+    });
+
     
 </script>

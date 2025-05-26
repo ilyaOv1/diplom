@@ -42,6 +42,11 @@
                     return { domNodes: [container] };
                 },
                 eventClick: function (info) {
+                    const taskId = info.event.extendedProps.id;
+                    console.log("dsadsa");
+                    if (taskId) {
+                        window.location.href = '/Tasks?taskId=' + taskId;
+                    }
                 }
             });
 

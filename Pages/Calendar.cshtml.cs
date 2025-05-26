@@ -48,6 +48,7 @@ namespace ProjManagmentSystem.Pages
                             start = t.expected_date.ToString("yyyy-MM-dd"),
                             extendedProps = new
                             {
+                                id = t.id,
                                 description = t.description,
                                 status = t.status
                             }
