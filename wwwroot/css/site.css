@@ -70,7 +70,29 @@ body {
 
 
 
+.audit-log-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+    color: #333;
+}
 
+.audit-log-date {
+    flex-shrink: 0;
+    white-space: nowrap;
+    margin-right: 16px;
+    color: #777;
+    font-size: 13px;
+    min-width: 160px;
+}
+
+.audit-log-description {
+    flex-grow: 1;
+    word-wrap: break-word;
+}
 
 
 .profile-background {

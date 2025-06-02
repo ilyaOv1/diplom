@@ -97,6 +97,11 @@ namespace ProjManagmentSystem.Pages
                 {
                     users = JsonSerializer.Deserialize<List<UserWithResponsibilityDTO>>(SelectedUsersToProject);
                 }
+                if (!RegexService.IsValidName(project.Name) || !RegexService.IsValidName(project.Description))
+                {
+                    Console.WriteLine($"Исключение при вводе имени данных");
+                    return Page();
+                }
                 var formContent = new MultipartFormDataContent
                 {
                     { new StringContent(project.Name), "Name" },

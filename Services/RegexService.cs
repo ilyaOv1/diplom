@@ -28,5 +28,12 @@ namespace ProjManagmentSystem.Services
             Regex regex = new Regex(pattern);
             return regex.IsMatch(password);
         }
+
+        public static bool IsValidName(string name)
+        {
+            string pattern = @"^[a-zA-Zа-яА-ЯёЁ0-9\s\-_]+$";
+            Regex regex = new Regex(pattern);
+            return regex.IsMatch(name);
+        }
     }
 }

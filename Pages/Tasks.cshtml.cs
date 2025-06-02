@@ -141,6 +141,11 @@ namespace ProjManagmentSystem.Pages
                 {
                     subtasks = JsonSerializer.Deserialize<List<SubtaskDTO>>(SelectedSubtasks);
                 }
+                if (!RegexService.IsValidName(task.name) || !RegexService.IsValidName(task.description))
+                {
+                    Console.WriteLine($"Исключение при вводе имени данных");
+                    return Page();
+                }
                 var formContent = new MultipartFormDataContent
                 {
                     { new StringContent(task.name), "name" },
@@ -248,6 +253,11 @@ namespace ProjManagmentSystem.Pages
 
             try
             {
+                if (!RegexService.IsValidName(subtask.name) || !RegexService.IsValidName(subtask.description))
+                {
+                    Console.WriteLine($"Исключение при вводе имени данных");
+                    return Page();
+                }
                 var formContent = new MultipartFormDataContent
                 {
                     { new StringContent("1"), "id" },

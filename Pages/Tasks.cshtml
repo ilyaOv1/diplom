@@ -11,13 +11,19 @@
 <div class="page-container" >
     <div class="header" style="margin-top: 80px;">
         <h1>Доска задач @Model.ProjectName</h1>
+
         @if (Model.IsPermissionToCreateAndEdit)
         {
             <form method="post">
                 <button id="addTaskButton" type="button" class="button">Добавить задачу</button>
+                <!-- Кнопка "История" в том же стиле -->
+                <button id="showHistoryButton" type="button" class="button">
+                    История
+                </button>
             </form>
         }
-        <input hidden id="projectId" value="@Model.ProjectId"/>
+
+        <input hidden id="projectId" value="@Model.ProjectId" />
     </div>
     <hr class="header-line">
 
@@ -317,9 +323,27 @@
         </form>
         <div id="searchResultsTask" style="margin-top: 16px;">
         </div>
+
+        
     </div>
 
+    <div id="auditLogModalOverlay" class="modal-overlay" style="display: none;"></div>
 
+    <div id="auditLogModal" class="modal-content" style="display: none; width: 900px;">
+        <span id="auditLogCloseModal" class="close">&times;</span>
+        <p style="color: #ABABAB; font-size: 14px;">История действий</p>
+        <hr style="border: 0; height: 2px; background: #B5B5B5;">
+
+        <div id="auditLogList" style="max-height: 500px; overflow-y: auto; padding-right: 10px;">
+        </div>
+
+        <hr style="border: 0; height: 2px; background: #B5B5B5;">
+        <div style="display: flex;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
+                <button type="button" id="auditLogCloseModalBtn" class="button">Закрыть</button>
+            </div>
+        </div>
+    </div>
 
     <div id="participantsTaskList"></div>
 
@@ -359,11 +383,17 @@
     const cancelDelete = document.getElementById('cancelDelete');
     const closeModalConfirm = document.getElementById('closeModalConfirm');
     const RemoveAndArchiveButtons = document.getElementById('RemoveAndArchiveButtons');
+    const showHistoryButton = document.getElementById('showHistoryButton');
+
     const selectedTaskUsers = [];
     const subtasksList = [];
     const currUsersInTask = [];
     const originalSubtasks = [];
     let draggedTask = null;
+
+    document.getElementById("auditLogCloseModal").addEventListener("click", closeAuditLogModal);
+    document.getElementById("auditLogCloseModalBtn").addEventListener("click", closeAuditLogModal);
+    document.getElementById("auditLogModalOverlay").addEventListener("click", closeAuditLogModal);
 
     if (addTaskButton) {
         addTaskButton.addEventListener('click', () => {
@@ -489,6 +519,65 @@
                 modalConfirm.style.display = 'none';
             }
         });
+    }
+
+    document.getElementById("showHistoryButton").addEventListener("click", async function () {
+        const projectId = @Model.ProjectId;
+
+        const logList = document.getElementById("auditLogList");
+
+        const token = getCookie('token');
+        if (!token) {
+            console.error('Токен не найден в cookies');
+            searchResultsTask.innerHTML = '<p>Ошибка авторизации</p>';
+            return;
+        }
+
+        fetch(`https://localhost:7136/api/auth/tasks/logs/${projectId}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            credentials: 'include'
+        })
+            .then(response => {
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        throw new Error('Не авторизован');
+                    }
+                    throw new Error('Ошибка сети');
+                }
+                return response.json();
+            })
+            .then(data => {
+                logList.innerHTML = "";
+                data.forEach(log => {
+                    const item = document.createElement("div");
+                    item.className = "audit-log-item";
+
+                    item.innerHTML = `
+                    <div class="audit-log-date">${new Date(log.timestamp).toLocaleString()}</div>
+                    <div class="audit-log-description">${log.description}</div>
+                `;
+                    logList.appendChild(item);
+                });
+
+                console.log(data);
+            })
+            .catch(error => {
+                console.error('Ошибка при поиске пользователя:', error);
+                searchResultsTask.innerHTML = `<p>${error.message}</p>`;
+            });
+
+        document.getElementById("auditLogModalOverlay").style.display = "block";
+        document.getElementById("auditLogModal").style.display = "block";
+    });
+
+
+    
+    function closeAuditLogModal() {
+        document.getElementById("auditLogModalOverlay").style.display = "none";
+        document.getElementById("auditLogModal").style.display = "none";
     }
 
     document.getElementById("editButton").addEventListener("click", async function (e) {
