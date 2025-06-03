@@ -324,7 +324,7 @@
                 }
 
                 data.forEach(user => {
-                    if (selectedUsers.some(participant => participant.email === user.email) || user.email === currUserEmail.textContent) {
+                    if (selectedUsers.some(participant => participant.Email === user.email) || user.email === currUserEmail.textContent) {
                         return;
                     }
                     const userDiv = document.createElement('div');

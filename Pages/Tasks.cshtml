@@ -517,10 +517,11 @@
     }
 
     document.getElementById("showHistoryButton").addEventListener("click", async function () {
-            if (projectId === null) {
-                alert("Невозможно загрузить историю: ID проекта не определён");
-                return;
-            }
+        let projectId = @Html.Raw(Json.Serialize(Model.ProjectId));
+        if (projectId === null || isNaN(parseInt(projectId))) {
+            alert("Невозможно загрузить историю: ID проекта не определён или некорректный");
+            return;
+        }
 
         let logList = document.getElementById("auditLogList");
 
@@ -530,7 +531,6 @@
             searchResultsTask.innerHTML = '<p>Ошибка авторизации</p>';
             return;
         }
-
         fetch(`https://localhost:7136/api/auth/tasks/logs/${projectId}`, {
             method: 'GET',
             headers: {
@@ -540,12 +540,9 @@
         })
             .then(response => {
                 if (!response.ok) {
-                    if (response.status === 401) {
-                        throw new Error('Не авторизован');
-                    }
-                    throw new Error('Ошибка сети');
+                    throw new Error('Сетевой ответ не успешен');
                 }
-                return response.json();
+                return response.json(); 
             })
             .then(data => {
                 logList.innerHTML = "";
@@ -560,10 +557,9 @@
                     logList.appendChild(item);
                 });
 
-                console.log(data);
             })
             .catch(error => {
-                console.error('Ошибка при поиске пользователя:', error);
+                console.error('Ошибка при поиске пользователя:', error.message);
                 searchResultsTask.innerHTML = `<p>${error.message}</p>`;
             });
 
@@ -584,15 +580,7 @@
         let form = document.getElementById("addTaskForm");
         let formData = new FormData(form);
         formData.append("SelectedUsersToTask", JSON.stringify(selectedTaskUsers));
-        let newSubtasks = subtasksList.filter(newSubtask => {
-            if (!newSubtask.Id) {
-                return true;
-            }
-            else{
-                return false;
-            }
-        });
-        console.log(newSubtasks);
+        const newSubtasks = subtasksList.filter(s => !s.Id);
         formData.append("SelectedSubtasks", JSON.stringify(newSubtasks));
         try {
             let response = await fetch(form.action, {
@@ -869,11 +857,9 @@
             if (count >= maxToShow) return;
 
             if (selectedTaskUsers.length <= 1){
-                console.log(u.Email);
                 let element = createUserElement(u.Email, u.Name, u.IsResponsible, false);
                 usersInProjectTask.appendChild(element);
             }else{
-                console.log(u.Email);
                 let element = createUserElement(u.Email, u.Name, u.IsResponsible, canEdit);
                 usersInProjectTask.appendChild(element);
             }
@@ -1173,6 +1159,7 @@
 
             listOfSubtasks.innerHTML = '';
             result.subtasks.forEach(subtask1 => {
+                
                 addSubtask(subtask1.id, subtask1.name, subtask1.description, subtask1.responsible, subtask1.expectedDate);
             });
             originalSubtasks = result.subtasks.map(st => ({
@@ -1182,10 +1169,7 @@
                 ExpectedDate: st.expected_date
             }));
 
-            subtasksList.length = 0;
-            originalSubtasks.forEach(st => {
-                subtasksList.push({ ...st });
-            });
+
 
         } catch (error) {
             console.error(error);

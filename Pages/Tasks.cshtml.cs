@@ -532,7 +532,7 @@ namespace ProjManagmentSystem.Pages
         public async Task<HttpResponseMessage> AddSubtaskToTask(List<SubtaskDTO> subtasks, HttpResponseMessage response)
         {
             int taskId;
-
+            
             if (!EditingTaskId.HasValue)
             {
                 var responseContent = await response.Content.ReadAsStringAsync();
@@ -554,6 +554,7 @@ namespace ProjManagmentSystem.Pages
 
             foreach (var subtask in subtasks)
             {
+                Console.WriteLine(subtask.Name);
                 var formContent = new MultipartFormDataContent
                 {
                     { new StringContent(subtask.Name), "name" },
