@@ -12,16 +12,10 @@
     <div class="header" style="margin-top: 80px;">
         <h1>Доска задач @Model.ProjectName</h1>
 
-        @if (Model.IsPermissionToCreateAndEdit)
-        {
-            <form method="post">
-                <button id="addTaskButton" type="button" class="button">Добавить задачу</button>
-                <!-- Кнопка "История" в том же стиле -->
-                <button id="showHistoryButton" type="button" class="button">
-                    История
-                </button>
-            </form>
-        }
+        <form method="post">
+            <button id="addTaskButton" type="button" class="button">Добавить задачу</button>
+            <button id="showHistoryButton" type="button" class="button">История</button>
+        </form>
 
         <input hidden id="projectId" value="@Model.ProjectId" />
     </div>
@@ -364,31 +358,32 @@
     </div>
 }
 <script>
-    const addTaskButton = document.getElementById('addTaskButton');
-    const addTaskModalOverlay = document.getElementById('addTaskModalOverlay');
-    const addTaskModal = document.getElementById('addTaskModal');
-    const addTaskCloseModal = document.getElementById('addTaskCloseModal');
-    const addParticipantTaskBtn = document.getElementById('addParticipantTaskBtn');
-    const addParticipantTaskModalOverlay = document.getElementById('addParticipantTaskModalOverlay');
-    const addParticipantTaskModal = document.getElementById('addParticipantTaskModal');
-    const addParticipantTaskCloseModal = document.getElementById('addParticipantTaskCloseModal');
-    const addSubtaskBtn = document.getElementById('addSubtaskBtn');
-    const addSubtaskModalOverlay = document.getElementById('addSubtaskModalOverlay');
-    const addSubtaskModal = document.getElementById('addSubtaskModal');
-    const addSubtaskCloseModal = document.getElementById('addSubtaskCloseModal');
-    const searchResultsTask = document.getElementById('searchResultsTask');
-    const openModalConfirm = document.getElementById('openModalConfirm');
-    const modalConfirm = document.getElementById('modalConfirm');
-    const modalConfirmOverlay = document.getElementById('modalConfirmOverlay');
-    const cancelDelete = document.getElementById('cancelDelete');
-    const closeModalConfirm = document.getElementById('closeModalConfirm');
-    const RemoveAndArchiveButtons = document.getElementById('RemoveAndArchiveButtons');
-    const showHistoryButton = document.getElementById('showHistoryButton');
+    let addTaskButton = document.getElementById('addTaskButton');
+    let addTaskModalOverlay = document.getElementById('addTaskModalOverlay');
+    let addTaskModal = document.getElementById('addTaskModal');
+    let addTaskCloseModal = document.getElementById('addTaskCloseModal');
+    let addParticipantTaskBtn = document.getElementById('addParticipantTaskBtn');
+    let addParticipantTaskModalOverlay = document.getElementById('addParticipantTaskModalOverlay');
+    let addParticipantTaskModal = document.getElementById('addParticipantTaskModal');
+    let addParticipantTaskCloseModal = document.getElementById('addParticipantTaskCloseModal');
+    let addSubtaskBtn = document.getElementById('addSubtaskBtn');
+    let addSubtaskModalOverlay = document.getElementById('addSubtaskModalOverlay');
+    let addSubtaskModal = document.getElementById('addSubtaskModal');
+    let addSubtaskCloseModal = document.getElementById('addSubtaskCloseModal');
+    let searchResultsTask = document.getElementById('searchResultsTask');
+    let openModalConfirm = document.getElementById('openModalConfirm');
+    let modalConfirm = document.getElementById('modalConfirm');
+    let modalConfirmOverlay = document.getElementById('modalConfirmOverlay');
+    let cancelDelete = document.getElementById('cancelDelete');
+    let closeModalConfirm = document.getElementById('closeModalConfirm');
+    let RemoveAndArchiveButtons = document.getElementById('RemoveAndArchiveButtons');
+    let showHistoryButton = document.getElementById('showHistoryButton');
+    let isPermissionToCreateAndEdit = @(Model.IsPermissionToCreateAndEdit.ToString().ToLower());
 
-    const selectedTaskUsers = [];
-    const subtasksList = [];
-    const currUsersInTask = [];
-    const originalSubtasks = [];
+    let selectedTaskUsers = [];
+    let subtasksList = [];
+    let currUsersInTask = [];
+    let originalSubtasks = [];
     let draggedTask = null;
 
     document.getElementById("auditLogCloseModal").addEventListener("click", closeAuditLogModal);
@@ -488,7 +483,7 @@
     if (openModalConfirm) {
         openModalConfirm.addEventListener('click', (event) => {
             if (event.target === openModalConfirm) {
-                const taskId = document.getElementById("taskIdInput").value;
+                let taskId = document.getElementById("taskIdInput").value;
                 document.getElementById("taskIdToDelete").value = taskId;
                 modalConfirm.style.display = 'block';
                 modalConfirmOverlay.style.display = 'block';
@@ -522,11 +517,14 @@
     }
 
     document.getElementById("showHistoryButton").addEventListener("click", async function () {
-        const projectId = @Model.ProjectId;
+            if (projectId === null) {
+                alert("Невозможно загрузить историю: ID проекта не определён");
+                return;
+            }
 
-        const logList = document.getElementById("auditLogList");
+        let logList = document.getElementById("auditLogList");
 
-        const token = getCookie('token');
+        let token = getCookie('token');
         if (!token) {
             console.error('Токен не найден в cookies');
             searchResultsTask.innerHTML = '<p>Ошибка авторизации</p>';
@@ -552,7 +550,7 @@
             .then(data => {
                 logList.innerHTML = "";
                 data.forEach(log => {
-                    const item = document.createElement("div");
+                    let item = document.createElement("div");
                     item.className = "audit-log-item";
 
                     item.innerHTML = `
@@ -583,10 +581,10 @@
     document.getElementById("editButton").addEventListener("click", async function (e) {
         e.preventDefault();
 
-        const form = document.getElementById("addTaskForm");
-        const formData = new FormData(form);
+        let form = document.getElementById("addTaskForm");
+        let formData = new FormData(form);
         formData.append("SelectedUsersToTask", JSON.stringify(selectedTaskUsers));
-        const newSubtasks = subtasksList.filter(newSubtask => {
+        let newSubtasks = subtasksList.filter(newSubtask => {
             if (!newSubtask.Id) {
                 return true;
             }
@@ -597,7 +595,7 @@
         console.log(newSubtasks);
         formData.append("SelectedSubtasks", JSON.stringify(newSubtasks));
         try {
-            const response = await fetch(form.action, {
+            let response = await fetch(form.action, {
                 method: "POST",
                 headers: {
                     'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
@@ -616,13 +614,13 @@
     });
 
     function LoadUsersByProject(){
-        const projectId = document.getElementById('projId').value;
+        let projectId = document.getElementById('projId').value;
         if (!projectId) {
             console.error('ID проекта не найден');
             searchResultsTask.innerHTML = '<p>Ошибка: ID проекта не указан</p>';
             return;
         }
-        const token = getCookie('token');
+        let token = getCookie('token');
         if (!token) {
             console.error('Токен не найден в cookies');
             searchResultsTask.innerHTML = '<p>Ошибка авторизации</p>';
@@ -656,7 +654,7 @@
                     if (selectedTaskUsers.some(participant => participant.Email === user.email)) {
                         return;
                     }
-                    const userDiv = document.createElement('div');
+                    let userDiv = document.createElement('div');
                     userDiv.style.display = 'flex';
                     userDiv.style.justifyContent = 'space-between';
                     userDiv.style.alignItems = 'center';
@@ -687,10 +685,10 @@
     document.getElementById('addSubTaskForm').addEventListener('submit', async function (e) {
         e.preventDefault();
 
-        const name = document.getElementById('subtaskName').value;
-        const description = document.getElementById('subtaskDescription').value;
-        const responsible = document.getElementById('subtaskResponsibleSelect').value;
-        const expectedDate = document.getElementById('editSubtaskExpectedDate').value;
+        let name = document.getElementById('subtaskName').value;
+        let description = document.getElementById('subtaskDescription').value;
+        let responsible = document.getElementById('subtaskResponsibleSelect').value;
+        let expectedDate = document.getElementById('editSubtaskExpectedDate').value;
 
         if (!name || !responsible) {
             alert("Заполните обязательные поля");
@@ -711,21 +709,21 @@
     });
 
     document.getElementById("inArchive").addEventListener("click", async function () {
-        const taskId = document.getElementById("taskIdInput").value;
+        let taskId = document.getElementById("taskIdInput").value;
 
         if (!taskId) {
             alert("Задача не выбрана");
             return;
         }
 
-        const response = await fetch(`/Tasks?handler=ChangeArchiveTask&taskId=${taskId}`, {
+        let response = await fetch(`/Tasks?handler=ChangeArchiveTask&taskId=${taskId}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
             }
         });
 
-        const result = await response.json();
+        let result = await response.json();
 
         if (result.success) {
             window.location.reload(); 
@@ -748,8 +746,8 @@
     function drop(event) {
         event.preventDefault();
 
-        const statusColumnId = event.currentTarget.id;
-        const newStatus = {
+        let statusColumnId = event.currentTarget.id;
+        let newStatus = {
             "status-new": "Новая",
             "status-in-progress": "В работе",
             "status-testing": "Можно проверять",
@@ -758,7 +756,7 @@
 
         if (!newStatus || !window.draggedTask) return;
 
-        const taskId = window.draggedTask.id.replace("task-", "");
+        let taskId = window.draggedTask.id.replace("task-", "");
 
         window.draggedTask.remove();
         event.currentTarget.appendChild(window.draggedTask); 
@@ -770,15 +768,15 @@
     }
 
     function updateTaskNumbers() {
-        const columns = document.querySelectorAll('.status-column');
+        let columns = document.querySelectorAll('.status-column');
 
         columns.forEach(column => {
             let counter = 1;
 
-            const tasks = column.querySelectorAll('div[id^="task-"]');
+            let tasks = column.querySelectorAll('div[id^="task-"]');
 
             tasks.forEach(taskDiv => {
-                const numberP = taskDiv.querySelector('p');
+                let numberP = taskDiv.querySelector('p');
 
                 if (numberP && numberP.textContent.trim().startsWith('№')) {
                     numberP.textContent = `№ ${counter++}`;
@@ -788,8 +786,8 @@
     }
 
     function getCookie(name) {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
+        let value = `; ${document.cookie}`;
+        let parts = value.split(`; ${name}=`);
         if (parts.length === 2) return parts.pop().split(';').shift();
     }
 
@@ -799,22 +797,22 @@
             return;
         }
 
-        const participant = { Email: email, Name: name, IsResponsible: isResponsible };
+        let participant = { Email: email, Name: name, IsResponsible: isResponsible };
         selectedTaskUsers.push(participant);
         sendArrayToServer();
         addParticipantTaskModal.style.display = 'none';
         addParticipantTaskModalOverlay.style.display = 'none';
 
-        const searchResults = document.getElementById('searchResultsTask');
+        let searchResults = document.getElementById('searchResultsTask');
         searchResults.innerHTML = '';
 
-        const usersInProjectTask = document.getElementById('usersInProjectTask');
+        let usersInProjectTask = document.getElementById('usersInProjectTask');
         updateUI(canEdit);
     }
 
     function addSubtask(id, name, description, responsible, expected_date) {
 
-        const subtask = {
+        let subtask = {
             Id: id,
             Name: name,
             Description: description,
@@ -825,10 +823,10 @@
     }
 
     function populateSubtaskUserSelect() {
-        const select = document.getElementById('subtaskResponsibleSelect');
+        let select = document.getElementById('subtaskResponsibleSelect');
         select.innerHTML = '';
         if (currUsersInTask.length === 0) {
-            const option = document.createElement('option');
+            let option = document.createElement('option');
             option.value = '';
             option.textContent = 'Нет пользователей';
             option.disabled = true;
@@ -836,7 +834,7 @@
             select.appendChild(option);
         } else {
             currUsersInTask.forEach(user => {
-                const option = document.createElement('option');
+                let option = document.createElement('option');
                 option.value = user.email;
                 option.textContent = `${user.name} ${user.surname}`;
                 select.appendChild(option);
@@ -845,8 +843,8 @@
     }
 
     function toggleResponsibility(email, canEdit) {
-        const user = selectedTaskUsers.find(u => u.Email === email);
-        const currentUserEmail = document.getElementById("currentUserEmail")?.value;
+        let user = selectedTaskUsers.find(u => u.Email === email);
+        let currentUserEmail = document.getElementById("currentUserEmail")?.value;
         if (email === currentUserEmail) {
 
             return;
@@ -861,22 +859,22 @@
     }
 
     function updateUI(canEdit) {
-        const usersInProjectTask = document.getElementById('usersInProjectTask');
-        const listOfSubtasks = document.getElementById('listOfSubtasks');
+        let usersInProjectTask = document.getElementById('usersInProjectTask');
+        let listOfSubtasks = document.getElementById('listOfSubtasks');
         usersInProjectTask.innerHTML = '';
         listOfSubtasks.innerHTML = '';
         let count = 0;
-        const maxToShow = 3;
+        let maxToShow = 3;
         selectedTaskUsers.forEach(u => {
             if (count >= maxToShow) return;
 
             if (selectedTaskUsers.length <= 1){
                 console.log(u.Email);
-                const element = createUserElement(u.Email, u.Name, u.IsResponsible, false);
+                let element = createUserElement(u.Email, u.Name, u.IsResponsible, false);
                 usersInProjectTask.appendChild(element);
             }else{
                 console.log(u.Email);
-                const element = createUserElement(u.Email, u.Name, u.IsResponsible, canEdit);
+                let element = createUserElement(u.Email, u.Name, u.IsResponsible, canEdit);
                 usersInProjectTask.appendChild(element);
             }
             count++;
@@ -885,7 +883,7 @@
         count = 0;
         subtasksList.forEach(s => {
             if (count >= maxToShow) return;
-            const element = createSubtaskElement(s.Name, s.ResponsibleEmail);
+            let element = createSubtaskElement(s.Name, s.ResponsibleEmail);
             listOfSubtasks.appendChild(element);
             count++;
         })
@@ -893,8 +891,8 @@
     }
 
     function createUserElement(email, name, isResponsible = false, canEdit = false) {
-        const userDiv = document.createElement('div');
-        const currUser = document.getElementById("currentUserEmail");
+        let userDiv = document.createElement('div');
+        let currUser = document.getElementById("currentUserEmail");
         userDiv.style.border = '1px solid #D2D2D2';
         userDiv.style.borderRadius = '8px';
         userDiv.style.background = '#FCFCFC';
@@ -905,7 +903,7 @@
         userDiv.style.marginBottom = '5px';
         userDiv.setAttribute('data-email', email);
 
-        const starImg = document.createElement('img');
+        let starImg = document.createElement('img');
         starImg.src = isResponsible ? '/Images/blue_star.png' : '/Images/star.png';
         starImg.style.width = '18px';
         starImg.style.height = '16px';
@@ -915,7 +913,7 @@
             starImg.addEventListener('click', () => toggleResponsibility(email, canEdit));
         }
 
-        const removeImg = document.createElement('img');
+        let removeImg = document.createElement('img');
         removeImg.src = '/Images/remove.png';
         removeImg.style.width = '14px';
         removeImg.style.height = '14px';
@@ -925,14 +923,14 @@
         }
         
 
-        const rightContainer = document.createElement('div');
+        let rightContainer = document.createElement('div');
         rightContainer.style.display = 'flex';
         rightContainer.style.gap = '10px';
         rightContainer.style.alignItems = 'center';
         rightContainer.appendChild(starImg);
         rightContainer.appendChild(removeImg);
 
-        const leftContainer = document.createElement('div');
+        let leftContainer = document.createElement('div');
         leftContainer.style.display = 'flex';
         leftContainer.style.alignItems = 'center';
         leftContainer.innerHTML = `
@@ -947,7 +945,7 @@
     }
 
     function createSubtaskElement(title, responsibleUser = 'Не назначен', canEdit = false) {
-        const subtaskDiv = document.createElement('div');
+        let subtaskDiv = document.createElement('div');
         subtaskDiv.style.border = '1px solid #D2D2D2';
         subtaskDiv.style.borderRadius = '8px';
         subtaskDiv.style.background = '#FCFCFC';
@@ -957,14 +955,14 @@
         subtaskDiv.style.marginBottom = '5px';
         subtaskDiv.style.position = 'relative';
 
-        const leftContainer = document.createElement('div');
+        let leftContainer = document.createElement('div');
         leftContainer.style.display = 'flex';
         leftContainer.style.alignItems = 'center';
         leftContainer.style.gap = '10px';
         leftContainer.style.paddingRight = '20px'; 
         leftContainer.style.flex = '1'; 
 
-        const taskText = document.createElement('p');
+        let taskText = document.createElement('p');
         taskText.textContent = title;
         taskText.style.fontSize = '13px';
         taskText.style.color = '#232323';
@@ -972,7 +970,7 @@
 
         leftContainer.appendChild(taskText);
 
-        const line = document.createElement('div');
+        let line = document.createElement('div');
         line.style.width = '1px';
         line.style.height = '24px';
         line.style.backgroundColor = '#C0C0C0';
@@ -980,7 +978,7 @@
         line.style.left = '50%';
         line.style.transform = 'translateX(-50%)';
 
-        const rightContainer = document.createElement('div');
+        let rightContainer = document.createElement('div');
         rightContainer.style.display = 'flex';
         rightContainer.style.alignItems = 'center';
         rightContainer.style.gap = '10px';
@@ -988,7 +986,7 @@
         rightContainer.style.flex = '1'; 
         rightContainer.style.justifyContent = 'flex-end';
 
-        const userDisplay = document.createElement('p');
+        let userDisplay = document.createElement('p');
         userDisplay.textContent = responsibleUser;
         userDisplay.style.fontSize = '13px';
         userDisplay.style.color = '#232323';
@@ -1004,8 +1002,8 @@
     }
 
     function removeUser(email) {
-        const index = selectedTaskUsers.findIndex(participant => participant.Email === email);
-        const currentUserEmail = document.getElementById("currentUserEmail")?.value;
+        let index = selectedTaskUsers.findIndex(participant => participant.Email === email);
+        let currentUserEmail = document.getElementById("currentUserEmail")?.value;
         if (email === currentUserEmail) {
 
             return;
@@ -1014,8 +1012,8 @@
             selectedTaskUsers.splice(index, 1);
         }
 
-        const usersInProjectTask = document.getElementById('usersInProjectTask');
-        const userElement = usersInProjectTask.querySelector(`div[data-email="${email}"]`);
+        let usersInProjectTask = document.getElementById('usersInProjectTask');
+        let userElement = usersInProjectTask.querySelector(`div[data-email="${email}"]`);
         if (userElement) {
             userElement.remove();
         }
@@ -1023,10 +1021,10 @@
     }
 
     async function handleTaskUpdateClick(id, name, description, status, projectId, access, expected_date) {
-        const usersInProjectTask = document.getElementById('usersInProjectTask');
-        const listOfSubtasks = document.getElementById('listOfSubtasks');
-        const canEdit = access === "True" || access === true || access === "1";
-        const isHide = status == "Готово";
+        let usersInProjectTask = document.getElementById('usersInProjectTask');
+        let listOfSubtasks = document.getElementById('listOfSubtasks');
+        let canEdit = access === "True" || access === true || access === "1";
+        let isHide = status == "Готово";
         selectedTaskUsers.length = 0;
         subtasksList.length = 0;
         addTaskModalOverlay.style.display = 'block';
@@ -1042,8 +1040,8 @@
         RemoveAndArchiveButtons.style.visibility = "";
         RemoveAndArchiveButtons.style.width = "";
         if (expected_date) {
-            const [day, month, year] = expected_date.split('.');
-            const formattedDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+            let [day, month, year] = expected_date.split('.');
+            let formattedDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
             document.getElementById("editTaskExpectedDate").value = formattedDate;
         }
         usersInProjectTask.innerHTML = '';
@@ -1079,7 +1077,7 @@
                 .then(response => response.json())
                 .then(result => {
                     if (result.success) {
-                        const data = result.data;
+                        let data = result.data;
 
                         if (Array.isArray(data)) {
                             currUsersInTask.length = 0;
@@ -1105,17 +1103,17 @@
 
     function handleTaskClick(event, taskName, taskId) {
         event.stopPropagation();
-        const url = `/Subtasks?taskName=${encodeURIComponent(taskName)}&taskId=${encodeURIComponent(taskId)}`;
+        let url = `/Subtasks?taskName=${encodeURIComponent(taskName)}&taskId=${encodeURIComponent(taskId)}`;
         window.location.href = url;
     }
 
 
     async function loadUsersForProject(taskId, canEdit) {
-        const usersInProject = document.getElementById('usersInProjectTask');
+        let usersInProject = document.getElementById('usersInProjectTask');
         usersInProject.innerHTML = '<p>Загрузка пользователей...</p>';
 
         try {
-            const response = await fetch(`/Tasks?handler=LoadTaskUsers&taskId=${taskId}`, {
+            let response = await fetch(`/Tasks?handler=LoadTaskUsers&taskId=${taskId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1126,7 +1124,7 @@
 
             if (!response.ok) throw new Error("Ошибка сети");
 
-            const result = await response.json();
+            let result = await response.json();
 
             if (!result.success) {
                 usersInProject.innerHTML = `<p>${result.message}</p>`;
@@ -1147,11 +1145,11 @@
     }
 
     async function loadSubTasks(taskId) {
-        const listOfSubtasks = document.getElementById('listOfSubtasks');
+        let listOfSubtasks = document.getElementById('listOfSubtasks');
         listOfSubtasks.innerHTML = '<p>Загрузка подзадач...</p>';
 
         try {
-            const response = await fetch(`/Tasks?handler=LoadSubTask&taskId=${taskId}`, {
+            let response = await fetch(`/Tasks?handler=LoadSubTask&taskId=${taskId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1162,7 +1160,7 @@
 
             if (!response.ok) throw new Error("Ошибка сети");
 
-            const result = await response.json();
+            let result = await response.json();
 
             if (!result.success) {
                 listOfSubtasks.innerHTML = `<p>${result.message}</p>`;
@@ -1196,7 +1194,7 @@
     }
 
     async function sendArrayToServer() {
-        const response = await fetch('?handler=ProcessArray', {
+        let response = await fetch('?handler=ProcessArray', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -1209,9 +1207,9 @@
 
     async function updateTaskStatusOnServer(taskId, newStatus) {
         try {
-            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+            let token = document.querySelector('input[name="__RequestVerificationToken"]').value;
 
-            const response = await fetch('/Tasks?handler=UpdateTaskStatus', {
+            let response = await fetch('/Tasks?handler=UpdateTaskStatus', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1229,17 +1227,27 @@
     }
 
     document.addEventListener("DOMContentLoaded", function () {
-        const urlParams = new URLSearchParams(window.location.search);
-        const taskId = urlParams.get('taskId');
+        let urlParams = new URLSearchParams(window.location.search);
+        let taskId = urlParams.get('taskId');
 
         if (taskId) {
-            const taskElement = document.getElementById('task-' + taskId);
+            let taskElement = document.getElementById('task-' + taskId);
 
             if (taskElement) {
                 taskElement.click();
             } else {
                 console.warn("Задача с ID " + taskId + " не найдена");
             }
+        }
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const addTaskButton = document.getElementById("addTaskButton");
+        const showHistoryButton = document.getElementById("showHistoryButton");
+
+        if (!isPermissionToCreateAndEdit) {
+            if (addTaskButton) addTaskButton.style.display = "none";
+            if (showHistoryButton) showHistoryButton.style.display = "none";
         }
     });
 
