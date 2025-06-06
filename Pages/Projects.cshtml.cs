@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Text;
 using System.Threading.Tasks;
+using System.Net;
 
 namespace ProjManagmentSystem.Pages
 {
@@ -97,16 +98,36 @@ namespace ProjManagmentSystem.Pages
                 {
                     users = JsonSerializer.Deserialize<List<UserWithResponsibilityDTO>>(SelectedUsersToProject);
                 }
-                if (!RegexService.IsValidName(project.Name) || !RegexService.IsValidName(project.Description))
+                bool isValid = true;
+                var errors = new Dictionary<string, List<string>>();
+
+                if (!RegexService.IsValidName(project.Name))
                 {
-                    Console.WriteLine($"Исключение при вводе имени данных");
-                    return Page();
+                    errors["Name"] = new List<string> { "Некорректное имя проекта." };
+                    isValid = false;
+                }
+
+                if (!string.IsNullOrEmpty(project.Description))
+                {
+                    if (!RegexService.IsValidName(project.Description))
+                    {
+                        errors["Description"] = new List<string> { "Некорректное описание проекта." };
+                        isValid = false;
+                    }
+                }
+
+                if (!isValid)
+                {
+                    return new JsonResult(new { errors })
+                    {
+                        StatusCode = (int)HttpStatusCode.BadRequest
+                    };
                 }
                 var formContent = new MultipartFormDataContent
                 {
                     { new StringContent(project.Name), "Name" },
 
-                    { new StringContent(project.Description), "Description" }
+                    { new StringContent(project.Description ?? string.Empty), "Description" }
                 };
 
                 HttpResponseMessage response;
@@ -146,7 +167,7 @@ namespace ProjManagmentSystem.Pages
 
                         if (addUserResponse.IsSuccessStatusCode)
                         {
-                            return RedirectToPage();
+                            return new JsonResult(new { success = true });
                         }
                         else
                         {
@@ -180,7 +201,7 @@ namespace ProjManagmentSystem.Pages
 
                         if (addUserResponse.IsSuccessStatusCode)
                         {
-                            return RedirectToPage();
+                            return new JsonResult(new { success = true });
                         }
                         else
                         {

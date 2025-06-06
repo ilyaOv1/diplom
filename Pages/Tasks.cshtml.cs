@@ -141,16 +141,37 @@ namespace ProjManagmentSystem.Pages
                 {
                     subtasks = JsonSerializer.Deserialize<List<SubtaskDTO>>(SelectedSubtasks);
                 }
-                if (!RegexService.IsValidName(task.name) || !RegexService.IsValidName(task.description))
+
+                bool isValid = true;
+                var errors = new Dictionary<string, List<string>>();
+
+                if (!RegexService.IsValidName(task.name))
                 {
-                    Console.WriteLine($"Исключение при вводе имени данных");
-                    return Page();
+                    errors["Name"] = new List<string> { "Некорректное имя задачи." };
+                    isValid = false;
+                }
+
+                if (!string.IsNullOrEmpty(task.description))
+                {
+                    if (!RegexService.IsValidName(task.description))
+                    {
+                        errors["Description"] = new List<string> { "Некорректное описание задачи." };
+                        isValid = false;
+                    }
+                }
+
+                if (!isValid)
+                {
+                    return new JsonResult(new { errors })
+                    {
+                        StatusCode = (int)HttpStatusCode.BadRequest
+                    };
                 }
                 var formContent = new MultipartFormDataContent
                 {
                     { new StringContent(task.name), "name" },
 
-                    { new StringContent(task.description), "description" }
+                    { new StringContent(task.description ?? string.Empty), "description" }
                 };
                 var expectedDate = task.expected_date == DateTime.Today
                     ? DateTime.Now.AddDays(7)

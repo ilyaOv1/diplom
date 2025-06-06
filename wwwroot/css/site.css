@@ -517,6 +517,17 @@ textarea{
     flex-shrink: 0;
 }
 
+    .input-validation-error {
+        border: 1px solid #EB0000 !important;
+    }
+
+    .field-validation-error {
+        color: #EB0000;
+        font-size: 12px;
+        margin-top: 4px;
+        display: block;
+    }
+
 
 button {
     background-color: #2954EC;

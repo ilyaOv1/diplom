@@ -70,17 +70,29 @@
                 <input type="hidden" id="projectIdInput" name="EditingProjectId" value="" />
                 <div class="form-field">
                     <p class="form-label">Наименование</p>
-                    <input class="form-control addProjInput"
-                           name="Name"
-                           id="editName"
-                           placeholder="Введите название проекта" />
+                    <div style="display: block;">
+                        <input class="form-control addProjInput @(ModelState.ContainsKey("project.Name") ? "input-validation-error" : "")"
+                               name="Name"
+                               id="editName"
+                               placeholder="Введите название проекта" />
+                        @if (ModelState.ContainsKey("project.Name"))
+                        {
+                            <span class="field-validation-error">@ModelState["project.Name"].Errors.FirstOrDefault()?.ErrorMessage</span>
+                        }
+                    </div>
                 </div>
                 <input id="currentUserEmail" hidden value="@UserService.Email" />
                 <div class="form-field">
                     <p class="form-label">Описание</p>
-                    <textarea class="form-control addProjTextArea"
-                                id="editDescription"
-                                name="Description"></textarea>
+                    <div style="display: block;">
+                        <textarea class="form-control addProjTextArea @(ModelState.ContainsKey("project.Description") ? "input-validation-error" : "")"
+                                  id="editDescription"
+                                  name="Description"></textarea>
+                        @if (ModelState.ContainsKey("project.Description"))
+                        {
+                            <span class="field-validation-error">@ModelState["project.Description"].Errors.FirstOrDefault()?.ErrorMessage</span>
+                        }
+                    </div>
                 </div>
                 <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 16px;">Участники проекта</h2>
                 <p id="addParticipantBtn" style="color: #D9D9D9; font-size: 13px; margin-bottom: 8px; cursor: pointer;">+ Добавить участника</p>
@@ -205,6 +217,7 @@
         addProjCloseModal.addEventListener('click', () => {
             addProjModalOverlay.style.display = 'none';
             addProjModal.style.display = 'none';
+            clearValidationErrors();
         });
     }
 
@@ -213,6 +226,7 @@
             if (event.target === addProjModalOverlay) {
                 addProjModalOverlay.style.display = 'none';
                 addProjModal.style.display = 'none';
+                clearValidationErrors();
             }
         });
     }
@@ -360,17 +374,14 @@
 
         const form = document.getElementById("addProjForm");
         const formData = new FormData(form);
-
         formData.append("SelectedUsersToProject", JSON.stringify(selectedUsers));
-        
-        for (let [key, value] of formData.entries()) {
-            console.log("FormData:", key, value);
-        }
+
         try {
             const response = await fetch(form.action, {
                 method: "POST",
                 headers: {
-                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value,
+                    'Accept': 'application/json'
                 },
                 body: formData
             });
@@ -378,13 +389,40 @@
             if (response.ok) {
                 window.location.reload();
             } else {
-                alert("Ошибка при создании проекта");
+                const errorData = await response.json();
+                clearValidationErrors();
+
+                if (errorData.errors) {
+                    displayValidationErrors(errorData.errors);
+                } else {
+                    alert("Ошибка при создании проекта");
+                }
             }
         } catch (error) {
             console.error("Ошибка:", error);
             alert(error);
         }
     });
+
+    function clearValidationErrors() {
+        document.querySelectorAll('.field-validation-error').forEach(el => el.remove());
+        document.querySelectorAll('.input-validation-error').forEach(el => el.classList.remove('input-validation-error'));
+    }
+
+    function displayValidationErrors(errors) {
+        for (const [field, messages] of Object.entries(errors)) {
+            const input = document.querySelector(`[name="${field}"]`);
+            if (input) {
+                input.classList.add('input-validation-error');
+
+                const errorContainer = document.createElement('span');
+                errorContainer.className = 'field-validation-error';
+                errorContainer.textContent = messages.join(', ');
+
+                input.parentNode.appendChild(errorContainer);
+            }
+        }
+    }
 
     function getCookie(name) {
         const value = `; ${document.cookie}`;

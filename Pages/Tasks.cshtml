@@ -195,27 +195,41 @@
                 <input type="hidden" id="taskIdInput" name="EditingTaskId" value="" />
                 <div class="form-field">
                     <p class="form-label">Наименование</p>
-                    <input class="form-control"
-                           name="Name"
-                           id="editTaskName"
-                           placeholder="Введите название задачи" />
+                    <div style="display: block;">
+                        <input class="form-control"
+                               name="Name"
+                               id="editTaskName"
+                               placeholder="Введите название задачи" />
+                        @if (ModelState.ContainsKey("task.Name"))
+                        {
+                            <span class="field-validation-error">@ModelState["task.Name"].Errors.FirstOrDefault()?.ErrorMessage</span>
+                        }
+                    </div>
                 </div>
                 <div class="form-field" style="display: none;">
                     <p class="form-label">Наименование</p>
-                    <input class="form-control"
-                           name="Status"
+                    <div style="display: block;">
+                        <input class="form-control"
+                               name="Status"
+                               value="Новая"
+                               placeholder="Введите название задачи" />
 
-                           value="Новая"
-                           placeholder="Введите название задачи" />
+                    </div>
                 </div>
                 <input type="hidden" name="ProjectId" id="projId" value="@Model.ProjectId" />
                 <input type="hidden" name="ProjectName" value="@Model.ProjectName" />
                 <input id="currentUserEmail" hidden value="@UserService.Email" />
                 <div class="form-field">
                     <p class="form-label">Описание</p>
-                    <textarea class="form-control"
-                              id="editTaskDescription"
-                              name="Description"></textarea>
+                    <div style="display: block;">
+                        <textarea class="form-control"
+                                  id="editTaskDescription"
+                                  name="Description"></textarea>
+                        @if (ModelState.ContainsKey("task.Description"))
+                        {
+                            <span class="field-validation-error">@ModelState["task.Description"].Errors.FirstOrDefault()?.ErrorMessage</span>
+                        }
+                    </div>
                 </div>
                 <div class="form-field">
                     <p class="form-label">Ожидаемая дата</p>
@@ -416,6 +430,7 @@
         addTaskCloseModal.addEventListener('click', () => {
             addTaskModalOverlay.style.display = 'none';
             addTaskModal.style.display = 'none';
+            clearValidationErrors()
         });
     }
 
@@ -424,6 +439,7 @@
             if (event.target === addTaskModalOverlay) {
                 addTaskModalOverlay.style.display = 'none';
                 addTaskModal.style.display = 'none';
+                clearValidationErrors()
             }
         });
     }
@@ -594,7 +610,14 @@
             if (response.ok) {
                 window.location.reload();
             } else {
-                alert("Ошибка при создании проекта");
+                const errorData = await response.json();
+                clearValidationErrors();
+
+                if (errorData.errors) {
+                    displayValidationErrors(errorData.errors);
+                } else {
+                    alert("Ошибка при создании проекта");
+                }
             }
         } catch (error) {
             console.error("Ошибка:", error);
@@ -719,6 +742,26 @@
             alert("Ошибка при изменении статуса архива");
         }
     });
+
+    function clearValidationErrors() {
+        document.querySelectorAll('.field-validation-error').forEach(el => el.remove());
+        document.querySelectorAll('.input-validation-error').forEach(el => el.classList.remove('input-validation-error'));
+    }
+
+    function displayValidationErrors(errors) {
+        for (const [field, messages] of Object.entries(errors)) {
+            const input = document.querySelector(`[name="${field}"]`);
+            if (input) {
+                input.classList.add('input-validation-error');
+
+                const errorContainer = document.createElement('span');
+                errorContainer.className = 'field-validation-error';
+                errorContainer.textContent = messages.join(', ');
+
+                input.parentNode.appendChild(errorContainer);
+            }
+        }
+    }
 
     function dragStart(event) {
         window.draggedTask = event.target;
